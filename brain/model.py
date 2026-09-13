@@ -85,6 +85,16 @@ class ConnectomeBrain:
         from brain.vision_input import VisualInput
         self.visual = VisualInput(self.ids, self.annotations, pre, post, weights)
         self.metadata['vision'] = self.visual.metadata
+        self.odor_projection = {side: np.array([
+            self.index[rid] for rid,r in self.annotations.items()
+            if r['cell_type']=='DM1_lPN' and r['side']==side
+        ],dtype=np.int32) for side in ('left','right')}
+        self.metadata['olfaction'] = {
+            'input': '68 ORN_DM1 cells; food-odor proxy, not sugar receptors',
+            'projection': 'DM1_lPN cells monitored downstream, not directly stimulated',
+            'encoder': 'Normalized antenna odor → saturating common rate and 16× bilateral contrast gain → Poisson input; engineered approximation.',
+            'chemistry': 'No volatile sucrose, receptor binding, gustatory circuit, feeding, or metabolism model.',
+        }
         self.inputs = np.unique(np.concatenate([*self.groups.values(), self.visual.receptors]))
         self.input_index = {int(i): j for j, i in enumerate(self.inputs)}
         self.engine = None
@@ -187,6 +197,23 @@ class ConnectomeBrain:
         slots = np.searchsorted(self.inputs, self.visual.receptors)
         rates[slots] = self.visual.rates(contrast, condition)
         return self._advance(rates, 'visual_' + condition, 180.0, 0.0, False)
+
+    def step_multisensory(self, contrast, odor, vision=True, olfaction=True):
+        if not isinstance(vision,bool) or not isinstance(olfaction,bool):
+            raise ValueError('Sensory switches must be booleans')
+        from brain.olfactory_input import odor_input_rates
+        odor_rates = odor_input_rates(odor) if olfaction else np.zeros(2)
+        rates = np.zeros(len(self.inputs))
+        rates[np.searchsorted(self.inputs,self.visual.receptors)] = self.visual.rates(contrast,'vision' if vision else 'blind')
+        for side, rate in zip(('left','right'),odor_rates):
+            rates[np.searchsorted(self.inputs,self.groups['ORN_DM1_'+side])] = rate
+        result = self._advance(rates,'vision_and_olfaction',180.0,float(np.mean(odor)),False)
+        result['olfaction'] = {
+            'input_rates_hz': odor_rates.tolist(),
+            'ORN_rates_hz': [float(self.last_delta[self.groups['ORN_DM1_'+side]].mean()/.02) for side in ('left','right')],
+            'PN_spikes': [int(self.last_delta[self.odor_projection[side]].sum()) for side in ('left','right')],
+        }
+        return result
 
     def _advance(self, rates, stimulus, rate_hz, odor, silence):
         silenced_ids = np.concatenate([self.groups['DNp09_left'], self.groups['DNp09_right']])

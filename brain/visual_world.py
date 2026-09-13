@@ -59,9 +59,10 @@ class VisualWorld:
         contact = root.find('contact')
         target_contacts = []
         for pair in list(contact):
-            if pair.get('geom2') == 'start_pole_left':
+            if 'start_pole_left' in (pair.get('geom1'), pair.get('geom2')):
                 attrs = dict(pair.attrib)
-                attrs.update(name='stripe_' + attrs['name'], geom2='visual_stripe')
+                attrs['name'] = 'stripe_' + attrs['name']
+                attrs['geom1' if attrs['geom1'] == 'start_pole_left' else 'geom2'] = 'visual_stripe'
                 target_contacts.append(attrs)
             if pair.get('geom1') in removed or pair.get('geom2') in removed:
                 contact.remove(pair)
@@ -91,6 +92,7 @@ class VisualWorld:
                           pos=' '.join(map(str, sensor['rel_pos'])),
                           quat=' '.join(map(str, quat)),
                           fovy=str(config['fovy_per_eye']))
+        self.configure_arena(root)
         self.model = mj.MjModel.from_xml_string(ET.tostring(root, encoding='unicode'))
         self.data = mj.MjData(self.model)
         self.stripe_id = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_GEOM, self.stripe_name)
@@ -117,6 +119,9 @@ class VisualWorld:
         self.cpg_args += [np.array(self.meta['ctrl_index_by_leg_dof']), np.array(self.meta['adhesion']), self.meta['timestep']]
         self.reset()
         self._retinal_rays(config['fovy_per_eye'])
+
+    def configure_arena(self, root):
+        """Scene extension point; called before MuJoCo compilation."""
 
     def _retinal_rays(self, fovy):
         """Derive pixel bearings from CAMERA geometry, never neuron anchors.
@@ -202,8 +207,7 @@ class VisualWorld:
 
     def images(self):
         center = self.position
-        self.body_camera.lookat[:] = [(center[0] + self.target[0])/2, (center[1] + self.target[1])/2, 1.5]
-        self.body_camera.distance = max(20.0, np.linalg.norm(center[:2] - self.target) * 1.35)
+        self.configure_body_camera(center)
         self.body_renderer.update_scene(self.data, self.body_camera)
         eyes = []
         for values in self.readings:
@@ -214,6 +218,10 @@ class VisualWorld:
             mosaic[mask] = np.clip(values[ids[mask]-1] * 255, 0, 255).astype(np.uint8)
             eyes.append(self.jpeg(mosaic, (225, 256)))
         return {'body': self.jpeg(self.body_renderer.render()), 'eyes': eyes}
+
+    def configure_body_camera(self, center):
+        self.body_camera.lookat[:] = [(center[0] + self.target[0])/2, (center[1] + self.target[1])/2, 1.5]
+        self.body_camera.distance = max(20.0, np.linalg.norm(center[:2] - self.target) * 1.35)
 
     def score(self):
         offset = self.target - self.position[:2]
