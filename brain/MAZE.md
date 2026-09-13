@@ -15,7 +15,9 @@ on** independently controls the source for the next trial.
 
 The server advances the entire loop every 20 ms, independently of browser
 polling. Pause stops at a completed bin; Resume continues the same trial.
-Run maze and Reset start a fresh brain and body. A trial stops on arrival,
+Run maze and Reset start a fresh brain and body. The default time limit is
+60 simulated seconds; 5, 15, and 30 seconds remain selectable. The path retains
+the entire trial. A trial stops on arrival,
 loss of balance, or its time limit. The manual and stripe experiments share
 this brain; a running experiment must be paused before switching modes.
 

@@ -60,13 +60,13 @@ class MazeNavigation:
         self.world = None
         self.reset()
 
-    def reset(self,condition='combined',heading_deg=75,seed=1,duration=30,food_odor=True,layout='complex'):
+    def reset(self,condition='combined',heading_deg=75,seed=1,duration=60,food_odor=True,layout='complex'):
         get_layout(layout)
         if condition not in ('combined','vision_only','odor_only','neither'):
             raise ValueError('Unknown maze sensory condition')
-        for value,low,high in [(heading_deg,-180,180),(duration,.1,30)]:
+        for value,low,high in [(heading_deg,-180,180),(duration,.1,60)]:
             if isinstance(value,bool) or not isinstance(value,(int,float)) or not np.isfinite(value) or not low<=value<=high:
-                raise ValueError('Heading must be −180…180°; duration .1…30 seconds')
+                raise ValueError('Heading must be −180…180°; duration .1…60 seconds')
         if isinstance(seed,bool) or not isinstance(seed,int) or not 0<=seed<=100000:
             raise ValueError('Seed must be an integer in 0…100000')
         if not isinstance(food_odor,bool):raise ValueError('food_odor must be a boolean')
@@ -115,7 +115,7 @@ class MazeNavigation:
         state = {'status':self.status,'trial_id':self.trial_id,'config':self.config.copy(),
                  'time':float(w.data.time),'frame':self.frames,'done':self.done,
                  'position':w.position.tolist(),'heading_deg':float(np.rad2deg(w.heading)),
-                 'target':[0,0],'path':w.path[-1501:],'score':w.score(),'decoder':decoder,
+                 'target':[0,0],'path':w.path.copy(),'score':w.score(),'decoder':decoder,
                  'odor':w.odor.tolist(),'antennae':w.antennae.tolist(),
                  'contrast':w.contrast.round(4).tolist(),'retina':w.readings.round(4).tolist(),
                  'sensory_time':max(0,float(w.data.time)-(.02 if neural else 0)),
