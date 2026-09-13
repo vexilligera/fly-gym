@@ -202,7 +202,8 @@ class ConnectomeBrain:
         if not isinstance(vision,bool) or not isinstance(olfaction,bool):
             raise ValueError('Sensory switches must be booleans')
         from brain.olfactory_input import odor_input_rates
-        odor_rates = odor_input_rates(odor) if olfaction else np.zeros(2)
+        odor_rates = odor_input_rates(odor)
+        if not olfaction: odor_rates[:] = 0
         rates = np.zeros(len(self.inputs))
         rates[np.searchsorted(self.inputs,self.visual.receptors)] = self.visual.rates(contrast,'vision' if vision else 'blind')
         for side, rate in zip(('left','right'),odor_rates):

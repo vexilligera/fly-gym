@@ -1,0 +1,312 @@
+{
+  "summary": "B300 validation: 3/3 vision + smell and 3/3 smell-only trials reached the food zone; 0/3 vision-only, 0/3 both-disconnected, and 0/3 odor-source-off trials did. Matched starts: 45\u00b0, 75\u00b0, 105\u00b0; seeds 1, 2, 3; 5 s limit. The smooth odor field makes vision unnecessary for these starts. This small test does not validate natural fly behavior.",
+  "brain_release": "FlyWire v783",
+  "tested_revision": "12dbefa",
+  "trials": [
+    {
+      "condition": "combined",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 45,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "reached",
+      "time": 1.6599999999998336,
+      "distance_mm": 2.286054496852311,
+      "contact_bins": 0,
+      "activity": {
+        "spikes": 922214,
+        "L2_spikes": 2199,
+        "PN_spikes": 885,
+        "ORN_spikes": 8674
+      }
+    },
+    {
+      "condition": "combined",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 75,
+        "seed": 2,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "reached",
+      "time": 1.5799999999998424,
+      "distance_mm": 2.444458981602922,
+      "contact_bins": 0,
+      "activity": {
+        "spikes": 868719,
+        "L2_spikes": 1986,
+        "PN_spikes": 849,
+        "ORN_spikes": 8397
+      }
+    },
+    {
+      "condition": "combined",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 105,
+        "seed": 3,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "reached",
+      "time": 1.6399999999998358,
+      "distance_mm": 2.3659936963694386,
+      "contact_bins": 0,
+      "activity": {
+        "spikes": 897164,
+        "L2_spikes": 2026,
+        "PN_spikes": 874,
+        "ORN_spikes": 8620
+      }
+    },
+    {
+      "condition": "vision_only",
+      "config": {
+        "condition": "vision_only",
+        "heading_deg": 45,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.692505081032515,
+      "contact_bins": 41,
+      "activity": {
+        "spikes": 879751,
+        "L2_spikes": 16641,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "vision_only",
+      "config": {
+        "condition": "vision_only",
+        "heading_deg": 75,
+        "seed": 2,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.726381281258362,
+      "contact_bins": 54,
+      "activity": {
+        "spikes": 910381,
+        "L2_spikes": 17340,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "vision_only",
+      "config": {
+        "condition": "vision_only",
+        "heading_deg": 105,
+        "seed": 3,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.737203730451107,
+      "contact_bins": 57,
+      "activity": {
+        "spikes": 919555,
+        "L2_spikes": 17592,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "odor_only",
+      "config": {
+        "condition": "odor_only",
+        "heading_deg": 45,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "reached",
+      "time": 1.619999999999838,
+      "distance_mm": 2.0979944012781977,
+      "contact_bins": 0,
+      "activity": {
+        "spikes": 777767,
+        "L2_spikes": 0,
+        "PN_spikes": 868,
+        "ORN_spikes": 8690
+      }
+    },
+    {
+      "condition": "odor_only",
+      "config": {
+        "condition": "odor_only",
+        "heading_deg": 75,
+        "seed": 2,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "reached",
+      "time": 1.5599999999998446,
+      "distance_mm": 2.337615115168103,
+      "contact_bins": 0,
+      "activity": {
+        "spikes": 748069,
+        "L2_spikes": 0,
+        "PN_spikes": 833,
+        "ORN_spikes": 8419
+      }
+    },
+    {
+      "condition": "odor_only",
+      "config": {
+        "condition": "odor_only",
+        "heading_deg": 105,
+        "seed": 3,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "reached",
+      "time": 1.619999999999838,
+      "distance_mm": 2.4279076422448207,
+      "contact_bins": 0,
+      "activity": {
+        "spikes": 777022,
+        "L2_spikes": 0,
+        "PN_spikes": 864,
+        "ORN_spikes": 8654
+      }
+    },
+    {
+      "condition": "neither",
+      "config": {
+        "condition": "neither",
+        "heading_deg": 45,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.332795131846318,
+      "contact_bins": 22,
+      "activity": {
+        "spikes": 0,
+        "L2_spikes": 0,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "neither",
+      "config": {
+        "condition": "neither",
+        "heading_deg": 75,
+        "seed": 2,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.352020068072722,
+      "contact_bins": 24,
+      "activity": {
+        "spikes": 0,
+        "L2_spikes": 0,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "neither",
+      "config": {
+        "condition": "neither",
+        "heading_deg": 105,
+        "seed": 3,
+        "duration": 5,
+        "food_odor": true
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 25.595662579248838,
+      "contact_bins": 27,
+      "activity": {
+        "spikes": 0,
+        "L2_spikes": 0,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "source_off",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 45,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": false
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.692505081032515,
+      "contact_bins": 41,
+      "activity": {
+        "spikes": 879751,
+        "L2_spikes": 16641,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "source_off",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 75,
+        "seed": 2,
+        "duration": 5,
+        "food_odor": false
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.726381281258362,
+      "contact_bins": 54,
+      "activity": {
+        "spikes": 910381,
+        "L2_spikes": 17340,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    },
+    {
+      "condition": "source_off",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 105,
+        "seed": 3,
+        "duration": 5,
+        "food_odor": false
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 18.737203730451107,
+      "contact_bins": 57,
+      "activity": {
+        "spikes": 919555,
+        "L2_spikes": 17592,
+        "PN_spikes": 0,
+        "ORN_spikes": 0
+      }
+    }
+  ],
+  "physics": {
+    "wall_block_max_x": -7.6419004402178,
+    "wall_contact_bins": 11,
+    "wall_seconds": 127.99135088920593
+  }
+}
