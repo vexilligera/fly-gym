@@ -1,7 +1,13 @@
 # Vision and olfaction in the sugar maze
 
-Open `/maze/` and press **Run maze**. The fly starts at (−13, −12) mm in a
-40 × 40 mm arena with two offset baffles. The sugar patch stays at the center.
+Open `/maze/` and press **Run maze**. The default **Branching maze** has 25
+connected grid cells, 20 wall pieces, and five terminal cells (including the
+start and sugar cells). The unique cell-center route to sugar passes through
+12 openings and makes eight turns. Corridors have 7 mm of clear width. The
+fly starts at (−16, −16) mm in the 40 × 40 mm arena. The original **Simple
+maze** with two offset baffles and a (−13, −12) mm start remains selectable.
+The sugar patch stays at the center of both layouts. Geometry stays fixed
+between trials; the trial seed changes leg phases, not the maze.
 Arrival means the thorax enters a 2.5 mm radius; no eating is simulated.
 Both eyes, two antenna readings, the body, path, and brain activity update live.
 Choose vision + smell, either sense alone, or both disconnected. **Food odor
@@ -12,6 +18,12 @@ polling. Pause stops at a completed bin; Resume continues the same trial.
 Run maze and Reset start a fresh brain and body. A trial stops on arrival,
 loss of balance, or its time limit. The manual and stripe experiments share
 this brain; a running experiment must be paused before switching modes.
+
+The body camera uses a persistent MJPEG stream. Frames include their own
+simulation timestamp and can arrive more frequently than brain/eye readouts.
+The existing odor overlay is unchanged and uses the active layout's field.
+Layout changes rebuild the body world and field on the simulation worker;
+the browser replaces the wall map and groups trial results by layout.
 
 ## Sensory and neural model
 
@@ -75,7 +87,7 @@ metabolism are absent. Adding a chemical name would not establish its effects.
 
 ## Measured checks and interpretation
 
-`scripts/validate_maze.py` runs matched headings 45°, 75°, 105° with leg-phase
+For the **simple maze**, `scripts/validate_maze.py` runs matched headings 45°, 75°, 105° with leg-phase
 seeds 1, 2, 3 and a 5 s limit for each of five conditions. Neural randomness
 resets to the fixed backend stream. B300 results on revision `12dbefa`:
 
@@ -102,6 +114,36 @@ can get stuck. The decoder has no learning, memory map, planning, reconstructed
 descending decision circuit, or VNC. Success is an engineering demonstration,
 not evidence that natural navigation emerged from the full connectome or that
 the rest of the brain is necessary for the behavior.
+
+`scripts/validate_complex_maze.py` checks the harder layout independently.
+All 25 cell centers connect with 1.5 mm clearance from the solid walls. The
+default combined trial (75°, seed 1) timed out at 30 simulated seconds, 18.4 mm
+from sugar; a second (90°, seed 2) timed out at 10 s, 21.6 mm away. Body centers
+stayed outside walls in every recorded frame. The simple reference still
+reached sugar in 1.60 s. **The existing reactive controller does not solve
+these harder trials.** Geometry/connectivity checks do not imply navigation
+success. No route planner, memory, or hidden waypoint input was added.
+
+## Camera rate and simulation speed
+
+The original viewer bundled JPEGs with brain JSON and waited 150 ms between
+requests. One tailnet snapshot request measured 0.92 s for 79 kB, which can
+reduce displayed updates to roughly one per second. That is separate from
+compute throughput: the harder maze generated about 18 frames/s on the B300.
+Mean time per 20 ms simulation step was 29.4 ms for body physics, 12.4 ms for
+brain computation, 6.2 ms for eyes/retina, and 7.5 ms for body render/JPEG.
+Thus the simulation advanced at about 0.36× real time, even though many more
+camera frames existed than the polling viewer could display.
+
+`/api/maze/camera.mjpg` now sends those cached JPEG frames on one persistent
+connection, capped at 20 frames/s. It skips stale frames under backpressure;
+it never runs additional simulation or renders on an HTTP thread. Held frames
+repeat periodically when paused. `/api/maze/status?body=0` omits the body JPEG
+from neural polling while streaming; the browser falls back to snapshots if
+the stream fails. Local API validation received about 19 frames/s and verified
+that one stream advances and survives switching layouts. Network/device
+conditions still limit displayed frame rate. Streaming improves delivery,
+not simulation throughput or biological fidelity.
 
 Detailed trajectories: `outputs/maze-validation.json`. Compact browser report:
 `wasm/maze/validation.json`. `scripts/validate_maze_api.py` checks live images,

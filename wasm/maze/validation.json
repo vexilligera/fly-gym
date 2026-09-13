@@ -1,5 +1,5 @@
 {
-  "summary": "B300 validation: 3/3 vision + smell and 3/3 smell-only trials reached the food zone; 0/3 vision-only, 0/3 both-disconnected, and 0/3 odor-source-off trials did. Matched starts: 45\u00b0, 75\u00b0, 105\u00b0; seeds 1, 2, 3; 5 s limit. The smooth odor field makes vision unnecessary for these starts. This small test does not validate natural fly behavior.",
+  "summary": "Simple-maze checks: 3/3 vision + smell and 3/3 smell-only trials reached the food zone; 0/3 vision-only, 0/3 both-disconnected, and 0/3 odor-source-off trials did. Matched starts: 45\u00b0, 75\u00b0, 105\u00b0; seeds 1, 2, 3; 5 s limit. The smooth odor field makes vision unnecessary for these starts. This small test does not validate natural fly behavior.",
   "brain_release": "FlyWire v783",
   "tested_revision": "12dbefa",
   "trials": [
@@ -308,5 +308,80 @@
     "wall_block_max_x": -7.6419004402178,
     "wall_contact_bins": 11,
     "wall_seconds": 127.99135088920593
+  },
+  "complex": {
+    "tested_revision": "aba44f2",
+    "summary": "Branching-maze checks: all 25 cells connect with 1.5 mm body clearance. The current reactive controller did not reach sugar in the two tested attempts (30 s at 75\u00b0, and 10 s at 90\u00b0). The simple-maze reference still succeeds. This harder layout exposes the controller\u2019s limits.",
+    "trials": [
+      {
+        "config": {
+          "condition": "combined",
+          "heading_deg": 75,
+          "seed": 1,
+          "duration": 30,
+          "food_odor": true,
+          "layout": "complex"
+        },
+        "status": "finished",
+        "time": 29.999999999943423,
+        "distance_mm": 18.433100384615845,
+        "contact_bins": 458,
+        "frames": 1500,
+        "wall_seconds": 84.34747559018433,
+        "worker_fps": 17.783579052063033,
+        "phase_ms": {
+          "eye_render_and_retina": 6.22927303177615,
+          "brain": 12.38696506464233,
+          "body_physics": 29.419133602331083,
+          "body_render_and_jpeg": 7.462432159110904
+        }
+      },
+      {
+        "config": {
+          "condition": "combined",
+          "heading_deg": 90,
+          "seed": 2,
+          "duration": 10,
+          "food_odor": true,
+          "layout": "complex"
+        },
+        "status": "finished",
+        "time": 9.999999999990033,
+        "distance_mm": 21.597932706246745,
+        "contact_bins": 84,
+        "frames": 500,
+        "wall_seconds": 27.015045640058815,
+        "worker_fps": 18.50820489670331,
+        "phase_ms": {
+          "eye_render_and_retina": 6.239714085124433,
+          "brain": 12.345813515596092,
+          "body_physics": 27.261253061704338,
+          "body_render_and_jpeg": 7.44761314149946
+        }
+      },
+      {
+        "config": {
+          "condition": "combined",
+          "heading_deg": 75,
+          "seed": 1,
+          "duration": 5,
+          "food_odor": true,
+          "layout": "simple"
+        },
+        "status": "reached",
+        "time": 1.5999999999998402,
+        "distance_mm": 2.069184332538633,
+        "contact_bins": 0,
+        "frames": 80,
+        "wall_seconds": 3.867156778462231,
+        "worker_fps": 20.68703302787012,
+        "phase_ms": {
+          "eye_render_and_retina": 6.088533689035103,
+          "brain": 12.236513692187145,
+          "body_physics": 21.998266194714233,
+          "body_render_and_jpeg": 7.344940392067656
+        }
+      }
+    ]
   }
 }

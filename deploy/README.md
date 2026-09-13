@@ -166,7 +166,8 @@ does not pause the compute loop before the trial's time limit.
 ## Multisensory maze
 
 See `brain/MAZE.md` for the exact signal path, chemical-model limits, and
-measured sensory controls. `/maze/` adds physical baffles, central sugar,
+measured sensory controls. `/maze/` offers a branching 25-cell maze and the
+original simple baffles, with central sugar,
 a pre-equilibrated 2-D food-odor field, and two local antenna samples. Both
 visual and olfactory input enter the same full-brain time interval. The
 movement decoder is engineered and receives neural activity, without a maze

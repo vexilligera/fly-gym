@@ -66,7 +66,10 @@ assert api('maze/world')['layout']=='complex' and len(api('maze/world')['walls']
 stream=urllib.request.urlopen(f'http://127.0.0.1:{args.port}/api/maze/camera.mjpg',timeout=10)
 assert stream.headers['Content-Type'].startswith('multipart/x-mixed-replace')
 def camera_frame():
-    while stream.readline().strip()!=b'--flyframe':pass
+    while True:
+        line=stream.readline()
+        assert line,'Camera stream ended unexpectedly'
+        if line.strip()==b'--flyframe':break
     headers={}
     while True:
         line=stream.readline().strip()

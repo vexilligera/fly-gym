@@ -3,6 +3,7 @@ import { BrainView } from '../connectome/brain-view.js';
 const $ = id => document.getElementById(id);
 const brainView = new BrainView();
 const names = {combined:'Vision + smell',vision_only:'Vision only',odor_only:'Smell only',neither:'Both disconnected'};
+const layouts = {simple:'Simple maze',complex:'Branching maze'};
 const descriptions = {
   combined:'Eye images drive R1–6 cells and local antenna samples drive DM1 odor neurons in the same brain step. A hand-designed controller combines L2 and odor-neuron spikes to steer the legs.',
   vision_only:'Control: eyes remain connected; odor input is zero. The fly can respond to walls but has no encoded food-odor cue.',
@@ -11,6 +12,13 @@ const descriptions = {
 };
 let state = {status:'idle'}, ready = false, busy = false, lastFrame = -1;
 let trialId = null, recordedId = null, trials = [], world = null, loadingWorld = false;
+let cameraStreaming = false, cameraRetryAt = 0, lastSnapshot = null;
+let validationReport = null;
+
+function renderValidation(layout) {
+  const report=layout==='complex'?validationReport?.complex:validationReport;
+  $('validation').textContent=report?.summary||'Measured validation results are unavailable for this layout.';
+}
 
 function message(text, error=false) {
   $('status').textContent=text;
@@ -22,7 +30,7 @@ function controls() {
   $('pause').textContent=state.status==='running'?'Pause':'Resume';
 }
 function config() {
-  return {condition:$('condition').value,heading_deg:Number($('heading').value),
+  return {layout:$('layout').value,condition:$('condition').value,heading_deg:Number($('heading').value),
     seed:Number($('seed').value),duration:Number($('duration').value),food_odor:$('food-odor').checked};
 }
 async function api(path, args) {
@@ -46,17 +54,32 @@ $('pause').onclick=()=>command(state.status==='running'?'pause':'start');
 $('condition').onchange=()=>{$('condition-description').textContent=descriptions[$('condition').value];};
 $('heading').oninput=()=>{$('heading-value').textContent=$('heading').value+'°';};
 $('show-field').onchange=drawField;
+$('layout').onchange=()=>{
+  $('layout-description').textContent=$('layout').value==='complex'
+    ?'25 cells · 5 dead ends · 8 turns on the route to sugar. Changes apply to the next trial.'
+    :'The original two-baffle arena. Changes apply to the next trial.';
+};
+$('body').onerror=()=>{
+  if(!cameraStreaming)return;
+  cameraStreaming=false;cameraRetryAt=Date.now()+5000;
+  if(lastSnapshot)$('body').src='data:image/jpeg;base64,'+lastSnapshot;
+  $('body-time').textContent='Snapshot fallback';
+};
 
-async function loadWorld() {
-  if(world||loadingWorld)return;
+async function loadWorld(layout) {
+  if(world?.layout===layout||loadingWorld)return;
   loadingWorld=true;
   try {
-    world=await api('maze/world');
+    const next=await api('maze/world');
+    if(next.layout!==state.config?.layout)return;
+    world=next;
+    $('walls').replaceChildren();
     for(const [x,y,hx,hy] of world.walls) {
       const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
       for(const [key,value] of Object.entries({x:x-hx,y:y-hy,width:2*hx,height:2*hy,fill:'#526574',stroke:'#91a4b3','stroke-width':.12}))rect.setAttribute(key,value);
       $('walls').append(rect);
     }
+    $('arena-description').textContent=`${world.name} · 40 × 40 mm · ${world.description}`;
     drawField();
   } catch(error) { message('Maze map unavailable: '+error.message,true); }
   finally { loadingWorld=false; }
@@ -77,10 +100,15 @@ function render(s) {
   state=s;controls();
   if(s.status==='error'){message(s.message||'Maze simulation stopped with an error',true);return;}
   if(!s.config){message(s.message||'Ready to run the sugar maze');return;}
-  if(s.trial_id!==trialId){trialId=s.trial_id;lastFrame=-1;drawField();}
-  loadWorld();
+  if(s.trial_id!==trialId){
+    trialId=s.trial_id;lastFrame=-1;
+    renderValidation(s.config.layout);
+    if(world?.layout!==s.config.layout){world=null;$('walls').replaceChildren();}
+    drawField();
+  }
+  loadWorld(s.config.layout);
   const statusText={running:'Live sensory feedback',paused:'Paused',reached:'Sugar zone reached',finished:'Time limit reached',fallen:'Fly lost balance'}[s.status]||s.status;
-  message(`● ${statusText} · ${names[s.config.condition]}${s.config.food_odor?'':' · Food odor off'}`);
+  message(`● ${statusText} · ${layouts[s.config.layout]||'Simple maze'} · ${names[s.config.condition]}${s.config.food_odor?'':' · Food odor off'}`);
   $('trial-state').textContent=s.status.toUpperCase();
   $('brain-live-state').textContent=s.status==='running'?'Live · latest bin':'Held · last bin';
   $('brain-live-state').dataset.running=s.status==='running';
@@ -89,11 +117,17 @@ function render(s) {
   if(s.brain)brainView.update(s.brain);else brainView.reset();
   $('body-loading').hidden=Boolean(s.images);
   if(s.images) {
-    $('body').src='data:image/jpeg;base64,'+s.images.body;
+    if(s.images.body)lastSnapshot=s.images.body;
+    if(!cameraStreaming&&Date.now()>=cameraRetryAt){
+      cameraStreaming=true;
+      $('body').src='/api/maze/camera.mjpg';
+    } else if(!cameraStreaming&&lastSnapshot) {
+      $('body').src='data:image/jpeg;base64,'+lastSnapshot;
+    }
     for(const [i,side] of ['left','right'].entries())$('eye-'+side).src='data:image/jpeg;base64,'+s.images.eyes[i];
   }
-  $('body-time').textContent=s.time.toFixed(3)+' s';
-  $('distance').textContent=s.score.distance_mm.toFixed(1)+' mm to sugar';
+  $('body-time').textContent=cameraStreaming?'Streaming camera':'Snapshot view';
+  $('distance').textContent='At brain readout: '+s.score.distance_mm.toFixed(1)+' mm';
   $('speed').textContent=s.playback_speed.toFixed(2)+'× real time';
   const vision=['combined','vision_only'].includes(s.config.condition);
   const smell=['combined','odor_only'].includes(s.config.condition);
@@ -126,7 +160,7 @@ function renderTrials() {
   $('trials').replaceChildren();
   for(const s of trials) {
     const row=document.createElement('tr');
-    const values=[names[s.config.condition],s.config.food_odor?'On':'Off',`${s.config.heading_deg}° / ${s.config.seed}`,s.time.toFixed(2)+' s',s.distance.toFixed(1)+' mm',{reached:'Reached',finished:'Time limit',fallen:'Lost balance'}[s.status]];
+    const values=[layouts[s.config.layout]||'Simple maze',names[s.config.condition],s.config.food_odor?'On':'Off',`${s.config.heading_deg}° / ${s.config.seed}`,s.time.toFixed(2)+' s',s.distance.toFixed(1)+' mm',{reached:'Reached',finished:'Time limit',fallen:'Lost balance'}[s.status]];
     for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
     $('trials').append(row);
   }
@@ -148,10 +182,11 @@ async function initialize() {
   }
   try {
     const response=await fetch('validation.json');
-    $('validation').textContent=response.ok?(await response.json()).summary:'Try matched trials to assess each sensory contribution.';
+    if(response.ok)validationReport=await response.json();
+    renderValidation(state.config?.layout||$('layout').value);
   } catch { $('validation').textContent='Measured validation results are unavailable.'; }
   while(true) {
-    try { if(!busy){const next=await api('maze/status');if(!busy)render(next);} }
+    try { if(!busy){const next=await api('maze/status'+(cameraStreaming?'?body=0':''));if(!busy)render(next);} }
     catch(error) { message('Connection lost: '+error.message,true); }
     await new Promise(resolve=>setTimeout(resolve,150));
   }

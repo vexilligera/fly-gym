@@ -18,11 +18,17 @@ def geometry_checks():
         adjacency[a].append(b);adjacency[b].append(a)
     previous={0:None};queue=deque([0])
     while queue:
-        for neighbor in adjacency[queue.popleft()]:
+        cell=queue.popleft()
+        for neighbor in adjacency[cell]:
             if neighbor not in previous:
-                previous[neighbor]=True;queue.append(neighbor)
+                previous[neighbor]=cell;queue.append(neighbor)
     assert len(previous)==25 and len(PASSAGES)==24
     assert sum(len(a)==1 for a in adjacency.values())==5
+    route=[];cell=12
+    while cell is not None:route.append(cell);cell=previous[cell]
+    directions=[(b%5-a%5,b//5-a//5) for a,b in zip(route,route[1:])]
+    assert len(directions)==12
+    assert sum(a!=b for a,b in zip(directions,directions[1:]))==8
     layout=LAYOUTS['complex'];field=OdorField(layout.walls)
     # Leave 1.5 mm clearance from walls for the body and feet.
     clearance=binary_erosion(~field.blocked,iterations=3)
