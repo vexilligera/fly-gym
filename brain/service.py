@@ -1,4 +1,4 @@
-"""One worker owns CUDA/Brian2 and the optional visual MuJoCo environment."""
+"""One worker owns CUDA/Brian2 and the optional sensory MuJoCo environment."""
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from brain.model import ConnectomeBrain
@@ -14,7 +14,7 @@ class BrainService:
         self.navigation_kind = None
         self.navigation_running = False
         self.navigation_generation = 0
-        self.navigation_state = {'status': 'idle', 'message': 'Start a visual navigation trial'}
+        self.navigation_state = {'status': 'idle', 'message': 'Ready to start a sensory navigation trial'}
         self.future = self.pool.submit(self._load)
 
     def _load(self):
@@ -54,12 +54,12 @@ class BrainService:
 
     def _manual(self, brain, action, arguments):
         if self.navigation_running:
-            raise ValueError('Pause the visual navigation trial before using manual stimulation')
+            raise ValueError('Pause the navigation trial before using manual stimulation')
         if self.navigation is not None:
             self.navigation.world.close()
             self.navigation = None
             self.navigation_kind = None
-            self.navigation_state = {'status': 'idle', 'message': 'Manual stimulation owns the shared brain; start a new visual trial'}
+            self.navigation_state = {'status': 'idle', 'message': 'Manual stimulation owns the shared brain; start a new navigation trial'}
         if action == 'reset':
             return brain.reset()
         if action == 'step':
@@ -94,19 +94,21 @@ class BrainService:
             raise ValueError('Unknown experiment')
         if action not in ('start', 'pause', 'reset'):
             raise ValueError('Unknown navigation action')
+        if action == 'pause':
+            if self.navigation_kind != kind or self.navigation is None:
+                raise ValueError(f'No {kind} trial to pause')
+            self.navigation_running = False
+            self.navigation_generation += 1
+            self.navigation_state = {**self.navigation_state, 'status': 'paused'}
+            return self.navigation_state
         if self.navigation_kind != kind and self.navigation is not None:
             if self.navigation_running:
                 raise ValueError(f'Pause the {self.navigation_kind} experiment before switching modes')
             self.navigation.world.close()
             self.navigation = None
         self.navigation_kind = kind
-        if action == 'pause':
-            self.navigation_running = False
-            self.navigation_generation += 1
-            self.navigation_state = {**self.navigation_state, 'status': 'paused'}
-            return self.navigation_state
         if self.navigation is None:
-            self.progress = 'Constructing the fly, compound eyes, and visual arena'
+            self.progress = 'Constructing the fly and sensory arena'
             if kind == 'maze':
                 from brain.maze_navigation import MazeNavigation
                 self.navigation = MazeNavigation(self.future.result())
@@ -137,4 +139,4 @@ class BrainService:
         except Exception as error:
             self.navigation_running = False
             self.navigation_state = {**self.navigation_state, 'status': 'error', 'message': str(error)}
-            print(f'Visual navigation error: {error}', flush=True)
+            print(f'Navigation error: {error}', flush=True)

@@ -15,10 +15,15 @@ nav = MazeNavigation(brain)
 # A body driven straight into the left baffle must not pass through it.
 nav.world.reset(heading_deg=0)
 max_x = -np.inf
+contact_bins = 0
 for _ in range(100):
     nav.world.step([.78, .78])
-    max_x = max(max_x, nav.world.position[0])
+    x, y, _ = nav.world.position
+    # Contact can deflect the fly along a wall and around its open end.
+    if y < 3: max_x = max(max_x, x)
+    contact_bins += int(nav.world.score()['wall_contacts']>0)
 assert max_x < -6.5, max_x
+assert contact_bins > 0
 records = []
 for condition in ('combined', 'vision_only', 'odor_only', 'neither', 'source_off'):
     for seed, heading in enumerate((45, 75, 105), 1):
@@ -47,5 +52,5 @@ for condition in ('combined', 'vision_only', 'odor_only', 'neither', 'source_off
                 'contact_bins':s['contact_bins'],'activity':sums,'frames':frames}
         records.append(record)
         print(json.dumps({k:v for k,v in record.items() if k!='frames'}), flush=True)
-        Path('outputs/maze-validation.json').write_text(json.dumps({'trials':records,'wall_block_max_x':float(max_x),'wall_seconds':time.time()-started},indent=2))
+        Path('outputs/maze-validation.json').write_text(json.dumps({'trials':records,'wall_block_max_x':float(max_x),'wall_contact_bins':contact_bins,'wall_seconds':time.time()-started},indent=2))
 nav.world.close()
