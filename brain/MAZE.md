@@ -135,6 +135,40 @@ of simulation-worker time. This longer run also did not solve the maze.
 The final state and checks are saved as `outputs/maze-60s-state.json` and
 `outputs/maze-60s-summary.json` on the cluster and development checkout.
 
+With the time limit raised to 120 s on revision `c573e3e`, the same condition,
+heading, and seed **reached the food zone at 81.76 simulated seconds**, 2.424 mm
+from its center. Arrival stopped the trial automatically after 4,088 steps,
+about 237 wall seconds. The first 60 s of the body trajectory matched the
+previous run exactly. Every recorded body center remained outside solid walls;
+the fly stayed upright and the brain/body clocks remained synchronized.
+This is one successful longer trial, not a reliability estimate or evidence
+that odor alone caused arrival.
+
+The earlier close pass was 9.067 mm from sugar at 1.20 s, behind a separating
+wall, with eight cell openings still between that cell and the source. In a
+nearby diagnostic sample at 1.14 s, antenna concentrations were only 0.001627
+and 0.001616 (source concentration is 1). Smoothed left/right ORN rates were
+4.46 and 3.08 Hz. Odor requested a +0.093 turn, while visual avoidance requested
+−0.088, leaving a +0.006 net turn. Thus the sensory signal was present but weak,
+and the two steering terms nearly canceled.
+
+Across 1,135 snapshots in the longer run, 94.5% of commands used the fixed
+wall-escape turn. In that mode, the decoder uses a held ±0.65 turn instead of
+adding the continuous odor and visual terms; odor can still influence the
+direction selected when an escape begins. Persistent front-wall activity can
+retrigger this mode. The controller has no temporal scent-trend comparison,
+dead-end memory, or route planning. These observations explain slow progress
+despite odor input; a matched sensory-ablation test would be needed to measure
+how much olfaction contributed to this eventual arrival.
+
+Diagnostics were polled every 0.2 wall seconds plus request time, so the 94.5%
+is a fraction of sampled commands, not an exact per-step fraction. The escape
+indicator now describes the command actually applied, including the last bin
+of each held turn; a 1,000-bin comparison verified unchanged motor outputs.
+The records are `outputs/maze-120s-state.json`, `outputs/maze-120s-summary.json`,
+and `outputs/maze-120s-diagnostics.jsonl`. The local analysis also records the
+trajectory comparison in `outputs/maze-120s-analysis.json`.
+
 ## Camera rate and simulation speed
 
 The original viewer bundled JPEGs with brain JSON and waited 150 ms between

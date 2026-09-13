@@ -310,8 +310,7 @@
     "wall_seconds": 127.99135088920593
   },
   "complex": {
-    "tested_revision": "aba44f2",
-    "summary": "Branching-maze checks: all 25 cells connect with 1.5 mm body clearance. The current reactive controller did not reach sugar in the two tested attempts (30 s at 75\u00b0, and 10 s at 90\u00b0). The simple-maze reference still succeeds. This harder layout exposes the controller\u2019s limits.",
+    "summary": "Branching-maze checks: all 25 cells connect with 1.5 mm body clearance. A 120 s trial reached sugar at 81.76 s (vision + smell, 75\u00b0, seed 1), after reproducing the earlier 60 s trajectory exactly. The 10, 30, and 60 s trials timed out. One longer success does not establish reliable odor-guided navigation; wall avoidance dominated 94.5% of sampled commands.",
     "trials": [
       {
         "config": {
@@ -381,7 +380,54 @@
           "body_physics": 21.998266194714233,
           "body_render_and_jpeg": 7.344940392067656
         }
+      },
+      {
+        "tested_revision": "81f7eb4",
+        "config": {
+          "condition": "combined",
+          "heading_deg": 75,
+          "seed": 1,
+          "duration": 60,
+          "food_odor": true,
+          "layout": "complex"
+        },
+        "status": "finished",
+        "time": 60.00000000086826,
+        "distance_mm": 19.886635747346364,
+        "contact_bins": 900,
+        "frames": 3000,
+        "path_points": 3001,
+        "observed_wall_seconds": 180.09938240982592,
+        "playback_speed": 0.3529062293491772
+      },
+      {
+        "tested_revision": "c573e3e",
+        "config": {
+          "condition": "combined",
+          "heading_deg": 75,
+          "seed": 1,
+          "duration": 120,
+          "food_odor": true,
+          "layout": "complex"
+        },
+        "status": "reached",
+        "time": 81.76000000159061,
+        "distance_mm": 2.4237543388245,
+        "contact_bins": 1270,
+        "frames": 4088,
+        "path_points": 4089,
+        "observed_wall_seconds": 236.78385286778212,
+        "playback_speed": 0.34573377343485084,
+        "diagnostics_samples": 1135,
+        "sampled_escape_fraction": 0.945374449339207,
+        "first_60s_path_identical": true,
+        "body_centers_inside_walls": 0
       }
+    ],
+    "tested_revisions": [
+      "aba44f2",
+      "81f7eb4",
+      "c573e3e"
     ]
   }
 }
