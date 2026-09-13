@@ -8,7 +8,7 @@ Vision + olfaction maze: **https://cw-login-zny.alpaca-elnath.ts.net:8443/maze/*
 
 The current deployment is Slurm job **5807547**, on `slurm-b300-128-021`, with
 one NVIDIA B300, 8 CPUs, and 24 GiB host memory. It expires at
-**2026-09-14 11:23:30 UTC / 20:23:30 JST**, or earlier if canceled. The `low`
+**2026-09-14 12:22:30 UTC / 21:22:30 JST**, or earlier if canceled. The `low`
 QoS is preemptible. This is a Slurm allocation, not a permanent hosted service.
 
 All files are under `/mnt/home/zny/flygym` on `crwv` and the shared compute
@@ -31,8 +31,8 @@ binds only to `127.0.0.1`; its browser-origin allowlist explicitly includes the
 Tailscale HTTPS origin. The gateway follows this job's compute-node changes
 after a Slurm requeue, and exits when the allocation ends. A requeue resets the
 brain state; use **Reset both** after reconnecting. The gateway tolerates the
-empty node field while a requeued job is pending. The visual update requeued
-this job on 2026-09-13 at 11:23:30 UTC; the expiry above reflects that restart.
+empty node field while a requeued job is pending. The maze update requeued
+this job on 2026-09-13 at 12:22:30 UTC; the expiry above reflects that restart.
 
 ## Operations (on the login node)
 
