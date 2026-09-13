@@ -28,7 +28,7 @@ function config() {
 async function api(path, args) {
   const response=await fetch('/api/'+path,args===undefined?{}:{method:'POST',
     headers:{'Content-Type':'application/json'},body:JSON.stringify(args)});
-  const data=await response.json();
+  const data=await response.json().catch(()=>{throw new Error('Compute service is temporarily unavailable.');});
   if(!response.ok)throw new Error(data.error||'Compute service request failed');
   return data;
 }

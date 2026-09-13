@@ -14,6 +14,7 @@ meter::-webkit-meter-optimum-value { background:#eeb773; }
 #body-loading[hidden] { display:none; }
 .body-image { min-height:260px; }
 .body-image > img { min-width:0; }
+img:not([src]) { visibility:hidden; }
 @media(min-width:1600px) { .maze-map { width:min(100%,370px); } }
 @media(max-width:900px) { .trial-controls { grid-template-columns:1.4fr 1fr 75px; } }
 @media(max-width:650px) { .trial-controls { grid-template-columns:1fr 1fr; } .maze-map { margin-bottom:15px; } }
