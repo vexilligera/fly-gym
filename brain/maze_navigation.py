@@ -84,12 +84,21 @@ class MazeNavigation:
         indices = self.brain.visual.readout_pixels
         self.policy = MazePolicy(self.world.bearings.ravel()[indices],self.world.visual_mask.ravel()[indices],seed)
         self.frames = 0;self.wall_seconds = 0;self.done = False;self.status = 'paused'
+        self.taste = None
         self.contact_bins = 0
         self.state = self.snapshot(None,{},True)
         return self.state
 
     def step(self,images=True):
         if self.done:return self.state
+        if self.taste is not None:
+            neural = self.taste.step()
+            self.frames += 1
+            self.done = self.taste.done
+            self.status = 'reached' if self.done else 'tasting'
+            self.state = {**self.state, 'status': self.status, 'frame': self.frames,
+                          'done': self.done, 'brain': neural, 'taste': self.taste.snapshot()}
+            return self.state
         started = time.perf_counter()
         vision = self.config['condition'] in ('combined','vision_only')
         olfaction = self.config['condition'] in ('combined','odor_only')
@@ -109,6 +118,19 @@ class MazeNavigation:
         self.state = self.snapshot(neural,decoder,images)
         self.wall_seconds += time.perf_counter()-started
         self.state['playback_speed'] = float(self.world.data.time/self.wall_seconds)
+        return self.state
+
+    def start_taste(self, rate_hz=200):
+        if not self.done or self.status != 'reached':
+            raise ValueError('Reach the food zone before starting a sugar-taste assay')
+        from brain.sugar_assay import SugarAssay
+        assay = SugarAssay(self.brain, rate_hz)
+        self.taste = assay
+        self.done = False
+        self.status = 'tasting'
+        self.frames += 1
+        self.state = {**self.state, 'status': 'tasting', 'done': False,
+                      'frame': self.frames, 'brain': None, 'taste': assay.snapshot()}
         return self.state
 
     def snapshot(self,neural,decoder,images):

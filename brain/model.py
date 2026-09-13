@@ -93,15 +93,20 @@ class ConnectomeBrain:
             'input': '68 ORN_DM1 cells; food-odor proxy, not sugar receptors',
             'projection': 'DM1_lPN cells monitored downstream, not directly stimulated',
             'encoder': 'Normalized antenna odor → saturating common rate and 16× bilateral contrast gain → Poisson input; engineered approximation.',
-            'chemistry': 'No volatile sucrose, receptor binding, gustatory circuit, feeding, or metabolism model.',
+            'chemistry': 'No volatile sucrose, receptor binding, ingestion, or metabolism. Sugar taste has a separate GRN stimulation assay.',
         }
-        self.inputs = np.unique(np.concatenate([*self.groups.values(), self.visual.receptors]))
+        legacy_inputs = np.unique(np.concatenate([*self.groups.values(), self.visual.receptors]))
+        from brain.sugar_input import SugarInput
+        self.sugar = SugarInput(self.ids, self.annotations)
+        self.metadata['sugar'] = self.sugar.metadata
+        self.inputs = np.union1d(legacy_inputs, self.sugar.receptors).astype(np.int32)
         self.input_index = {int(i): j for j, i in enumerate(self.inputs)}
         self.engine = None
         if backend == 'cuda':
             from brain.cuda_engine import CudaEngine
             progress('Constructing full recurrent network on the allocated CUDA GPU')
-            self.engine = CudaEngine(len(self.ids), pre, post, weights, self.inputs)
+            self.engine = CudaEngine(len(self.ids), pre, post, weights, self.inputs,
+                                     primary_inputs=legacy_inputs)
             self.metadata.update(self.engine.metadata)
         elif backend == 'brian2':
             self._create_brian_network(pre, post, weights, progress)
@@ -214,6 +219,15 @@ class ConnectomeBrain:
             'ORN_rates_hz': [float(self.last_delta[self.groups['ORN_DM1_'+side]].mean()/.02) for side in ('left','right')],
             'PN_spikes': [int(self.last_delta[self.odor_projection[side]].sum()) for side in ('left','right')],
         }
+        return result
+
+    def step_sugar(self, rate_hz=200.0):
+        if isinstance(rate_hz, bool) or not isinstance(rate_hz, (int, float)) or not np.isfinite(rate_hz) or not 0 <= rate_hz <= 200:
+            raise ValueError('Sugar GRN input must be 0–200 Hz')
+        rates = np.zeros(len(self.inputs))
+        rates[np.searchsorted(self.inputs, self.sugar.receptors)] = rate_hz
+        result = self._advance(rates, 'sugar_taste_assay', float(rate_hz), 0.0, False)
+        result['sugar'] = self.sugar.readout(self.last_delta, rate_hz)
         return result
 
     def _advance(self, rates, stimulus, rate_hz, odor, silence):

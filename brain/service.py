@@ -92,8 +92,18 @@ class BrainService:
     def _navigation_command(self,kind,action,arguments):
         if kind not in ('vision','maze'):
             raise ValueError('Unknown experiment')
-        if action not in ('start', 'pause', 'reset'):
+        if action not in ('start', 'pause', 'reset', 'taste'):
             raise ValueError('Unknown navigation action')
+        if action == 'taste':
+            if kind != 'maze' or self.navigation_kind != 'maze' or self.navigation is None:
+                raise ValueError('Reach the maze food zone before presenting sugar')
+            if self.navigation_running:
+                raise ValueError('Wait for the active experiment to finish before presenting sugar')
+            self.navigation_state = self.navigation.start_taste(**arguments)
+            self.navigation_running = True
+            self.navigation_generation += 1
+            self.pool.submit(self._vision_tick, self.navigation_generation)
+            return self.navigation_state
         if action == 'pause':
             if self.navigation_kind != kind or self.navigation is None:
                 raise ValueError(f'No {kind} trial to pause')

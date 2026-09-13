@@ -85,7 +85,7 @@ class LocalHandler(SimpleHTTPRequestHandler):
             self.close_connection = True
 
     def do_POST(self):
-        if self.path not in ('/api/brain/step', '/api/brain/reset', '/api/vision/start', '/api/vision/pause', '/api/vision/reset', '/api/maze/start', '/api/maze/pause', '/api/maze/reset'):
+        if self.path not in ('/api/brain/step', '/api/brain/reset', '/api/vision/start', '/api/vision/pause', '/api/vision/reset', '/api/maze/start', '/api/maze/pause', '/api/maze/reset', '/api/maze/taste'):
             return self.send_error(404)
         origin = self.headers.get('Origin')
         port = self.server.server_address[1]
@@ -98,7 +98,7 @@ class LocalHandler(SimpleHTTPRequestHandler):
             arguments = json.loads(self.rfile.read(length))
             visual = self.path.startswith('/api/vision/')
             maze = self.path.startswith('/api/maze/')
-            allowed = {'condition','heading_deg','seed','duration','food_odor','layout'} if maze else {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
+            allowed = {'rate_hz'} if self.path == '/api/maze/taste' else {'condition','heading_deg','seed','duration','food_odor','layout'} if maze else {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
             if not isinstance(arguments, dict) or set(arguments) - allowed:
                 raise ValueError('Unknown parameters')
             action = self.path.rsplit('/',1)[-1]

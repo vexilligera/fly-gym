@@ -26,8 +26,9 @@ function message(text, error=false) {
 }
 function controls() {
   $('start').disabled=$('reset').disabled=!ready||busy;
-  $('pause').disabled=!ready||busy||!['running','paused'].includes(state.status)||!state.config;
-  $('pause').textContent=state.status==='running'?'Pause':'Resume';
+  $('pause').disabled=!ready||busy||!['running','tasting','paused'].includes(state.status)||!state.config;
+  $('pause').textContent=['running','tasting'].includes(state.status)?'Pause':'Resume';
+  $('taste-start').disabled=$('taste-control').disabled=!ready||busy||state.status!=='reached'||!state.done;
 }
 function config() {
   return {layout:$('layout').value,condition:$('condition').value,heading_deg:Number($('heading').value),
@@ -43,14 +44,20 @@ async function api(path, args) {
 async function command(action,args={}) {
   if(!$('seed').reportValidity())return;
   busy=true;controls();
-  message(action==='pause'?'Finishing the current simulation bin…':'Preparing the maze and both senses…');
+  message(action==='pause'?'Finishing the current simulation bin…':action==='taste'?'Preparing the sugar-taste assay…':'Preparing the maze and both senses…');
   try { render(await api('maze/'+action,args)); }
   catch(error) { message(error.message,true); }
   finally { busy=false;controls(); }
 }
 $('start').onclick=()=>command('start',config());
 $('reset').onclick=()=>command('reset',config());
-$('pause').onclick=()=>command(state.status==='running'?'pause':'start');
+$('pause').onclick=()=>command(['running','tasting'].includes(state.status)?'pause':'start');
+async function watchTaste(rate_hz) {
+  await command('taste',{rate_hz});
+  if(state.status==='tasting')$('brain-canvas').scrollIntoView({behavior:'smooth',block:'center'});
+}
+$('taste-start').onclick=()=>watchTaste(Number($('taste-rate').value));
+$('taste-control').onclick=()=>watchTaste(0);
 $('condition').onchange=()=>{$('condition-description').textContent=descriptions[$('condition').value];};
 $('heading').oninput=()=>{$('heading-value').textContent=$('heading').value+'°';};
 $('show-field').onchange=drawField;
@@ -107,11 +114,11 @@ function render(s) {
     drawField();
   }
   loadWorld(s.config.layout);
-  const statusText={running:'Live sensory feedback',paused:'Paused',reached:'Sugar zone reached',finished:'Time limit reached',fallen:'Fly lost balance'}[s.status]||s.status;
+  const statusText={running:'Live sensory feedback',tasting:'Live sugar-taste assay · body held',paused:'Paused',reached:s.taste?'Sugar assay complete · body held':'Sugar zone reached',finished:'Time limit reached',fallen:'Fly lost balance'}[s.status]||s.status;
   message(`● ${statusText} · ${layouts[s.config.layout]||'Simple maze'} · ${names[s.config.condition]}${s.config.food_odor?'':' · Food odor off'}`);
   $('trial-state').textContent=s.status.toUpperCase();
-  $('brain-live-state').textContent=s.status==='running'?'Live · latest bin':'Held · last bin';
-  $('brain-live-state').dataset.running=s.status==='running';
+  $('brain-live-state').textContent=['running','tasting'].includes(s.status)?'Live · latest bin':'Held · last bin';
+  $('brain-live-state').dataset.running=['running','tasting'].includes(s.status);
   if(s.frame===lastFrame)return;
   lastFrame=s.frame;
   if(s.brain)brainView.update(s.brain);else brainView.reset();
@@ -128,32 +135,45 @@ function render(s) {
   }
   $('body-time').textContent=cameraStreaming?'Streaming camera':'Snapshot view';
   $('distance').textContent='At brain readout: '+s.score.distance_mm.toFixed(1)+' mm';
-  $('speed').textContent=s.playback_speed.toFixed(2)+'× real time';
+  $('speed').textContent=s.taste?'Body held · 0.2× neural time':s.playback_speed.toFixed(2)+'× real time';
   const vision=['combined','vision_only'].includes(s.config.condition);
   const smell=['combined','odor_only'].includes(s.config.condition);
-  $('eyes-state').textContent=vision?'721 samples / eye':'Input disconnected';
-  $('sensory-time').textContent=`Sensors sampled at ${s.sensory_time.toFixed(3)} s → brain/body at ${s.time.toFixed(3)} s.`;
-  $('odor-state').textContent=!s.config.food_odor?'Food odor off: both antenna samples are zero.':smell?'Local food-odor concentration, normalized 0–1.':'Odor is present here; neural odor input is disconnected.';
-  const d=s.decoder||{}, o=s.brain?.olfaction;
+  $('eyes-state').textContent=s.taste?'Held arrival image':vision?'721 samples / eye':'Input disconnected';
+  $('sensory-time').textContent=s.taste?`Assay brain time ${s.taste.time.toFixed(3)} s; body held at arrival (${s.time.toFixed(3)} s).`:`Sensors sampled at ${s.sensory_time.toFixed(3)} s → brain/body at ${s.time.toFixed(3)} s.`;
+  $('odor-state').textContent=s.taste?'Arrival samples held for reference. Vision and odor inputs are off during the taste assay.':!s.config.food_odor?'Food odor off: both antenna samples are zero.':smell?'Local food-odor concentration, normalized 0–1.':'Odor is present here; neural odor input is disconnected.';
+  const d=s.taste?{}:s.decoder||{}, o=s.brain?.olfaction;
   for(const [i,side] of ['left','right'].entries()) {
     $('odor-'+side).textContent=s.odor[i].toFixed(3);
     $('odor-meter-'+side).value=s.odor[i];
     $('orn-'+side).textContent=(d['odor_'+side+'_hz']||0).toFixed(0)+' Hz';
     $('pn-'+side).textContent=o?.PN_spikes[i]||0;
-    $('gain-'+side).textContent=(d.gains?.[i]||0).toFixed(2);
+    $('gain-'+side).textContent=s.taste?'held':(d.gains?.[i]||0).toFixed(2);
   }
   $('l2-spikes').textContent=(d.L2_spikes||0).toLocaleString();
   $('wall-front').textContent=(d.wall_front||0).toFixed(2);
   $('active').textContent=(s.brain?.active_neurons||0).toLocaleString();
-  $('steering').textContent=d.escape?'Turning away from a strong front-wall response.':`Odor steering ${(d.odor_turn||0).toFixed(2)} · Visual avoidance ${(d.visual_turn||0).toFixed(2)}. Positive turns left.`;
+  $('steering').textContent=s.taste?'Body held for a neural assay. Motor readouts do not move the mouth or legs.':d.escape?'Turning away from a strong front-wall response.':`Odor steering ${(d.odor_turn||0).toFixed(2)} · Visual avoidance ${(d.visual_turn||0).toFixed(2)}. Positive turns left.`;
   $('ground-truth').textContent=`Evaluation: ${s.score.distance_mm.toFixed(1)} mm from center. The controller does not receive this distance.`;
-  $('result').textContent=s.status==='reached'?`Entered the 2.5 mm food zone after ${s.time.toFixed(2)} simulated seconds. Feeding is not modeled.`:s.status==='fallen'?'The fly lost balance; the trial stopped.':s.done?'Time limit reached without entering the food zone.':'A trial ends at the food zone, the time limit, or loss of balance.';
+  $('result').textContent=(s.status==='reached'||s.taste)?`Entered the 2.5 mm food zone after ${s.time.toFixed(2)} simulated seconds. A separate sugar-taste assay is available below; ingestion is not modeled.`:s.status==='fallen'?'The fly lost balance; the trial stopped.':s.done?'Time limit reached without entering the food zone.':'A trial ends at the food zone, the time limit, or loss of balance.';
+  renderTaste(s.taste,s.brain?.sugar);
   $('path').setAttribute('d',s.path.map((p,i)=>(i?'L':'M')+p.join(' ')).join(' '));
   $('fly-marker').setAttribute('transform',`translate(${s.position[0]} ${s.position[1]}) rotate(${s.heading_deg})`);
   if(s.done&&recordedId!==trialId) {
     recordedId=trialId;
     trials.unshift({config:s.config,time:s.time,distance:s.score.distance_mm,status:s.status});
     trials=trials.slice(0,12);renderTrials();
+  }
+}
+function renderTaste(taste,readout) {
+  const trace=taste?.trace||[];
+  $('taste-phase').textContent=!taste?'Available after arrival':`${taste.done?'Complete':taste.phase} · ${taste.time.toFixed(2)} / 8.00 s`;
+  $('taste-detail').textContent=!taste?'21 released sugar GRNs are stimulated. Both MN9 motor neurons are observed downstream, without direct stimulation.':`${taste.rate_hz===0?'No-taste control':taste.rate_hz+' Hz sugar input'} · 21 GRNs · reset neural baseline · held body. MN9 is a feeding-initiation readout, not a happiness score.`;
+  $('taste-grn').textContent=readout?readout.GRN_hz.toFixed(1)+' Hz':'—';
+  for(const side of ['left','right'])$('taste-mn-'+side).textContent=readout?readout.MN9_hz[side].toFixed(1)+' Hz':'—';
+  const maximum=Math.max(200,...trace.flatMap(p=>[p.GRN_hz,p.MN9_left_hz,p.MN9_right_hz]));
+  $('taste-chart-max').textContent=Math.ceil(maximum);
+  for(const [id,key] of [['grn','GRN_hz'],['left','MN9_left_hz'],['right','MN9_right_hz']]) {
+    $('taste-line-'+id).setAttribute('d',trace.map((p,i)=>`${i?'L':'M'}${40+p.time*46} ${120-p[key]/maximum*105}`).join(' '));
   }
 }
 function renderTrials() {

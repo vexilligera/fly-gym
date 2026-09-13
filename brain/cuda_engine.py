@@ -75,7 +75,7 @@ extern "C" __global__ void apply_inputs(
 
 
 class CudaEngine:
-    def __init__(self, n, pre, post, weights, inputs):
+    def __init__(self, n, pre, post, weights, inputs, primary_inputs=None):
         if cp.cuda.runtime.getDeviceCount() < 1:
             raise RuntimeError('The CUDA backend requires a GPU allocated to this process.')
         if not np.equal(weights, np.rint(weights)).all():
@@ -84,6 +84,12 @@ class CudaEngine:
             raise ValueError('Synapse-count sum exceeds the integer delivery accumulator.')
         self.n, self.m = n, len(inputs)
         self.inputs_host = np.asarray(inputs, dtype=np.int32)
+        # Additional sensory channels must not shift the existing navigation
+        # input random stream, even while the new channels are inactive.
+        primary = self.inputs_host if primary_inputs is None else np.asarray(primary_inputs)
+        slot_by_id = {int(i): slot for slot, i in enumerate(self.inputs_host)}
+        self.primary_slots = np.array([slot_by_id[int(i)] for i in primary], dtype=np.int32)
+        self.secondary_slots = np.setdiff1d(np.arange(self.m), self.primary_slots)
         order = np.argsort(pre, kind='stable')
         row = np.zeros(n + 1, dtype=np.int32)
         np.cumsum(np.bincount(pre, minlength=n), out=row[1:])
@@ -125,7 +131,7 @@ class CudaEngine:
             'gpu': props['name'].decode(), 'cupy_version': cp.__version__,
             'cuda_runtime': cp.cuda.runtime.runtimeGetVersion(),
             'integration': 'Float64 exact linear LIF, 0.1 ms, 1.8 ms delay, Brian2 refractory/event order',
-            'random_input': 'Independent Bernoulli rate*dt events; NumPy generator seed 42, a different random stream from Brian2',
+            'random_input': 'Independent Bernoulli rate*dt events; seed 42 for existing inputs, independent seed 43 for added sensory channels; differs from Brian2',
         }
 
     def reset(self):
@@ -138,11 +144,14 @@ class CudaEngine:
         cp.cuda.get_current_stream().synchronize()
         self.steps = 0
         self.rng = np.random.default_rng(42)
+        self.secondary_rng = np.random.default_rng(43)
 
     def step(self, rates, silenced, events=None):
         rates = np.asarray(rates)
         if events is None:
-            events = self.rng.random((200, self.m)) < rates[None, :] * .0001
+            events = np.zeros((200, self.m), dtype=np.uint8)
+            events[:, self.primary_slots] = self.rng.random((200, len(self.primary_slots))) < rates[None, self.primary_slots] * .0001
+            events[:, self.secondary_slots] = self.secondary_rng.random((200, len(self.secondary_slots))) < rates[None, self.secondary_slots] * .0001
         events = np.ascontiguousarray(events, dtype=np.uint8)
         if events.shape != (200, self.m):
             raise ValueError('Expected 200 input-event rows for the 20 ms batch.')
