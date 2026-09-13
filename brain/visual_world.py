@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 import mujoco as mj
 import numba as nb
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 import yaml
 from scipy.spatial.transform import Rotation
 from flygym import assets_dir
@@ -197,10 +197,14 @@ class VisualWorld:
         return self.contrast
 
     @staticmethod
-    def jpeg(frame, size=None):
+    def jpeg(frame, size=None, caption=None):
         im = Image.fromarray(frame)
         if size:
             im = im.resize(size)
+        if caption:
+            draw = ImageDraw.Draw(im)
+            draw.rectangle((8,8,190,29),fill=(18,28,37))
+            draw.text((14,13),caption,fill=(229,242,238))
         buf = io.BytesIO()
         im.save(buf, format='JPEG', quality=78)
         return base64.b64encode(buf.getvalue()).decode('ascii')
@@ -217,7 +221,10 @@ class VisualWorld:
             mask = ids > 0
             mosaic[mask] = np.clip(values[ids[mask]-1] * 255, 0, 255).astype(np.uint8)
             eyes.append(self.jpeg(mosaic, (225, 256)))
-        return {'body': self.jpeg(self.body_renderer.render()), 'eyes': eyes}
+        return {'body': self.jpeg(self.body_renderer.render(),caption=self.body_caption()), 'eyes': eyes}
+
+    def body_caption(self):
+        return None
 
     def configure_body_camera(self, center):
         self.body_camera.lookat[:] = [(center[0] + self.target[0])/2, (center[1] + self.target[1])/2, 1.5]

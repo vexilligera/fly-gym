@@ -3,9 +3,11 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import argparse
+import base64
 import json
 import os
 import sys
+import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -20,12 +22,17 @@ class LocalHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
+        if self.path == '/api/maze/camera.mjpg':
+            return self.stream_maze_camera()
         if self.path == '/api/brain/status':
             return self.send_json(self.server.brain.status())
         if self.path == '/api/vision/status':
             return self.send_json(self.server.brain.navigation_status('vision'))
-        if self.path == '/api/maze/status':
-            return self.send_json(self.server.brain.navigation_status('maze'))
+        if self.path in ('/api/maze/status','/api/maze/status?body=0'):
+            state = self.server.brain.navigation_status('maze')
+            if self.path.endswith('?body=0') and 'images' in state:
+                state = {**state,'images':{'eyes':state['images']['eyes']}}
+            return self.send_json(state)
         if self.path == '/api/maze/world':
             try:
                 return self.send_json(self.server.brain.maze_geometry())
@@ -43,6 +50,40 @@ class LocalHandler(SimpleHTTPRequestHandler):
                 return self.send_json({'error': str(error)}, 500)
         return super().do_GET()
 
+    def stream_maze_camera(self):
+        """Send cached worker frames; never render or queue physics in HTTP threads."""
+        self.connection.settimeout(10)
+        self.send_response(200)
+        self.send_header('Content-Type','multipart/x-mixed-replace; boundary=flyframe')
+        self.send_header('X-Accel-Buffering','no')
+        self.end_headers()
+        previous = None
+        sent_at = 0.0
+        try:
+            while True:
+                state = self.server.brain.navigation_status('maze')
+                picture = state.get('images',{}).get('body')
+                frame = (state.get('trial_id'),state.get('frame'))
+                now = time.monotonic()
+                # A slow connection skips old frames instead of building a queue.
+                # Repeat the held frame occasionally to keep idle streams alive.
+                if picture and (frame != previous or now-sent_at >= 2):
+                    data = base64.b64decode(picture)
+                    header = (f'--flyframe\r\nContent-Type: image/jpeg\r\nContent-Length: {len(data)}\r\n'
+                              f'X-Simulation-Time: {state["time"]:.3f}\r\n'
+                              f'X-Trial-Id: {state["trial_id"]}\r\n\r\n').encode()
+                    self.wfile.write(header+data+b'\r\n')
+                    self.wfile.flush()
+                    previous, sent_at = frame, now
+                elif not picture and now-sent_at>=2:
+                    # No world yet: a multipart comment detects a disconnected client.
+                    self.wfile.write(b'\r\n');self.wfile.flush();sent_at=now
+                time.sleep(.05)
+        except (BrokenPipeError,ConnectionResetError,TimeoutError,OSError):
+            pass
+        finally:
+            self.close_connection = True
+
     def do_POST(self):
         if self.path not in ('/api/brain/step', '/api/brain/reset', '/api/vision/start', '/api/vision/pause', '/api/vision/reset', '/api/maze/start', '/api/maze/pause', '/api/maze/reset'):
             return self.send_error(404)
@@ -57,7 +98,7 @@ class LocalHandler(SimpleHTTPRequestHandler):
             arguments = json.loads(self.rfile.read(length))
             visual = self.path.startswith('/api/vision/')
             maze = self.path.startswith('/api/maze/')
-            allowed = {'condition','heading_deg','seed','duration','food_odor'} if maze else {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
+            allowed = {'condition','heading_deg','seed','duration','food_odor','layout'} if maze else {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
             if not isinstance(arguments, dict) or set(arguments) - allowed:
                 raise ValueError('Unknown parameters')
             action = self.path.rsplit('/',1)[-1]

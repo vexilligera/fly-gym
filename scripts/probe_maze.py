@@ -8,7 +8,7 @@ b=ConnectomeBrain(backend='cuda')
 n=MazeNavigation(b)
 records=[]
 for condition,heading in [('combined',75),('odor_only',75),('vision_only',75)]:
- n.reset(condition=condition,heading_deg=heading,duration=10)
+ n.reset(layout='simple',condition=condition,heading_deg=heading,duration=10)
  frames=[]
  while not n.done:
   s=n.step(images=False)

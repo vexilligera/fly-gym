@@ -7,6 +7,7 @@ import time
 import uuid
 import numpy as np
 from brain.maze_world import MazeWorld
+from brain.maze_layouts import get_layout
 
 
 class MazePolicy:
@@ -56,10 +57,11 @@ class MazePolicy:
 class MazeNavigation:
     def __init__(self,brain):
         self.brain = brain
-        self.world = MazeWorld()
+        self.world = None
         self.reset()
 
-    def reset(self,condition='combined',heading_deg=75,seed=1,duration=15,food_odor=True):
+    def reset(self,condition='combined',heading_deg=75,seed=1,duration=30,food_odor=True,layout='complex'):
+        get_layout(layout)
         if condition not in ('combined','vision_only','odor_only','neither'):
             raise ValueError('Unknown maze sensory condition')
         for value,low,high in [(heading_deg,-180,180),(duration,.1,30)]:
@@ -68,7 +70,11 @@ class MazeNavigation:
         if isinstance(seed,bool) or not isinstance(seed,int) or not 0<=seed<=100000:
             raise ValueError('Seed must be an integer in 0…100000')
         if not isinstance(food_odor,bool):raise ValueError('food_odor must be a boolean')
-        self.config = dict(condition=condition,heading_deg=heading_deg,seed=seed,duration=duration,food_odor=food_odor)
+        if self.world is None or self.world.layout.key != layout:
+            replacement = MazeWorld(layout)
+            if self.world is not None:self.world.close()
+            self.world = replacement
+        self.config = dict(condition=condition,heading_deg=heading_deg,seed=seed,duration=duration,food_odor=food_odor,layout=layout)
         self.trial_id = uuid.uuid4().hex
         self.brain.reset()
         self.world.food_odor = food_odor

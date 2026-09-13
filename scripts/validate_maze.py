@@ -12,6 +12,7 @@ from brain.maze_navigation import MazeNavigation
 started = time.time()
 brain = ConnectomeBrain(backend='cuda')
 nav = MazeNavigation(brain)
+nav.reset(layout='simple')
 # A body driven straight into the left baffle must not pass through it.
 nav.world.reset(heading_deg=0)
 max_x = -np.inf
@@ -27,7 +28,7 @@ assert contact_bins > 0
 records = []
 for condition in ('combined', 'vision_only', 'odor_only', 'neither', 'source_off'):
     for seed, heading in enumerate((45, 75, 105), 1):
-        nav.reset(condition='combined' if condition=='source_off' else condition,
+        nav.reset(layout='simple',condition='combined' if condition=='source_off' else condition,
                   heading_deg=heading, seed=seed, duration=5, food_odor=condition!='source_off')
         sums = dict(spikes=0, L2_spikes=0, PN_spikes=0, ORN_spikes=0)
         frames = []
