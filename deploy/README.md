@@ -4,6 +4,8 @@ Private URL: **https://cw-login-zny.alpaca-elnath.ts.net:8443/connectome/**
 
 Visual navigation: **https://cw-login-zny.alpaca-elnath.ts.net:8443/vision/**
 
+Vision + olfaction maze: **https://cw-login-zny.alpaca-elnath.ts.net:8443/maze/**
+
 The current deployment is Slurm job **5807547**, on `slurm-b300-128-021`, with
 one NVIDIA B300, 8 CPUs, and 24 GiB host memory. It expires at
 **2026-09-14 11:23:30 UTC / 20:23:30 JST**, or earlier if canceled. The `low`
@@ -12,7 +14,7 @@ QoS is preemptible. This is a Slurm allocation, not a permanent hosted service.
 All files are under `/mnt/home/zny/flygym` on `crwv` and the shared compute
 filesystem. The CUDA brain and HTTP server execute on the allocated compute
 node. In `/connectome/`, MuJoCo body physics executes in the browser. In
-`/vision/`, MuJoCo physics, eye rendering, neural stepping, and steering all run
+`/vision/` and `/maze/`, MuJoCo physics, eye rendering, neural stepping, and steering all run
 on the compute node; the browser observes snapshots and draws the brain anchors.
 
 ```text
@@ -33,6 +35,26 @@ empty node field while a requeued job is pending. The visual update requeued
 this job on 2026-09-13 at 11:23:30 UTC; the expiry above reflects that restart.
 
 ## Operations (on the login node)
+
+Code is synchronized through `https://github.com/vexilligera/fly-gym`, branch
+`codex/vision-olfaction-maze`. On the Mac this remote is named `workspace`
+(official FlyGym remains `origin`); on the cluster it is `origin`. Changes are
+committed and pushed on the Mac, then pulled on the shared cluster checkout:
+
+```sh
+# Mac
+git -c http.version=HTTP/1.1 -c http.postBuffer=52428800 push workspace codex/vision-olfaction-maze
+# Login node: fetch code; existing environment, datasets, and assets stay local.
+cd /mnt/home/zny/flygym
+git pull --ff-only
+```
+
+Restart the running server after backend changes with `scontrol requeue 5807547`
+only after validation. This resets the live experiment and temporarily takes
+the endpoint offline while the job is pending. The gateway follows the new
+node. Runtime state, downloaded connectome data, generated meshes, environments,
+logs, and the private EGL loader are excluded from Git; a fresh clone still
+needs the installation/data/asset steps described below.
 
 ```sh
 cd /mnt/home/zny/flygym
@@ -140,3 +162,23 @@ controlled experiments validate this engineered loop, not natural fly vision.
 continuous stepping, origin guards, image decoding, and manual-mode regression
 checks passed as well. Visual trials stop automatically; closing the browser
 does not pause the compute loop before the trial's time limit.
+
+## Multisensory maze
+
+See `brain/MAZE.md` for the exact signal path, chemical-model limits, and
+measured sensory controls. `/maze/` adds physical baffles, central sugar,
+a pre-equilibrated 2-D food-odor field, and two local antenna samples. Both
+visual and olfactory input enter the same full-brain time interval. The
+movement decoder is engineered and receives neural activity, without a maze
+map or target coordinates. The brain, stripe, and maze pages share one worker.
+
+```sh
+srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_maze.py
+srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=1 .venv/bin/python scripts/validate_maze_api.py --port 8000
+```
+
+The standalone behavioral check constructs its own brain/world. The API check
+controls the specified server and resets its shared simulation. Use a staging
+server when preserving a running experiment matters. Results are recorded in
+`outputs/maze-validation.json` and `outputs/maze-api-validation.json`; the small
+browser report is versioned in `wasm/maze/validation.json`.

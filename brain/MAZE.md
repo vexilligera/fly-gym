@@ -1,0 +1,116 @@
+# Vision and olfaction in the sugar maze
+
+Open `/maze/` and press **Run maze**. The fly starts at (−13, −12) mm in a
+40 × 40 mm arena with two offset baffles. The sugar patch stays at the center.
+Arrival means the thorax enters a 2.5 mm radius; no eating is simulated.
+Both eyes, two antenna readings, the body, path, and brain activity update live.
+Choose vision + smell, either sense alone, or both disconnected. **Food odor
+on** independently controls the source for the next trial.
+
+The server advances the entire loop every 20 ms, independently of browser
+polling. Pause stops at a completed bin; Resume continues the same trial.
+Run maze and Reset start a fresh brain and body. A trial stops on arrival,
+loss of balance, or its time limit. The manual and stripe experiments share
+this brain; a running experiment must be paused before switching modes.
+
+## Sensory and neural model
+
+1. The actual MuJoCo scene is rendered by two body-attached eye cameras.
+   NeuroMechFly's fisheye optics and 721 samples per eye are retained. Dark
+   contrast in a fixed retinal mask drives the 7,932 annotated R1–6 cells
+   through the synthetic registration described in [VISION.md](VISION.md).
+2. Two virtual antenna sensors, fixed in the thorax frame at
+   (0.65, ±0.38, 0.08) mm, sample a normalized odor field. There is no active
+   antennal movement. The odor source is co-located with the sugar; sugar
+   itself is not treated as a volatile chemical.
+3. `OdorField` solves the steady equation `D ∇²c − λc = 0` on a 0.5 mm grid,
+   with D = 12 mm²/s, λ = 0.12/s, c = 1 in the central source, and no flux
+   through walls. These are chosen simulation parameters, not a calibrated
+   food odor. Bilinear sampling uses only unblocked neighbors. Odor spreads
+   around openings; a sealed compartment receives no source odor. There is
+   no wind, turbulence, vertical flow, or evolving plume. Turning the source
+   off starts with zero odor everywhere, without a modeled washout period.
+4. A chosen encoder converts the two local samples into Poisson input rates
+   for 35 left and 33 right `ORN_DM1` cells. The common rate is
+   `110 mean(c)/(mean(c)+0.04)` Hz. Bilateral contrast is amplified by 16,
+   clipped to ±0.85, and applied as a left/right rate multiplier. This
+   comparison occurs **outside the brain** and exaggerates small antenna
+   differences. It is not a measured olfactory transduction model or a
+   claim that DM1 encodes sucrose. Only one food-odor channel is represented.
+5. Eye and odor events enter the same 20 ms simulation interval of all
+   138,639 neurons and 15,091,983 released signed connection rows. No
+   connections are removed. L2 and DM1 projection-neuron activity is produced
+   by the recurrent network; those readout cells are not directly stimulated.
+6. The engineered movement decoder reads L2 counts and **ORN** spike rates.
+   L2 sector responses are smoothed over 60 ms and produce wall avoidance;
+   left/right ORN activity is smoothed over 120 ms and produces odor steering.
+   A strong front response triggers a short held turn. These signals modulate
+   a constant walking drive through the existing six-leg recorded-step CPG.
+   DM1 projection neurons are displayed as downstream responses, but do not
+   steer this controller. Their released inputs are substantially bilateral.
+
+`MazePolicy` receives neural activity, fixed synthetic retinal directions,
+modality switches, and its history. It receives no body pose, target position,
+maze geometry, odor map, distance-to-goal, or waypoint plan. World coordinates
+are used only to construct the scene/field, sample sensors, and score arrival.
+The UI's odor map is an observer visualization.
+
+## Brain chemistry: what “interaction” means here
+
+The connectome engine uses uniform point-neuron LIF dynamics: 20 ms membrane
+time constant, 5 ms synaptic decay, 1.8 ms transmission delay, and released
+signed synapse counts scaled by 0.275 mV. External Poisson events add voltage
+to selected sensory neurons. A cell's spikes affect its connected neighbors
+through those weights. All cells and released wiring remain in the model.
+
+This approximates electrical consequences of transmission; it does not
+simulate neurotransmitter molecules. There are no ligand concentrations at
+receptors, binding kinetics, receptor subtypes, release vesicles, reuptake,
+drug diffusion, detailed ion channels, or molecule-specific dose responses.
+Real photoreceptors use graded potentials and histamine; the released LIF
+model's signs and the artificial event encoder do not reproduce that pathway.
+The antenna field is an environmental scent proxy, not a biochemical model
+inside the brain. Taste, hunger, reward learning, feeding, digestion, and
+metabolism are absent. Adding a chemical name would not establish its effects.
+
+## Measured checks and interpretation
+
+`scripts/validate_maze.py` runs matched headings 45°, 75°, 105° with leg-phase
+seeds 1, 2, 3 and a 5 s limit for each of five conditions. Neural randomness
+resets to the fixed backend stream. B300 results on revision `12dbefa`:
+
+| Condition | Arrivals | Arrival time, simulated seconds |
+|---|---:|---|
+| Vision + smell | 3/3 | 1.58–1.66 |
+| Smell only | 3/3 | 1.56–1.62 |
+| Vision only | 0/3 | — |
+| Both disconnected | 0/3 | — |
+| Combined, source off | 0/3 | — |
+
+Combined trials generated both L2 and downstream DM1 projection-neuron
+spikes. Both-disconnected trials remained neurally silent with constant
+walking gains. Source-off and vision-only trials gave identical trajectories.
+A separate straight-drive test verified actual wall contacts and blockage
+below the left baffle's opening; contact can mechanically deflect the body
+along a wall. Finite state and synchronized neural/body clocks are checked
+on every step. A sealed-compartment field check verifies wall impermeability.
+
+This small, smooth-field maze is easy to navigate using odor alone from these
+starts. These data **do not demonstrate a benefit from adding vision**. Visual
+input changes the controller's turns, but wall avoidance remains crude and
+can get stuck. The decoder has no learning, memory map, planning, reconstructed
+descending decision circuit, or VNC. Success is an engineering demonstration,
+not evidence that natural navigation emerged from the full connectome or that
+the rest of the brain is necessary for the behavior.
+
+Detailed trajectories: `outputs/maze-validation.json`. Compact browser report:
+`wasm/maze/validation.json`. `scripts/validate_maze_api.py` checks live images,
+continuous stepping, modality/source controls, arrival, pause/resume, invalid
+requests, origins, and ownership across the three interfaces. The existing
+stripe API checks are also run as regression coverage.
+
+Displayed brain dots are anatomical annotation anchors with actual modeled
+spike counts in the latest completed bin. They are not neuron morphology,
+voltage, calcium, or chemical measurements. Browser updates can skip bins;
+live playback need not keep biological real time. The odor colors are a
+square-root contrast display of normalized concentration, not ppm.
