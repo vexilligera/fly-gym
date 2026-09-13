@@ -79,6 +79,15 @@ in `outputs/sugar-validation.json`. HTTP controls, pause/resume, ownership,
 invalid-input handling, held-body timing, and the 0 Hz control are checked by
 `scripts/validate_sugar_api.py` against a staging service.
 
+The deployed maze was rerun after this change. It reached the food zone at
+81.76 simulated seconds, with all 4,089 recorded path points identical to the
+previous run. Starting the assay through the browser reproduced the 200 Hz
+results above while preserving the body's position, path, and arrival time.
+The live 3D view displayed taste-driven network spikes during stimulation;
+the completed chart showed the baseline, response, and washout without browser
+errors. The assay can be replayed from the arrival state with **Watch sugar
+response**, or compared with **Run no-taste control**.
+
 ## How to extend this into actual sugar interaction
 
 1. Add contact sensors on the tarsi/labellum and a sugar-solution surface.
