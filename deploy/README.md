@@ -183,3 +183,18 @@ controls the specified server and resets its shared simulation. Use a staging
 server when preserving a running experiment matters. Results are recorded in
 `outputs/maze-validation.json` and `outputs/maze-api-validation.json`; the small
 browser report is versioned in `wasm/maze/validation.json`.
+
+## Sugar-taste assay
+
+After a maze arrival, `/maze/` offers **Watch sugar response** and a no-taste
+control. The 21 released sugar GRNs drive the full network; the two MN9 cells
+are readouts only. This is a reset, held-body neural assay with a separate
+0–8 s clock, played at 0.2× speed. It does not simulate mouth mechanics or
+ingestion. See `brain/SUGAR_AND_SLEEP.md` for wiring and limitations.
+
+`scripts/validate_sugar.py` checks the pinned input cohort, unchanged legacy
+CUDA inputs, stimulus timing, a silent control, and downstream responses at
+50/100/200 Hz. It needs the pinned `external/fly-brain/code/benchmark.py` as
+well as the existing data. `scripts/validate_sugar_api.py --port 8001` checks
+HTTP controls against a staging server, including arrival gating, pause/resume,
+body/clock separation, ownership, and reset. Reports are saved in `outputs/`.
