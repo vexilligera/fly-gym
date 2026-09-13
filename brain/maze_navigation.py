@@ -38,7 +38,8 @@ class MazePolicy:
         if vision and front > .18 and self.escape <= 0:
             self.turn_bias = 1 if (right-left+.2*odor_direction)>=0 else -1
             self.escape = 12
-        if self.escape > 0:
+        escaping = self.escape > 0
+        if escaping:
             turn = .65*self.turn_bias
             forward = .52
             self.escape -= 1
@@ -51,7 +52,7 @@ class MazePolicy:
                        'wall_left':left,'wall_front':front,'wall_right':right,
                        'odor_left_hz':float(ol[0]),'odor_right_hz':float(ol[1]),
                        'odor_turn':float(odor_turn),'visual_turn':avoidance,
-                       'turn':float(turn),'escape':bool(self.escape), 'gains':gains.tolist()}
+                       'turn':float(turn),'escape':escaping, 'gains':gains.tolist()}
 
 
 class MazeNavigation:
@@ -60,13 +61,13 @@ class MazeNavigation:
         self.world = None
         self.reset()
 
-    def reset(self,condition='combined',heading_deg=75,seed=1,duration=60,food_odor=True,layout='complex'):
+    def reset(self,condition='combined',heading_deg=75,seed=1,duration=120,food_odor=True,layout='complex'):
         get_layout(layout)
         if condition not in ('combined','vision_only','odor_only','neither'):
             raise ValueError('Unknown maze sensory condition')
-        for value,low,high in [(heading_deg,-180,180),(duration,.1,60)]:
+        for value,low,high in [(heading_deg,-180,180),(duration,.1,120)]:
             if isinstance(value,bool) or not isinstance(value,(int,float)) or not np.isfinite(value) or not low<=value<=high:
-                raise ValueError('Heading must be −180…180°; duration .1…60 seconds')
+                raise ValueError('Heading must be −180…180°; duration .1…120 seconds')
         if isinstance(seed,bool) or not isinstance(seed,int) or not 0<=seed<=100000:
             raise ValueError('Seed must be an integer in 0…100000')
         if not isinstance(food_odor,bool):raise ValueError('food_odor must be a boolean')
