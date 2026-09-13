@@ -1,6 +1,8 @@
 # Bulk output files
 # Downloaded public connectome releases and annotations (see brain/README.md).
 external/
+deploy/egl/
+deploy/ready
 brain/data/
 brain/validation.json
 MUJOCO_LOG.TXT

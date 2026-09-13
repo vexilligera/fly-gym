@@ -23,7 +23,14 @@ class LocalHandler(SimpleHTTPRequestHandler):
         if self.path == '/api/brain/status':
             return self.send_json(self.server.brain.status())
         if self.path == '/api/vision/status':
-            return self.send_json(self.server.brain.navigation_state)
+            return self.send_json(self.server.brain.navigation_status('vision'))
+        if self.path == '/api/maze/status':
+            return self.send_json(self.server.brain.navigation_status('maze'))
+        if self.path == '/api/maze/world':
+            try:
+                return self.send_json(self.server.brain.maze_geometry())
+            except ValueError as error:
+                return self.send_json({'error':str(error)},400)
         if self.path == '/api/brain/geometry' or self.path.startswith('/api/brain/neuron/'):
             try:
                 if self.path == '/api/brain/geometry':
@@ -37,7 +44,7 @@ class LocalHandler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
-        if self.path not in ('/api/brain/step', '/api/brain/reset', '/api/vision/start', '/api/vision/pause', '/api/vision/reset'):
+        if self.path not in ('/api/brain/step', '/api/brain/reset', '/api/vision/start', '/api/vision/pause', '/api/vision/reset', '/api/maze/start', '/api/maze/pause', '/api/maze/reset'):
             return self.send_error(404)
         origin = self.headers.get('Origin')
         port = self.server.server_address[1]
@@ -49,11 +56,15 @@ class LocalHandler(SimpleHTTPRequestHandler):
                 raise ValueError('Expected a small JSON object')
             arguments = json.loads(self.rfile.read(length))
             visual = self.path.startswith('/api/vision/')
-            allowed = {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
+            maze = self.path.startswith('/api/maze/')
+            allowed = {'condition','heading_deg','seed','duration','food_odor'} if maze else {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
             if not isinstance(arguments, dict) or set(arguments) - allowed:
                 raise ValueError('Unknown parameters')
-            call = self.server.brain.vision_command if visual else self.server.brain.execute
-            result = call(self.path.rsplit('/', 1)[-1], arguments)
+            action = self.path.rsplit('/',1)[-1]
+            if maze or visual:
+                result = self.server.brain.navigation_command('maze' if maze else 'vision',action,arguments)
+            else:
+                result = self.server.brain.execute(action,arguments)
             return self.send_json(result)
         except (ValueError, TypeError) as error:
             return self.send_json({'error': str(error)}, 400)
