@@ -142,7 +142,9 @@ repeat periodically when paused. `/api/maze/status?body=0` omits the body JPEG
 from neural polling while streaming; the browser falls back to snapshots if
 the stream fails. Local API validation received about 19 frames/s and verified
 that one stream advances and survives switching layouts. Network/device
-conditions still limit displayed frame rate. Streaming improves delivery,
+conditions still limit displayed frame rate. A subsequent private Tailscale
+check received 31 distinct frames at 19.1 frames/s; the in-app browser rendered
+the stream successfully. Streaming improves delivery,
 not simulation throughput or biological fidelity.
 
 Detailed trajectories: `outputs/maze-validation.json`. Compact browser report:
