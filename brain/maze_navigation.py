@@ -15,7 +15,6 @@ class MazePolicy:
         self.mask = np.asarray(mask)
         self.visual = np.zeros(len(bearings))
         self.olfactory = np.zeros(2)
-        self.last_odor = 0.0
         self.turn_bias = 1 if seed%2 else -1
         self.escape = 0
         self.steps = 0
@@ -35,7 +34,7 @@ class MazePolicy:
         # Repel the higher wall response. At a head-on wall choose and hold a
         # turn until it clears rather than oscillating on shot noise each bin.
         avoidance = float(np.clip(1.2*(right-left),-.65,.65))
-        if vision and front > .42 and self.escape <= 0:
+        if vision and front > .18 and self.escape <= 0:
             self.turn_bias = 1 if (right-left+.2*odor_direction)>=0 else -1
             self.escape = 12
         if self.escape > 0:
@@ -47,7 +46,8 @@ class MazePolicy:
             forward = .78 * (1-.45*np.clip(front,0,1))
         gains = np.clip([forward-turn,forward+turn],.12,1.2)
         self.steps += 1
-        return gains, {'wall_left':left,'wall_front':front,'wall_right':right,
+        return gains, {'L2_spikes':int(np.sum(visual_counts)),
+                       'wall_left':left,'wall_front':front,'wall_right':right,
                        'odor_left_hz':float(ol[0]),'odor_right_hz':float(ol[1]),
                        'odor_turn':float(odor_turn),'visual_turn':avoidance,
                        'turn':float(turn),'escape':bool(self.escape), 'gains':gains.tolist()}
