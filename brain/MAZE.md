@@ -126,6 +126,15 @@ reached sugar in 1.60 s. **The existing reactive controller does not solve
 these harder trials.** Geometry/connectivity checks do not imply navigation
 success. No route planner, memory, or hidden waypoint input was added.
 
+A subsequent live trial on revision `81f7eb4` ran the branching maze with
+vision + smell, heading 75°, seed 1, and food odor for the full 60 simulated
+seconds. It completed 3,000 synchronized brain/body steps and retained all
+3,001 path points. The fly stayed upright, finished 19.9 mm from sugar, and
+came no closer than 9.1 mm. Throughput was 0.353× real time, about 170 seconds
+of simulation-worker time. This longer run also did not solve the maze.
+The final state and checks are saved as `outputs/maze-60s-state.json` and
+`outputs/maze-60s-summary.json` on the cluster and development checkout.
+
 ## Camera rate and simulation speed
 
 The original viewer bundled JPEGs with brain JSON and waited 150 ms between
