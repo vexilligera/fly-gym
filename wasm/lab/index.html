@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NeuroMechFly · Brain to body</title>
+  <link rel="stylesheet" href="lab.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">N</span> NeuroMechFly <span class="local-tag">LOCAL LAB</span></a>
+    <nav aria-label="Resources">
+      <a href="../connectome/">Full connectome →</a>
+      <a href="../viewer/viewer.html" target="_blank" rel="noopener">Joint viewer ↗</a>
+      <a href="../game/game.html" target="_blank" rel="noopener">Original game ↗</a>
+      <a href="https://neuromechfly.org/" target="_blank" rel="noopener">Documentation ↗</a>
+    </nav>
+  </header>
+  <main>
+    <div class="intro">
+      <div><p class="eyebrow">EMBODIED CONTROL / DROSOPHILA MELANOGASTER</p><h1>From intent to six moving legs.</h1><p>You supply the brain-level command. A simulated nerve cord coordinates the steps.</p></div>
+      <div id="connection" role="status">Loading local simulation…</div>
+    </div>
+    <div class="workspace">
+      <section class="simulation" aria-label="Interactive fly simulation">
+        <div class="modebar" role="group" aria-label="Level of control">
+          <button data-mode="CPG" aria-pressed="true"><span>01</span> Descending commands</button>
+          <button data-mode="tripod" aria-pressed="false"><span>02</span> Two tripods</button>
+          <button data-mode="single" aria-pressed="false"><span>03</span> Six legs</button>
+        </div>
+        <div class="stage-wrap">
+          <iframe id="fly" src="../game/game.html?inspect" title="Live NeuroMechFly MuJoCo simulation"></iframe>
+          <div class="stage-label"><span class="live-dot"></span> PHYSICS SIMULATION <span>0.1× speed</span></div>
+          <div class="stage-bottom"><span id="sim-time">0.000 s simulated</span><span id="position">Position —</span></div>
+        </div>
+        <div class="control-deck">
+          <div id="drive-controls" class="button-row">
+            <button data-drive="walk" class="primary">Walk <kbd>W</kbd></button>
+            <button data-drive="left">Turn left <kbd>A</kbd></button>
+            <button data-drive="right">Turn right <kbd>D</kbd></button>
+            <button data-drive="back">Back <kbd>S</kbd></button>
+            <button data-drive="stop">Stop <kbd>Q</kbd></button>
+          </div>
+          <div id="step-controls" class="button-row" hidden></div>
+          <div class="button-row utility-row">
+            <button id="demo">Show me the sequence</button>
+            <span class="spacer"></span>
+            <button id="pause">Pause</button><button id="reset">Reset</button>
+          </div>
+        </div>
+        <div class="lesson">
+          <span class="lesson-label" id="lesson-label">01 / THE BRAIN SETS INTENT</span>
+          <p id="lesson-text">Press Walk. Equal left and right drive makes the fly walk forward. Turn left reduces drive on the left side; the six leg controllers handle the timing.</p>
+        </div>
+      </section>
+      <aside class="inspector" aria-label="Live controller signals">
+        <div class="inspector-heading"><h2>Inside the control loop</h2><span>LIVE SIGNALS</span></div>
+        <section class="signal-section">
+          <div class="section-heading"><span class="step-number">1</span><h3>Descending drive</h3><span class="hint">brain → nerve cord</span></div>
+          <div class="drive-pair">
+            <div><div class="meter-label">Left <output id="gain-left">0.00</output></div><div class="meter-track"><i id="bar-left"></i></div></div>
+            <div><div class="meter-label">Right <output id="gain-right">0.00</output></div><div class="meter-track"><i id="bar-right"></i></div></div>
+          </div>
+          <p class="detail" id="drive-detail">Two abstract drive values. These represent your command, not measured neural spikes.</p>
+        </section>
+        <section class="signal-section">
+          <div class="section-heading"><span class="step-number">2</span><h3 id="rhythm-title">Six coupled oscillators</h3><span class="hint">VNC model</span></div>
+          <div id="oscillators" class="oscillators" aria-label="Live leg phase and adhesion commands"></div>
+          <div class="legend"><span><i class="dot tripod-a"></i> Tripod A: LF · LH · RM</span><span><i class="dot tripod-b"></i> Tripod B: RF · RH · LM</span></div>
+          <p class="detail" id="rhythm-detail">Each dial is one leg’s cycle. Opposite tripods tend to alternate. “Grip” is the adhesion command, not a contact measurement.</p>
+        </section>
+        <section class="signal-section joint-section">
+          <div class="section-heading"><span class="step-number">3</span><h3>Joint target → body motion</h3></div>
+          <div class="chart-caption"><span>Left-front knee · radians</span><span><i class="line-key target"></i> Target <i class="line-key actual"></i> Actual</span></div>
+          <canvas id="joint-chart" role="img" aria-label="Live target and actual left-front knee angles over the last 250 milliseconds of simulated time"></canvas>
+          <div class="readout"><span>Target <output id="joint-target">—</output></span><span>Actual <output id="joint-actual">—</output></span><span>Contacts <output id="contacts">—</output></span></div>
+          <p class="detail">Position actuators track the target angles. Inertia, gravity, and contact determine the resulting motion.</p>
+        </section>
+        <details class="scope" open>
+          <summary>Where is the biological brain?</summary>
+          <p>A real fly integrates vision, smell, and body feedback in its brain and ventral nerve cord (VNC). Descending neurons help select and steer behavior; local leg circuits coordinate movement.</p>
+          <p>This demo substitutes your commands for brain-level decisions and uses mathematical oscillators plus recorded step trajectories. It has <strong>no whole-brain connectome or spiking neurons</strong>. Vision, smell, and sensory reflex corrections are not active here.</p>
+          <p>MuJoCo does use joint error and contact in its mechanical calculation. FlyGym also includes a <a href="https://neuromechfly.org/tutorials/4c_hybrid_controller/" target="_blank" rel="noopener">hybrid controller</a> that uses sensory feedback to correct stumbling.</p>
+        </details>
+      </aside>
+    </div>
+    <footer>FlyGym 2.1.0 · MuJoCo 3.9.0 · Model and controllers from <a href="https://github.com/NeLy-EPFL/flygym" target="_blank" rel="noopener">NeLy, EPFL</a>. Local signal inspector added for this demonstration. All simulation assets are served from this computer.</footer>
+  </main>
+  <script type="module" src="lab.js"></script>
+</body>
+</html>

@@ -66,7 +66,12 @@ async function main() {
     assetsDir: ASSETS, xmlName: 'fly.xml',
     onStage: (msg) => { overlayMsg.textContent = msg; },
   });
-  new Game(mj, model, data, meta).start();
+  const game = new Game(mj, model, data, meta);
+  game.start();
+  if (new URLSearchParams(location.search).has('inspect')) {
+    const { attachInspector } = await import('../lab/bridge.js');
+    attachInspector(game);
+  }
 }
 
 // --- the ported controllers -------------------------------------------------
@@ -654,7 +659,7 @@ class Game {
     if (this.phase === 'ready' && this._padState && this._padState.active) this._startCountdown();
 
     let nSteps = 0;
-    if (this.phase === 'running') {
+    if (this.phase === 'running' && !this.inspectorPaused && !this.externalClock) {
       const b = this.bodyId;
       // wallDt is scaled by PLAYBACK_SPEED so the sim advances in slow motion.
       nSteps = this._stepper.advance(wallDt * PLAYBACK_SPEED, () => {
@@ -670,6 +675,8 @@ class Game {
     this.renderer.render(this.scene, this.camera);
 
     if (this.phase === 'running') document.getElementById('timer').textContent = this._controlTime().toFixed(2);
-    this._statsMeter(now, nSteps);
+    this._statsMeter(now, nSteps + (this.externalSteps || 0));
+    this.externalSteps = 0;
+    this.inspector?.sample(nowMs);
   }
 }

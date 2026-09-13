@@ -1,0 +1,142 @@
+# B300 Slurm deployment
+
+Private URL: **https://cw-login-zny.alpaca-elnath.ts.net:8443/connectome/**
+
+Visual navigation: **https://cw-login-zny.alpaca-elnath.ts.net:8443/vision/**
+
+The current deployment is Slurm job **5807547**, on `slurm-b300-128-021`, with
+one NVIDIA B300, 8 CPUs, and 24 GiB host memory. It expires at
+**2026-09-14 11:23:30 UTC / 20:23:30 JST**, or earlier if canceled. The `low`
+QoS is preemptible. This is a Slurm allocation, not a permanent hosted service.
+
+All files are under `/mnt/home/zny/flygym` on `crwv` and the shared compute
+filesystem. The CUDA brain and HTTP server execute on the allocated compute
+node. In `/connectome/`, MuJoCo body physics executes in the browser. In
+`/vision/`, MuJoCo physics, eye rendering, neural stepping, and steering all run
+on the compute node; the browser observes snapshots and draws the brain anchors.
+
+```text
+Tailnet browser (private HTTPS :8443)
+  → existing cw-login-zny Tailscale identity on slurm-login-0
+  → loopback SSH tunnel :18080, managed by deploy/gateway.py
+  → loopback HTTP :8000 on the allocated B300
+  → all 138,639 neurons / 15,091,983 connection rows on CUDA
+```
+
+Tailscale Serve uses the existing `/mnt/home/zny/.tailscale` identity and
+`/mnt/home/zny/tailscale` binaries. No public Funnel is enabled. The backend
+binds only to `127.0.0.1`; its browser-origin allowlist explicitly includes the
+Tailscale HTTPS origin. The gateway follows this job's compute-node changes
+after a Slurm requeue, and exits when the allocation ends. A requeue resets the
+brain state; use **Reset both** after reconnecting. The gateway tolerates the
+empty node field while a requeued job is pending. The visual update requeued
+this job on 2026-09-13 at 11:23:30 UTC; the expiry above reflects that restart.
+
+## Operations (on the login node)
+
+```sh
+cd /mnt/home/zny/flygym
+squeue -j 5807547
+tail -f outputs/slurm-5807547.log
+curl http://127.0.0.1:18080/api/brain/status
+```
+
+The current job ID, compute node, and gateway PID are recorded in
+`outputs/job-id`, `outputs/compute-node`, and `outputs/gateway.pid`.
+
+To start a new allocation after this one has ended:
+
+```sh
+cd /mnt/home/zny/flygym
+sbatch --parsable deploy/slurm.sbatch > outputs/job-id
+nohup .venv/bin/python deploy/gateway.py > outputs/gateway.log 2>&1 &
+echo $! > outputs/gateway.pid
+```
+
+The checked deployment marker `deploy/ready` must exist before the batch job
+starts the server. The script waits at most 30 minutes for preparation.
+Do not start a second job/gateway while the current one is active.
+
+To stop this allocation:
+
+```sh
+scancel 5807547
+/mnt/home/zny/tailscale/tailscale --socket=/mnt/home/zny/.tailscale/tailscaled.sock serve --https=8443 off
+```
+
+This removes only this service's Tailscale listener, not other Tailscale state.
+The gateway exits when it sees the job end.
+
+## Installation and verification
+
+The isolated server environment uses Python 3.12.13. It needs the dependencies
+in `brain/requirements-vision-b300-lock.txt`; the Mac's broader FlyGym lock is separate.
+The browser assets were generated locally and copied along with the exact
+connectome and annotation files recorded in `brain/provenance.json`.
+
+```sh
+/mnt/home/zny/.local/bin/uv pip sync --python .venv/bin/python brain/requirements-vision-b300-lock.txt
+srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=8 .venv/bin/python scripts/validate_cuda.py
+srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=8 .venv/bin/python scripts/validate_connectome.py
+```
+
+Pause the browser before running the full-connectome checks: they reset and
+advance the one shared brain. Check outputs are `outputs/cuda-validation.json`
+and `brain/validation.json` on the cluster.
+
+The CUDA implementation uses float64 exact linear LIF updates and Brian2's
+threshold/refractory/delay ordering. It retains all signed connection rows;
+synapse counts accumulate as integers before conversion to postsynaptic input.
+The input RNG differs from Brian2, so equal seed values do not promise identical
+whole-brain spike trains. Identical explicit inputs on the recurrent test
+network matched spike counts exactly, with voltage errors below 10⁻⁹ mV.
+Full-release index/coordinate/activity checks and intervention checks passed.
+
+Initial full-network checks measured approximately **3.5× real time for odor
+input and 6.4× for direct walking input** in brain computation. This excludes
+network transit and browser physics. The current browser exchanges one 20 ms
+window per request, so playback over a long-distance tailnet can be limited by
+round-trip latency even when the brain itself runs faster than real time.
+
+## Visual runtime
+
+See `brain/VISION.md` for the signal path and limits. The visual experiment adds
+the official NeuroMechFly eye geometry and 721 ommatidia per eye, an explicitly
+synthetic retinal registration, R1–6 input to the full network, and an engineered
+L2-spike-to-CPG steering decoder. All released synapses remain intact. It does
+not model molecular phototransduction, natural retinotopy, or a reconstructed VNC.
+
+The compute image contains the NVIDIA EGL driver and GL dispatch library but
+lacks the GLVND EGL loader. We extracted the official Ubuntu package privately,
+without changing system packages:
+
+```sh
+mkdir -p deploy/egl
+curl -fL https://archive.ubuntu.com/ubuntu/pool/main/libg/libglvnd/libegl1_1.4.0-1_amd64.deb -o deploy/egl/libegl1_1.4.0-1_amd64.deb
+cd deploy/egl
+dpkg-deb -x libegl1_1.4.0-1_amd64.deb .
+```
+
+Package SHA-256:
+`4a35c0e925e15a076e7ce11d7c76f8ecb16615fc347c2c09afa4c205a7ca8ec4`.
+The Linux CUDA server automatically adds this project-local directory to the
+dynamic linker path (one interpreter re-exec), selects `MUJOCO_GL=egl`, and
+defaults to four Numba threads. MuJoCo opens the first EGL device it can
+initialize inside the allocation. Do not run it on the login node.
+
+To reproduce visual checks in this allocation:
+
+```sh
+cd /mnt/home/zny/flygym
+srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_vision.py
+```
+
+The matched 24-trial check passed: 6/6 arrivals with vision, 2/6 for each of
+disconnected eyes, shuffled registration, and disconnected neural steering.
+Two almost-aligned starts also succeed with straight walking. These small
+controlled experiments validate this engineered loop, not natural fly vision.
+`outputs/vision-validation.json` contains trajectories and per-bin readouts;
+`wasm/vision/validation.json` contains the public summary. API pause/reset,
+continuous stepping, origin guards, image decoding, and manual-mode regression
+checks passed as well. Visual trials stop automatically; closing the browser
+does not pause the compute loop before the trial's time limit.

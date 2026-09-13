@@ -1,0 +1,15 @@
+{
+  "eon_commit": "a3db62f9436074e485c0278290c2164ed6150808",
+  "annotations_commit": "8587524c1748ce5ef2080822a2fc890fc03bf597",
+  "annotations_git_blob_verified": "afea3e15a5671f5da0b9f7dd2e932d328c3b57a0",
+  "sha256": {
+    "external/fly-brain/data/2025_Completeness_783.csv": "52b0ac6094cd32c546f8d4c341e094376f48f4e791f8db9b166de5dff8199ea4",
+    "external/fly-brain/data/2025_Connectivity_783.parquet": "efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347",
+    "brain/data/neuron_annotations.tsv": "9a4f8b2f843196074431ebd7cd883536afa1be86c8a4ce90970441e8be81d1be"
+  },
+  "neurons": 138639,
+  "connections": 15091983,
+  "synapse_count_sum": 54492922,
+  "neural_parameters_source": "Shiu/Eon Brian2 LIF equations",
+  "body_decoder": "Local demonstration adapter; no VNC connectome"
+}

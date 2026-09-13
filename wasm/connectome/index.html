@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NeuroMechFly · Live brain</title><link rel="stylesheet" href="../lab/lab.css"><link rel="stylesheet" href="connectome.css"><script type="importmap">{"imports":{"three":"../shared/vendor/three/three.module.js"}}</script></head>
+<body>
+<header class="topbar"><a class="brand" href="./"><span class="brand-mark">N</span> NeuroMechFly <span class="local-tag">CONNECTOME LAB</span></a><nav aria-label="Resources"><a href="../vision/">Visual navigation →</a><a href="../lab/">CPG explainer</a><a href="../viewer/viewer.html" target="_blank" rel="noopener">Joint viewer ↗</a><a href="https://github.com/eonsystemspbc/fly-brain" target="_blank" rel="noopener">Brain source ↗</a></nav></header>
+<main>
+  <div class="intro"><div><p class="eyebrow">FLYWIRE v783 / WHOLE-BRAIN LIF MODEL</p><h1>Watch the brain respond.</h1><p>Live neural spikes across the released connectome, synchronized with the fly’s body.</p></div><div id="status" role="status">Loading brain backend…</div></div>
+  <div class="workspace">
+    <section class="simulation" aria-label="Connectome-driven fly simulation">
+      <div class="brain-controls">
+        <label>Neural input<select id="stimulus"><option value="walk">Stimulate DNp09 · walking drive</option><option value="left">DNp09 + left DNa02 · steering</option><option value="right">DNp09 + right DNa02 · steering</option><option value="reverse">Stimulate MDN · reverse drive</option><option value="odor">Odor channel · ORN_DM1</option><option value="none">No external stimulation</option></select></label>
+        <label id="rate-label">Input events <output id="rate-value">100 Hz</output><input id="rate" type="range" min="0" max="250" step="10" value="100"></label>
+        <label id="odor-label" hidden>Odor exposure <output id="odor-value">0.50 · 75 Hz</output><input id="odor" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+      </div>
+      <div class="control-deck"><div class="button-row"><button id="run" class="primary" disabled>Run brain &amp; body</button><button id="reset" disabled>Reset both</button><label class="silence"><input type="checkbox" id="silence"> Silence DNp09</label></div><p id="input-description" class="detail">Direct neural stimulation: random input events activate identified DNp09 neurons. This is an experimental intervention, not an autonomous decision to walk.</p></div>
+      <div class="dual-stage">
+        <section class="brain-pane" aria-label="Live spatial brain activity">
+          <div class="pane-heading"><h2>Brain activation</h2><span id="brain-live-state">Paused</span></div>
+          <div class="brain-stage">
+            <div id="brain-canvas"></div>
+            <div id="brain-loading">Loading brain coordinates…</div>
+            <div class="brain-overlay"><output id="brain-visible">0 firing</output><output id="brain-window">0.000–0.000 s</output></div>
+            <div class="brain-tools"><label><input id="brain-context" type="checkbox" checked> All anchors</label><button id="brain-home" title="Restore the original brain angle and zoom">Reset view</button></div>
+          </div>
+          <div class="brain-caption">
+            <div class="brain-legend"><span><i class="dot response-dot"></i>Network response</span><span><i class="dot input-dot"></i>Direct input</span><span>Larger = more spikes / 20 ms</span></div>
+            <div id="brain-pick-hint">Drag to rotate · Scroll to zoom · Click a neuron to inspect</div>
+            <div id="selected-neuron" hidden><button id="clear-neuron" aria-label="Clear neuron selection">×</button><strong id="neuron-name"></strong><output id="neuron-spikes"></output><span id="neuron-id"></span><span id="neuron-detail"></span></div>
+          </div>
+        </section>
+        <section class="body-pane" aria-label="Synchronized fly body">
+          <div class="pane-heading"><h2>Fly body</h2><span id="speed">waiting</span></div>
+          <div class="stage-wrap"><iframe id="fly" src="../game/game.html?inspect" title="NeuroMechFly body driven by the full connectome"></iframe><div class="stage-label"><span class="live-dot"></span> CONNECTOME → BODY</div><div class="stage-bottom"><span id="body-time">Body 0.000 s</span><span id="position">Position —</span></div></div>
+          <p class="body-caption">Brain spikes → descending readout → leg controller → motion</p>
+        </section>
+      </div>
+      <div class="spatial-note"><span id="brain-geometry">Reading released annotation coordinates…</span><span>Dots are annotation anchors, not neuron shapes. Each frame holds one completed 20 ms bin; live computation may be slower than real time.</span></div>
+      <div class="lesson"><span class="lesson-label">MEASURED WIRING → MODELED DYNAMICS → DEMONSTRATION ADAPTER</span><p>The brain network is reconstructed from FlyWire. Spikes in DNp09, DNa02, and MDN drive a hand-designed decoder, then the six-oscillator leg controller. The ventral nerve cord and muscles are not reconstructed here.</p></div>
+    </section>
+    <aside class="inspector" aria-label="Neural and body telemetry">
+      <div class="inspector-heading"><h2>The full network is loaded</h2><span>REAL MODEL OUTPUT</span></div>
+      <div class="brain-totals"><div><output id="neurons">—</output><span>neurons</span></div><div><output id="edges">—</output><span>weighted connections</span></div><div><output id="synapses">—</output><span>synapse-count sum</span></div></div>
+      <p class="detail" id="compute-info">Connecting to the brain compute service…</p><p class="detail" id="compute-speed"></p>
+      <section class="signal-section"><div class="section-heading"><span class="step-number">1</span><h3>Brain activity</h3><span class="hint" id="brain-time">0.000 s</span></div><div class="activity"><span><output id="active">0</output> active neurons</span><span><output id="spikes">0</output> spikes</span><span>last 20 ms</span></div><canvas id="activity-chart" role="img" aria-label="Brain spike counts per 20 millisecond simulation window"></canvas><div id="top-neurons" class="detail">Run the model to see which neurons respond.</div></section>
+      <section class="signal-section"><div class="section-heading"><span class="step-number">2</span><h3>Descending neuron readout</h3><span class="hint">smoothed spikes/s</span></div><table class="rates"><thead><tr><th>Neuron type</th><th>Left</th><th>Right</th></tr></thead><tbody><tr><td>DNp09 · forward</td><td id="DNp09_left">0</td><td id="DNp09_right">0</td></tr><tr><td>DNa02 · steering</td><td id="DNa02_left">0</td><td id="DNa02_right">0</td></tr><tr><td>MDN · reverse</td><td id="MDN_left">0</td><td id="MDN_right">0</td></tr><tr><td>ORN_DM1 · odor input</td><td id="ORN_DM1_left">0</td><td id="ORN_DM1_right">0</td></tr></tbody></table><div class="drive-pair"><div class="meter-label">Left drive <output id="gain-left">0.00</output></div><div class="meter-label">Right drive <output id="gain-right">0.00</output></div></div><p class="detail">The rate-to-drive scaling is chosen for this demonstration. The spikes and recurrent propagation come from the full network.</p></section>
+      <section class="signal-section"><div class="section-heading"><span class="step-number">3</span><h3>VNC abstraction → physical body</h3></div><div id="oscillators" class="oscillators" aria-label="Six leg cycle phases"></div><div class="readout"><span>LF knee target <output id="joint-target">—</output> rad</span><span>Actual <output id="joint-actual">—</output> rad</span><span>Contacts <output id="contacts">—</output></span></div></section>
+      <details class="scope" open><summary>Chemicals: what is actually modeled?</summary><p><strong>Odors:</strong> the odor control stimulates the 68 annotated ORN_DM1 sensory neurons. Exposure 0–1 maps to 0–150 input events/s by an illustrative rule. Resulting spikes propagate through the connectome. Odor stimulation is not guaranteed to produce walking.</p><p><strong>Neurotransmitters:</strong> the released connection table supplies excitatory/inhibitory signs and synapse counts. These produce positive/negative postsynaptic input. There are no simulated molecules, receptor-binding reactions, drug doses, metabolism, or slow neuromodulatory pathways.</p></details>
+      <details class="scope"><summary>Coverage, sources, and limitations</summary><p>This loads all 138,639 neurons and 15,091,983 connection rows in Eon’s public FlyWire v783 model, representing a synapse-count sum of 54,492,922. It is the released brain model, not a full brain-plus-VNC connectome.</p><p>Each neuron has the same simple leaky integrate-and-fire dynamics: threshold, reset, refractory period, synaptic decay, and delay. Morphology, detailed ion channels, receptor subtypes, plasticity, learning, and molecular chemistry are absent. The body uses position actuators and recorded step patterns.</p><p>The spatial view places 138,625 cells at their released annotation anchors. It converts 4 × 4 × 40 nm voxels to micrometers and starts in the FlyWire X / −Y plane, with −Z depth. No spatial positions are invented for the 14 unmatched cells. Colors mark spikes, not membrane voltage, calcium fluorescence, or chemical concentration. Amber cells receive direct input; teal cells are other firing neurons. Synaptic edges are simulated but not drawn.</p><p>Brain and body advance together in 20 ms batches. The view displays every firing neuron with coordinates in each completed batch; it does not resolve individual spike times inside that bin or interpolate activity. Pause holds the last bin. No neural state is prerecorded. This experiment is driven by external neural/odor stimulation; body sensations and vision are not fed back into the brain.</p><p><a href="https://github.com/eonsystemspbc/fly-brain" target="_blank" rel="noopener">Eon release</a> · <a href="https://www.nature.com/articles/s41586-024-07763-9" target="_blank" rel="noopener">Shiu et al., Nature 2024</a> · <a href="https://github.com/flyconnectome/flywire_annotations" target="_blank" rel="noopener">FlyWire annotations</a></p></details>
+    </aside>
+  </div>
+  <footer>FlyWire v783 · <span id="runtime-info">Brain compute service</span> · NeuroMechFly / MuJoCo in this browser · All released brain connections retained. Stimulation and the brain-to-body decoder are modeling choices, not a validated reproduction of an entire living fly.</footer>
+</main><script type="module" src="connectome.js"></script>
+</body></html>

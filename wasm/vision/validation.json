@@ -1,0 +1,13 @@
+{
+  "schema": "vision-validation-v1",
+  "passed": true,
+  "trials_per_condition": 6,
+  "successes": {
+    "vision": 6,
+    "blind": 2,
+    "shuffled": 2,
+    "readout_off": 2
+  },
+  "scope": "2 simulated seconds/trial; stripe 18 mm from origin; success within 3 mm. Six matched starts. Synthetic registration and engineered L2 decoder only.",
+  "summary": "Deployment check: stripe reached in 6/6 visual trials, 2/6 with eyes disconnected, 2/6 with shuffled mapping, and 2/6 with neural steering disconnected. Six matched starts, 2 simulated seconds each. This tests the engineered loop, not biological fidelity."
+}

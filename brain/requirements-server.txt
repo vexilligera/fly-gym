@@ -1,0 +1,5 @@
+# Portable headless server; MuJoCo and Three.js run in the browser.
+numpy>=2.0,<3
+pyarrow>=19,<26
+brian2>=2.8,<3
+cupy-cuda12x[ctk]>=13.6,<15

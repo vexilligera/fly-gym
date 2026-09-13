@@ -1,4 +1,8 @@
 # Bulk output files
+# Downloaded public connectome releases and annotations (see brain/README.md).
+external/
+brain/data/
+brain/validation.json
 MUJOCO_LOG.TXT
 demo_output/
 outputs/
