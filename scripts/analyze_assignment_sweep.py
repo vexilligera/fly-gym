@@ -203,6 +203,11 @@ def plot(report, output):
                 ylabel='Candidate pairs separated / 120', title='Hypothetical resolution · not biological validation')
     axes[1].tick_params(axis='x', rotation=55)
     axes[1].legend(fontsize=8)
+    if not any(p['joint_separated_pairs'] for p in report['protocol_comparison']):
+        axes[1].text(.5, .5, 'No pairs exceed the assumed resolutions\nin any primary test.',
+                     transform=axes[1].transAxes, ha='center', va='center', color='#596873')
+        for i in x:
+            axes[1].text(i, 2, '0', ha='center', color='#596873', fontsize=9)
     fig.savefig(output/'assignment-sweep.png', dpi=170)
     fig.savefig(output/'assignment-sweep.pdf')
     plt.close(fig)
