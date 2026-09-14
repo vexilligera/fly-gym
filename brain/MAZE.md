@@ -10,10 +10,11 @@ The sugar patch stays at the center of both layouts. Geometry stays fixed
 between trials; the trial seed changes leg phases, not the maze.
 Arrival means the thorax enters a 2.5 mm radius; no eating is simulated.
 Both eyes, two antenna readings, the body, path, and brain activity update live.
-After arrival, **Watch sugar response** opens a separate held-body neural assay:
+After arrival, **Watch proboscis + brain** opens a separate neural/mouth assay:
 2 s baseline, 4 s input to the released sugar GRNs, and 2 s washout. A no-taste
-control is available. The brain resets and has its own assay clock; the body
-and its arrival time stay held. See [SUGAR_AND_SLEEP.md](SUGAR_AND_SLEEP.md) for
+control is available. The brain resets and shares an assay clock with a
+three-hinge MuJoCo proboscis. The torso, legs, and arrival time stay held. The
+close-up streams extension and turning driven by an approximate MN9 decoder. See [SUGAR_AND_SLEEP.md](SUGAR_AND_SLEEP.md) for
 the exact wiring, measured responses, ingestion limits, and sleep feasibility.
 Choose vision + smell, either sense alone, or both disconnected. **Food odor
 on** independently controls the source for the next trial.
@@ -90,7 +91,8 @@ Real photoreceptors use graded potentials and histamine; the released LIF
 model's signs and the artificial event encoder do not reproduce that pathway.
 The antenna field is an environmental scent proxy, not a biochemical model
 inside the brain. A separate imposed sugar-GRN assay now probes taste-related
-circuit activity. Hunger, reward learning, physical feeding, digestion, and
+circuit activity and drives an engineered proboscis articulation. Hunger, reward
+learning, contact-controlled feeding, pumping, digestion, and
 metabolism remain absent. Adding a chemical name would not establish its effects.
 
 ## Measured checks and interpretation

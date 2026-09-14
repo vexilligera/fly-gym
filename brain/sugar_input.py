@@ -35,7 +35,7 @@ class SugarInput:
             'source': 'Eon a3db62f code/benchmark.py sugar experiment and paper-phil-drosophila/example.ipynb',
             'paper': 'https://doi.org/10.1038/s41586-024-07763-9',
             'encoding': '0–200 Hz imposed sensory input, not a sucrose concentration calibration',
-            'limits': 'Feeding-initiation circuit assay; no proboscis mechanics, ingestion, satiety, reward learning, or happiness measure',
+            'limits': 'Feeding-initiation assay; optional engineered proboscis servos, no validated muscle mapping, ingestion, satiety, reward learning, or happiness measure',
         }
 
     def readout(self, delta, rate):

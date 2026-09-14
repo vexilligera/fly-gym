@@ -9,6 +9,7 @@ from brain.maze_layouts import get_layout
 
 class MazeWorld(VisualWorld):
     def __init__(self,layout='complex'):
+        self.feeding = None
         self.layout = get_layout(layout)
         self.walls = self.layout.walls
         self.field = OdorField(self.walls)
@@ -43,6 +44,9 @@ class MazeWorld(VisualWorld):
                           rgba='.97 .93 .79 1',contype='0',conaffinity='0')
 
     def reset(self, heading_deg=75, target_deg=30, seed=1):
+        if self.feeding is not None:
+            self.feeding.close()
+            self.feeding = None
         # target_deg is accepted for the inherited constructor, but never used
         # as a maze controller input. Sugar always stays at the maze center.
         mj.mj_resetDataKeyframe(self.model,self.data,0)
@@ -74,6 +78,19 @@ class MazeWorld(VisualWorld):
 
     def body_caption(self):
         return f'Simulation {self.data.time:.3f} s'
+
+    def start_feeding(self):
+        from brain.proboscis import ProboscisWorld
+        replacement = ProboscisWorld(self)
+        if self.feeding is not None:
+            self.feeding.close()
+        self.feeding = replacement
+
+    def close(self):
+        if self.feeding is not None:
+            self.feeding.close()
+            self.feeding = None
+        super().close()
 
     def map_geometry(self):
         return {'layout': self.layout.key, 'name':self.layout.name,

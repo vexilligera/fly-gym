@@ -1,20 +1,21 @@
 # Sugar interaction and sleep: wiring and limits
 
 The implemented first step is a **sugar-taste circuit assay after maze arrival**.
-It lets us watch modeled sensory and downstream feeding-initiation activity.
-It does not animate a proboscis, transport liquid, simulate digestion, or measure
-pleasure. Sleep is a feasible extension, but is not implemented or demonstrated
+It lets us watch modeled sensory and downstream feeding-initiation activity,
+plus an articulated proboscis driven by an engineered MN9-to-servo mapping.
+It does not transport liquid, simulate pumping or digestion, or measure pleasure. Sleep is a feasible extension, but is not implemented or demonstrated
 by this assay's silent baseline.
 
 ## What is wired now
 
 ```text
 Maze food-zone arrival (thorax within 2.5 mm)
-  → user starts a separate, held-body taste presentation
+  → user starts a separate taste presentation with torso and legs held
   → brain reset; 2 s baseline / 4 s sugar input / 2 s washout
   → 21 released sugar GRNs receive imposed 0–200 Hz input
   → all 138,639 neurons and 15,091,983 connection rows remain active in the model
   → actual modeled spikes in the full brain and the two MN9 motor readouts
+  → engineered joint targets → MuJoCo rostrum/haustellum movement
 ```
 
 The 21 input IDs are copied exactly from the pinned Eon release's
@@ -51,8 +52,9 @@ scaled by 0.275 mV. Source events add the existing 68.75 mV input kick. No MN9,
 dopamine, or reward neurons are directly driven.
 
 During the assay, vision and odor input are off to isolate the taste response.
-The MuJoCo body remains held at its actual arrival posture and time. The brain
-has a separate 0–8 s assay clock. The display runs at 0.2× neural time so the
+The torso and legs remain held at their actual arrival posture and time. A
+separate posed copy of the MuJoCo scene articulates the mouth. The brain and
+proboscis share a separate 0–8 s assay clock. The display runs at 0.2× neural time so the
 response is watchable. The 3D view shows measured model spikes per 20 ms bin;
 the chart aggregates actual counts into 100 ms bins. A 0 Hz control repeats the
 same reset and timing. This is a controlled stimulus protocol, not natural
@@ -85,8 +87,42 @@ previous run. Starting the assay through the browser reproduced the 200 Hz
 results above while preserving the body's position, path, and arrival time.
 The live 3D view displayed taste-driven network spikes during stimulation;
 the completed chart showed the baseline, response, and washout without browser
-errors. The assay can be replayed from the arrival state with **Watch sugar
-response**, or compared with **Run no-taste control**.
+errors. The assay can be replayed from the arrival state with **Watch proboscis +
+brain**, or compared with **Run no-taste control**.
+
+## Visible proboscis action
+
+The native NeuroMechFly rostrum and haustellum meshes and masses are retained.
+`brain/proboscis.py` freezes every existing body at its measured arrival pose,
+then adds three dynamic hinges and position servos in a separate MuJoCo model.
+The original maze model, path, and walking dynamics are untouched. The main
+MJPEG camera switches to a three-quarter close-up; **Enlarge fly** opens it
+full-screen. Maze walls are hidden in this observer close-up to prevent occlusion;
+the navigation scene is unchanged. The neural and mouth clocks advance together in 20 ms bins, with
+200 MuJoCo steps per bin. Playback is paced to at most 0.2× real time.
+
+Only measured left/right MN9 firing rates enter the mouth decoder. After a
+120 ms low-pass filter, the mean rate divided by 100 Hz sets a bounded extension
+fraction. This sets rostrum pitch from 0 to −100° and coupled haustellum pitch
+from 0 to +70°. Yaw is 25° × extension × (right − left)/(right + left + 20 Hz).
+The right MN9 is contralateral to the released left sugar-GRN cohort. This
+chosen sign illustrates turning toward the stimulated side; the angle gain,
+haustellum coupling, and frequency-to-angle conversion are not established by
+the connectome or calibrated to an animal. No oscillation or sucking cycle is
+invented. The mouth retracts when the MN9 response subsides.
+
+These are gravity-compensated, damped joint dynamics, with no mouth collision,
+contact-triggered taste, fluid intake, or feedback to the brain. The food-zone
+arrival threshold does not establish that the mouth touches the sugar. This
+visualizes a feeding-initiation command and an approximate movement response;
+it is not a complete physical feeding loop.
+
+`scripts/validate_proboscis.py` checks bilateral symmetry, bounded targets,
+stationary zero input, extension and retraction, dynamic joint limits, preservation
+of all fixed body poses, unchanged navigation state, rendering, and reset.
+`scripts/validate_sugar_api.py` additionally checks that full-connectome MN9
+activity causes movement, the no-taste control stays still, and brain/mouth
+clocks and MJPEG assay timestamps agree.
 
 ## How to extend this into actual sugar interaction
 
@@ -97,9 +133,10 @@ response**, or compared with **Run no-taste control**.
 2. Calibrate concentration-to-GRN activity from experiments, including onset,
    adaptation, mixture effects, and nutritional-state dependence. The current
    50/100/200 Hz controls are stimulation settings, not mM or ppm.
-3. Add articulated proboscis joints, actuators, and a constrained MN-to-muscle
-   decoder. The present body is a walking model and has no implemented sipping
-   mechanics. MN9 alone is insufficient for the entire proboscis/pumping cycle.
+3. Replace the approximate three-hinge servos with validated joint limits,
+   collision geometry, muscle dynamics, and additional motor-neuron mappings.
+   The current extension animation has dynamic joints but no sipping mechanics.
+   MN9 alone is insufficient for the entire proboscis/pumping cycle.
 4. Gate a fluid-consumption model on labellum contact and pumping. Track liquid
    remaining, ingested volume, and an explicitly modeled internal nutrient
    state. Motor spikes alone must not increment a consumption counter.

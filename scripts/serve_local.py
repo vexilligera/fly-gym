@@ -69,9 +69,11 @@ class LocalHandler(SimpleHTTPRequestHandler):
                 # Repeat the held frame occasionally to keep idle streams alive.
                 if picture and (frame != previous or now-sent_at >= 2):
                     data = base64.b64decode(picture)
+                    assay_header = (f'X-Assay-Time: {state["taste"]["time"]:.3f}\r\n'
+                                    'X-View: proboscis\r\n') if state.get('taste') else 'X-View: maze\r\n'
                     header = (f'--flyframe\r\nContent-Type: image/jpeg\r\nContent-Length: {len(data)}\r\n'
                               f'X-Simulation-Time: {state["time"]:.3f}\r\n'
-                              f'X-Trial-Id: {state["trial_id"]}\r\n\r\n').encode()
+                              f'X-Trial-Id: {state["trial_id"]}\r\n{assay_header}\r\n').encode()
                     self.wfile.write(header+data+b'\r\n')
                     self.wfile.flush()
                     previous, sent_at = frame, now

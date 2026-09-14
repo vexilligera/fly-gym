@@ -92,12 +92,19 @@ class MazeNavigation:
     def step(self,images=True):
         if self.done:return self.state
         if self.taste is not None:
+            started = time.perf_counter()
             neural = self.taste.step()
+            self.world.feeding.step(neural['sugar']['MN9_hz'])
+            if abs(self.world.feeding.data.time-neural['time']) > 1e-7:
+                raise RuntimeError('Brain/proboscis clock mismatch')
             self.frames += 1
             self.done = self.taste.done
             self.status = 'reached' if self.done else 'tasting'
             self.state = {**self.state, 'status': self.status, 'frame': self.frames,
-                          'done': self.done, 'brain': neural, 'taste': self.taste.snapshot()}
+                          'done': self.done, 'brain': neural, 'taste': self.taste_snapshot()}
+            if images:
+                self.state['images'] = {**self.state['images'], 'body': self.world.feeding.image()}
+            time.sleep(max(0, .1-(time.perf_counter()-started)))
             return self.state
         started = time.perf_counter()
         vision = self.config['condition'] in ('combined','vision_only')
@@ -124,14 +131,21 @@ class MazeNavigation:
         if not self.done or self.status != 'reached':
             raise ValueError('Reach the food zone before starting a sugar-taste assay')
         from brain.sugar_assay import SugarAssay
-        assay = SugarAssay(self.brain, rate_hz)
+        SugarAssay.validate_rate(rate_hz)
+        self.world.start_feeding()
+        assay = SugarAssay(self.brain, rate_hz, paced=False)
         self.taste = assay
         self.done = False
         self.status = 'tasting'
         self.frames += 1
         self.state = {**self.state, 'status': 'tasting', 'done': False,
-                      'frame': self.frames, 'brain': None, 'taste': assay.snapshot()}
+                      'frame': self.frames, 'brain': None, 'taste': self.taste_snapshot(),
+                      'images': {**self.state['images'], 'body': self.world.feeding.image()}}
         return self.state
+
+    def taste_snapshot(self):
+        return {**self.taste.snapshot(), 'body_held': False, 'torso_legs_held': True,
+                'proboscis': self.world.feeding.snapshot()}
 
     def snapshot(self,neural,decoder,images):
         w = self.world

@@ -186,7 +186,7 @@ browser report is versioned in `wasm/maze/validation.json`.
 
 ## Sugar-taste assay
 
-After a maze arrival, `/maze/` offers **Watch sugar response** and a no-taste
+After a maze arrival, `/maze/` offers **Watch proboscis + brain** and a no-taste
 control. The 21 released sugar GRNs drive the full network; the two MN9 cells
 are readouts only. This is a reset, held-body neural assay with a separate
 0–8 s clock, played at 0.2× speed. It does not simulate mouth mechanics or
@@ -198,3 +198,19 @@ CUDA inputs, stimulus timing, a silent control, and downstream responses at
 well as the existing data. `scripts/validate_sugar_api.py --port 8001` checks
 HTTP controls against a staging server, including arrival gating, pause/resume,
 body/clock separation, ownership, and reset. Reports are saved in `outputs/`.
+
+
+### Articulated proboscis
+
+The sugar assay now renders the existing mouth meshes with three MuJoCo hinges
+and engineered MN9-driven servos. Torso and legs stay at the arrival pose;
+brain and mouth share the assay clock. The main camera switches to a close-up,
+and MJPEG headers add `X-Assay-Time` and `X-View: proboscis`. Restart the Python
+service after deploying this change. No additional asset generation is needed.
+
+```sh
+srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_proboscis.py
+```
+
+The sugar API validation also covers actual joint movement, washout retraction,
+and a stationary no-taste control. Use the staging port as described above.

@@ -93,7 +93,8 @@ class VisualWorld:
                           quat=' '.join(map(str, quat)),
                           fovy=str(config['fovy_per_eye']))
         self.configure_arena(root)
-        self.model = mj.MjModel.from_xml_string(ET.tostring(root, encoding='unicode'))
+        self.model_xml = ET.tostring(root, encoding='unicode')
+        self.model = mj.MjModel.from_xml_string(self.model_xml)
         self.data = mj.MjData(self.model)
         self.stripe_id = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_GEOM, self.stripe_name)
         self.thorax = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_BODY, 'nmf/c_thorax')

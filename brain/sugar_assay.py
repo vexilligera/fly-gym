@@ -4,9 +4,13 @@ import time
 
 
 class SugarAssay:
-    def __init__(self, brain, rate_hz=200, paced=True):
+    @staticmethod
+    def validate_rate(rate_hz):
         if isinstance(rate_hz, bool) or not isinstance(rate_hz, (int, float)) or not math.isfinite(rate_hz) or not 0 <= rate_hz <= 200:
             raise ValueError('Sugar GRN input must be 0–200 Hz')
+
+    def __init__(self, brain, rate_hz=200, paced=True):
+        self.validate_rate(rate_hz)
         self.brain, self.rate_hz = brain, rate_hz
         self.paced = paced
         self.steps = 0
