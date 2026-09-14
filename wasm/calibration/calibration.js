@@ -38,7 +38,7 @@ try{
   $('spikes').textContent=`${report.causal_effect.motor_spikes} / ${report.causal_effect.disconnected_motor_spikes}`;
   const score=report.calcium_fits[0].scores.find(s=>s.split==='test');
   $('fit-result').textContent=`The held-out ramp has ${(100*score.relative_mse).toFixed(1)}% of the zero-response baseline error. Several held-out swing recordings are worse than that baseline. The fit is not accepted for neural calibration.`;
-  for(const reason of report.promotion.reasons){const li=document.createElement('li');li.textContent=reason;$('limits').append(li);}
+  for(const reason of report.promotion.reasons){const li=document.createElement('li');li.textContent=reason.replace('The frozen observation fit','The earlier 13Bα observation fit');$('limits').append(li);}
   chart('angle-chart',[{name:'Connected',key:'angle_deg',data:trials.connected.trace,color:'#b44226'},{name:'Disconnected',key:'angle_deg',data:trials.disconnected.trace,color:'#64748b'}],90,125,'degrees');
   chart('rate-chart',[{name:'Sensory',key:'sensory_hz',data:trials.connected.trace,color:'#64748b'},{name:'Flexor',key:'flexor_hz',data:trials.connected.trace,color:'#b44226'},{name:'Extensor',key:'extensor_hz',data:trials.connected.trace,color:'#459578'}],0,180,'Hz');
   for(const id of ['play','reset','time'])$(id).disabled=false;

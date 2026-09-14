@@ -39,7 +39,12 @@ def validate(directory):
     altered = copy.deepcopy(r)
     altered['angle_deg'][100:] = [30.]*(len(r['angle_deg'])-100)
     np.testing.assert_allclose(predict(r, original)[:100], predict(altered, original)[:100], atol=1e-12)
-    assert report['frozen_fit'] == original
+    assert report['frozen_fit']['selected_model'] == original['selected_model']
+    for key in ('training_scale', 'training_constant'):
+        np.testing.assert_allclose(report['frozen_fit'][key], original[key], atol=1e-12, rtol=1e-12)
+    for name, candidate in original['candidates'].items():
+        np.testing.assert_allclose(report['frozen_fit']['candidates'][name]['coefficients'], candidate['coefficients'], atol=1e-12, rtol=1e-12)
+        np.testing.assert_allclose(report['frozen_fit']['candidates'][name]['validation_mse'], candidate['validation_mse'], atol=1e-12, rtol=1e-12)
     assert not report['accepted_as_neural_calibration'] and not report['maze_changed']
     trials = json.loads((directory/'sweep-trials.json').read_text())
     assert len(report['sweep']) == 9

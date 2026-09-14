@@ -116,6 +116,14 @@ physical trials, a PNG/PDF figure, runtime/source hashes and validation JSON.
 The viewer adds interactive recording and perturbation selectors at
 `/calibration/`. The original MuJoCo video remains the 20° extension trial.
 
+The full follow-up ran locally and on B300 node `slurm-b300-128-021` in Slurm
+allocation `5807547` from experiment commit `528079a`. Every spike count agreed;
+physical angle differences agreed to within 1e-10 degrees. Calcium coefficients
+agreed to numerical precision across the two SciPy/NumPy runtimes. Published
+artifacts are the B300-generated results. Validation checks animal separation,
+held-out-data poisoning, causal filtering, all nine disconnected controls,
+finite mechanics, and reproduction of the original 20° reflex.
+
 Next: resolve flexion/extension subtypes within the actual sensory cell IDs,
 obtain matched physiological or optogenetic motor recordings, and validate
 bidirectional muscle recruitment. Do not use this pooled observation benchmark

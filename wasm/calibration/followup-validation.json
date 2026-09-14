@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "distinct training, selection and test animals",
+    "held-out and reference data cannot change fit or selection",
+    "causal calcium filtering",
+    "timestamp and source hash integrity",
+    "nine matched disconnected physical controls",
+    "flexion negative results retained",
+    "default reflex reproduces original trial",
+    "finite mechanics and matching clocks",
+    "no automatic promotion to neural engine or maze"
+  ]
+}

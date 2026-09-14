@@ -1,0 +1,841 @@
+{
+  "status": "Sensory response benchmark and physical sensitivity test; physiological circuit calibration not accepted",
+  "dataset": {
+    "source_doi": "https://doi.org/10.5061/dryad.gqnk98t16",
+    "original_article": "https://doi.org/10.1016/j.neuron.2018.09.009",
+    "release_article": "https://doi.org/10.1038/s41586-025-09554-2",
+    "source_file": "claw_magnet_Mamiya2018.parquet",
+    "source_download": "https://datadryad.org/downloads/file_stream/4330032",
+    "sha256": "7fc8a108258529d52815dc6e28b84958afffa073362ae41d75f551f2d83d01da",
+    "source_bytes": 849677,
+    "license": "CC0-1.0",
+    "indicator": "GCaMP6f",
+    "signal_units": "Processed calcium as released; no conversion to spikes or absolute calcium concentration.",
+    "notes": [
+      "ROI recordings pool claw axons with mixed flexion and extension tuning.",
+      "The original Mamiya experiment imaged the right front leg; the later release uses L1 column/ROI names. No specimen/laterality/body-ID match is asserted.",
+      "Source time, angle and calcium values are preserved, including tracking angles slightly above 180 degrees.",
+      "The release is already processed. Its preprocessing cannot be undone; our additional normalization uses training data only.",
+      "Animal labels across X/Y/Z ROIs are not confirmed to identify the same individuals. Only X is used; Y/Z are not counted as additional independent animals."
+    ]
+  },
+  "recording_count": 60,
+  "primary_recording_count": 20,
+  "primary_animal_count": 10,
+  "all_roi_unique_animal_count": null,
+  "frozen_fit": {
+    "selected_model": "angle_history",
+    "candidates": {
+      "angle": {
+        "coefficients": [
+          -0.04685192142489768,
+          -0.0039449848887730685,
+          1.276374649983141,
+          -0.13505477095792215,
+          -0.5374625425900349
+        ],
+        "validation_mse": 0.013785459071761484
+      },
+      "angle_history": {
+        "coefficients": [
+          -0.05247009423093747,
+          -0.023358025904401405,
+          1.3880392759082858,
+          -0.044210434006208645,
+          -0.7969141444867048,
+          0.010916982165620785,
+          0.15388487342905252,
+          0.06118539658601436
+        ],
+        "validation_mse": 0.006477200508314769
+      },
+      "legacy_encoder": {
+        "coefficients": [
+          0.15200283908124007,
+          0.17920282926676268
+        ],
+        "validation_mse": 0.07102755800923793
+      }
+    },
+    "training_scale": 51.49785880443555,
+    "training_constant": 0.23400549104977078,
+    "kernel": {
+      "rise_s": 0.03,
+      "decay_s": 0.3
+    },
+    "train_animals": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "validation_animals": [
+      7,
+      8
+    ],
+    "neural_parameters_fitted": false,
+    "promoted_to_circuit": false
+  },
+  "evaluation": {
+    "scores": [
+      {
+        "id": "A01_01_01",
+        "animal_id": 1,
+        "protocol": "ramp_hold_flex_first",
+        "split": "train",
+        "n_samples": 451,
+        "constant_mse": 0.0534089993968138,
+        "models": {
+          "angle": {
+            "mse": 0.011717446580289092,
+            "relative_mse": 0.21939086507185368,
+            "pearson_r": 0.8878487234121711
+          },
+          "angle_history": {
+            "mse": 0.0075264199793225245,
+            "relative_mse": 0.14092044532426728,
+            "pearson_r": 0.9336493677775093
+          },
+          "legacy_encoder": {
+            "mse": 0.049402953830527195,
+            "relative_mse": 0.9249930608786954,
+            "pearson_r": 0.2897302610468934
+          }
+        },
+        "shifted_input_mse": 0.009524608506381994
+      },
+      {
+        "id": "A02_01_01",
+        "animal_id": 2,
+        "protocol": "ramp_hold_flex_first",
+        "split": "train",
+        "n_samples": 451,
+        "constant_mse": 0.0617979087111246,
+        "models": {
+          "angle": {
+            "mse": 0.02323146769645242,
+            "relative_mse": 0.37592643798107017,
+            "pearson_r": 0.7933919171271645
+          },
+          "angle_history": {
+            "mse": 0.0157825534741308,
+            "relative_mse": 0.25538976647100825,
+            "pearson_r": 0.8667467987473589
+          },
+          "legacy_encoder": {
+            "mse": 0.07123980264227549,
+            "relative_mse": 1.1527866254388508,
+            "pearson_r": -0.05618762859473087
+          }
+        },
+        "shifted_input_mse": 0.019855907005798132
+      },
+      {
+        "id": "A03_01_01",
+        "animal_id": 3,
+        "protocol": "ramp_hold_flex_first",
+        "split": "train",
+        "n_samples": 451,
+        "constant_mse": 0.05750826810676746,
+        "models": {
+          "angle": {
+            "mse": 0.016495480691824008,
+            "relative_mse": 0.2868366799222537,
+            "pearson_r": 0.852540395319832
+          },
+          "angle_history": {
+            "mse": 0.008226039984632456,
+            "relative_mse": 0.14304099663304645,
+            "pearson_r": 0.934720332040898
+          },
+          "legacy_encoder": {
+            "mse": 0.059754682904404575,
+            "relative_mse": 1.0390624665216228,
+            "pearson_r": 0.1163408861399398
+          }
+        },
+        "shifted_input_mse": 0.013655169143969168
+      },
+      {
+        "id": "A04_01_01",
+        "animal_id": 4,
+        "protocol": "ramp_hold_flex_first",
+        "split": "train",
+        "n_samples": 451,
+        "constant_mse": 0.09820733397307796,
+        "models": {
+          "angle": {
+            "mse": 0.03099278079332889,
+            "relative_mse": 0.31558519653761385,
+            "pearson_r": 0.8637319544935929
+          },
+          "angle_history": {
+            "mse": 0.016794121119908793,
+            "relative_mse": 0.1710067918605004,
+            "pearson_r": 0.9515589668671902
+          },
+          "legacy_encoder": {
+            "mse": 0.07883471335656002,
+            "relative_mse": 0.8027375366708493,
+            "pearson_r": 0.5148045262721318
+          }
+        },
+        "shifted_input_mse": 0.026307559367645728
+      },
+      {
+        "id": "A05_01_01",
+        "animal_id": 5,
+        "protocol": "ramp_hold_flex_first",
+        "split": "train",
+        "n_samples": 451,
+        "constant_mse": 0.06975252603333214,
+        "models": {
+          "angle": {
+            "mse": 0.01829864529966495,
+            "relative_mse": 0.262336668508904,
+            "pearson_r": 0.8614146312882398
+          },
+          "angle_history": {
+            "mse": 0.007696448596163815,
+            "relative_mse": 0.11033935305061165,
+            "pearson_r": 0.9463091443395861
+          },
+          "legacy_encoder": {
+            "mse": 0.052976725090530155,
+            "relative_mse": 0.7594954348350703,
+            "pearson_r": 0.5356938736507942
+          }
+        },
+        "shifted_input_mse": 0.016730819125728845
+      },
+      {
+        "id": "A06_01_01",
+        "animal_id": 6,
+        "protocol": "ramp_hold_flex_first",
+        "split": "train",
+        "n_samples": 451,
+        "constant_mse": 0.05466415686368527,
+        "models": {
+          "angle": {
+            "mse": 0.01775117496790845,
+            "relative_mse": 0.32473152402540734,
+            "pearson_r": 0.8356175614527885
+          },
+          "angle_history": {
+            "mse": 0.009793042223587926,
+            "relative_mse": 0.17914924121135914,
+            "pearson_r": 0.9219072918434076
+          },
+          "legacy_encoder": {
+            "mse": 0.04044142935755156,
+            "relative_mse": 0.7398162100697795,
+            "pearson_r": 0.5406189221109259
+          }
+        },
+        "shifted_input_mse": 0.015042550781329109
+      },
+      {
+        "id": "A07_01_01",
+        "animal_id": 7,
+        "protocol": "ramp_hold_flex_first",
+        "split": "validation",
+        "n_samples": 451,
+        "constant_mse": 0.07943397219452111,
+        "models": {
+          "angle": {
+            "mse": 0.015927213307298068,
+            "relative_mse": 0.2005088360468096,
+            "pearson_r": 0.9284688194027657
+          },
+          "angle_history": {
+            "mse": 0.007310880665303082,
+            "relative_mse": 0.09203720352042705,
+            "pearson_r": 0.9896802199949487
+          },
+          "legacy_encoder": {
+            "mse": 0.07533180872418524,
+            "relative_mse": 0.948357568468434,
+            "pearson_r": 0.2753117423343363
+          }
+        },
+        "shifted_input_mse": 0.016233842956709446
+      },
+      {
+        "id": "A08_01_01",
+        "animal_id": 8,
+        "protocol": "ramp_hold_flex_first",
+        "split": "validation",
+        "n_samples": 451,
+        "constant_mse": 0.06151807659712979,
+        "models": {
+          "angle": {
+            "mse": 0.0116437048362249,
+            "relative_mse": 0.18927290123970086,
+            "pearson_r": 0.9027677720583083
+          },
+          "angle_history": {
+            "mse": 0.005643520351326456,
+            "relative_mse": 0.09173759427305896,
+            "pearson_r": 0.9553811824724666
+          },
+          "legacy_encoder": {
+            "mse": 0.06672330729429063,
+            "relative_mse": 1.0846130273423356,
+            "pearson_r": 0.05600140077058055
+          }
+        },
+        "shifted_input_mse": 0.013657280226480526
+      },
+      {
+        "id": "A09_01_01",
+        "animal_id": 9,
+        "protocol": "ramp_hold_flex_first",
+        "split": "animal_test",
+        "n_samples": 451,
+        "constant_mse": 0.07172578711124436,
+        "models": {
+          "angle": {
+            "mse": 0.017716417349780418,
+            "relative_mse": 0.24700206248420573,
+            "pearson_r": 0.8684656491834688
+          },
+          "angle_history": {
+            "mse": 0.008135813816477011,
+            "relative_mse": 0.11342941143132565,
+            "pearson_r": 0.9433673411403272
+          },
+          "legacy_encoder": {
+            "mse": 0.07321383631029123,
+            "relative_mse": 1.0207463627654438,
+            "pearson_r": 0.1259877099888428
+          }
+        },
+        "shifted_input_mse": 0.01795308988634362
+      },
+      {
+        "id": "A10_01_01",
+        "animal_id": 10,
+        "protocol": "ramp_hold_flex_first",
+        "split": "animal_test",
+        "n_samples": 451,
+        "constant_mse": 0.046903112213419695,
+        "models": {
+          "angle": {
+            "mse": 0.03542703468840389,
+            "relative_mse": 0.7553237518056996,
+            "pearson_r": 0.688904058901894
+          },
+          "angle_history": {
+            "mse": 0.03696158616884145,
+            "relative_mse": 0.7880412284937071,
+            "pearson_r": 0.710305090067538
+          },
+          "legacy_encoder": {
+            "mse": 0.06260625028948105,
+            "relative_mse": 1.334799490588355,
+            "pearson_r": -0.2980279935310304
+          }
+        },
+        "shifted_input_mse": 0.040665532057029836
+      },
+      {
+        "id": "A01_01_02",
+        "animal_id": 1,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.08057594269798095,
+        "models": {
+          "angle": {
+            "mse": 0.01500088997597403,
+            "relative_mse": 0.1861708280870032,
+            "pearson_r": 0.9180313867825376
+          },
+          "angle_history": {
+            "mse": 0.01691675979263686,
+            "relative_mse": 0.20994802202991483,
+            "pearson_r": 0.8920530366273213
+          },
+          "legacy_encoder": {
+            "mse": 0.060668535714998965,
+            "relative_mse": 0.7529360958567994,
+            "pearson_r": 0.5594926420279287
+          }
+        },
+        "shifted_input_mse": 0.01698369322278585
+      },
+      {
+        "id": "A02_01_02",
+        "animal_id": 2,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.044973866352034174,
+        "models": {
+          "angle": {
+            "mse": 0.004972845499239478,
+            "relative_mse": 0.11057189213652198,
+            "pearson_r": 0.9527803849214618
+          },
+          "angle_history": {
+            "mse": 0.007620820423689082,
+            "relative_mse": 0.1694499726582745,
+            "pearson_r": 0.9413725414552381
+          },
+          "legacy_encoder": {
+            "mse": 0.040513578355055466,
+            "relative_mse": 0.9008248932376487,
+            "pearson_r": 0.32582294135195944
+          }
+        },
+        "shifted_input_mse": 0.009980501095671989
+      },
+      {
+        "id": "A03_01_02",
+        "animal_id": 3,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.07465520767260742,
+        "models": {
+          "angle": {
+            "mse": 0.01263710192457614,
+            "relative_mse": 0.16927287885923276,
+            "pearson_r": 0.9227791141891566
+          },
+          "angle_history": {
+            "mse": 0.010879884026475115,
+            "relative_mse": 0.14573509826920186,
+            "pearson_r": 0.9263699414501254
+          },
+          "legacy_encoder": {
+            "mse": 0.0588939318484468,
+            "relative_mse": 0.788879084051577,
+            "pearson_r": 0.5005745539074917
+          }
+        },
+        "shifted_input_mse": 0.013640469446802542
+      },
+      {
+        "id": "A04_01_02",
+        "animal_id": 4,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.0687959474812009,
+        "models": {
+          "angle": {
+            "mse": 0.027822226297904526,
+            "relative_mse": 0.4044166454064347,
+            "pearson_r": 0.7739858434175545
+          },
+          "angle_history": {
+            "mse": 0.025987783192848418,
+            "relative_mse": 0.3777516575369474,
+            "pearson_r": 0.7968348636798065
+          },
+          "legacy_encoder": {
+            "mse": 0.040964569071536526,
+            "relative_mse": 0.5954503218773236,
+            "pearson_r": 0.79443944466504
+          }
+        },
+        "shifted_input_mse": 0.02906917227309101
+      },
+      {
+        "id": "A05_01_02",
+        "animal_id": 5,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.07515689794353211,
+        "models": {
+          "angle": {
+            "mse": 0.02921824003533422,
+            "relative_mse": 0.38876325174153487,
+            "pearson_r": 0.7834758319395116
+          },
+          "angle_history": {
+            "mse": 0.027223208680004156,
+            "relative_mse": 0.3622183648460034,
+            "pearson_r": 0.8019039144108893
+          },
+          "legacy_encoder": {
+            "mse": 0.046244655058943034,
+            "relative_mse": 0.6153081929178102,
+            "pearson_r": 0.7799016710926414
+          }
+        },
+        "shifted_input_mse": 0.03162225454177432
+      },
+      {
+        "id": "A06_01_02",
+        "animal_id": 6,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.06399819096649824,
+        "models": {
+          "angle": {
+            "mse": 0.028186192070246776,
+            "relative_mse": 0.44042170012276877,
+            "pearson_r": 0.7539548588066827
+          },
+          "angle_history": {
+            "mse": 0.024018854345853824,
+            "relative_mse": 0.37530520758668334,
+            "pearson_r": 0.8029367199636958
+          },
+          "legacy_encoder": {
+            "mse": 0.04014705363390361,
+            "relative_mse": 0.6273154448212417,
+            "pearson_r": 0.7258355239988423
+          }
+        },
+        "shifted_input_mse": 0.026218483860661328
+      },
+      {
+        "id": "A07_01_02",
+        "animal_id": 7,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.0687065659953478,
+        "models": {
+          "angle": {
+            "mse": 0.018967250058216364,
+            "relative_mse": 0.2760616803276219,
+            "pearson_r": 0.8693513930902741
+          },
+          "angle_history": {
+            "mse": 0.01372226938214675,
+            "relative_mse": 0.19972282391577975,
+            "pearson_r": 0.9110811494053342
+          },
+          "legacy_encoder": {
+            "mse": 0.05377856549302872,
+            "relative_mse": 0.7827281820003947,
+            "pearson_r": 0.5402256998650227
+          }
+        },
+        "shifted_input_mse": 0.018819226895460686
+      },
+      {
+        "id": "A08_01_02",
+        "animal_id": 8,
+        "protocol": "ramp_hold_ext_first",
+        "split": "protocol_test",
+        "n_samples": 449,
+        "constant_mse": 0.06435436789531425,
+        "models": {
+          "angle": {
+            "mse": 0.010363822765369145,
+            "relative_mse": 0.16104303568373254,
+            "pearson_r": 0.9280858862066718
+          },
+          "angle_history": {
+            "mse": 0.008012463061636296,
+            "relative_mse": 0.12450534942197292,
+            "pearson_r": 0.9452218031519614
+          },
+          "legacy_encoder": {
+            "mse": 0.056908179396287735,
+            "relative_mse": 0.8842939688081579,
+            "pearson_r": 0.3617480298274488
+          }
+        },
+        "shifted_input_mse": 0.015182760395490488
+      },
+      {
+        "id": "A09_01_02",
+        "animal_id": 9,
+        "protocol": "ramp_hold_ext_first",
+        "split": "animal_test",
+        "n_samples": 449,
+        "constant_mse": 0.062437869366031344,
+        "models": {
+          "angle": {
+            "mse": 0.023826456289626412,
+            "relative_mse": 0.3816026480651971,
+            "pearson_r": 0.7944060125721897
+          },
+          "angle_history": {
+            "mse": 0.01785843797038175,
+            "relative_mse": 0.2860193365294018,
+            "pearson_r": 0.8542054264268991
+          },
+          "legacy_encoder": {
+            "mse": 0.04365820654260587,
+            "relative_mse": 0.6992263987527679,
+            "pearson_r": 0.6149572554239339
+          }
+        },
+        "shifted_input_mse": 0.023972325827282422
+      },
+      {
+        "id": "A10_01_02",
+        "animal_id": 10,
+        "protocol": "ramp_hold_ext_first",
+        "split": "animal_test",
+        "n_samples": 449,
+        "constant_mse": 0.036026844824307756,
+        "models": {
+          "angle": {
+            "mse": 0.023795307309008924,
+            "relative_mse": 0.6604882393962498,
+            "pearson_r": 0.8072562239347635
+          },
+          "angle_history": {
+            "mse": 0.02634121213377563,
+            "relative_mse": 0.7311551223048789,
+            "pearson_r": 0.8335489770645574
+          },
+          "legacy_encoder": {
+            "mse": 0.03871257833474516,
+            "relative_mse": 1.074548118868997,
+            "pearson_r": 0.11644506829919643
+          }
+        },
+        "shifted_input_mse": 0.034365811218756474
+      }
+    ],
+    "groups": {
+      "train": {
+        "trials": 6,
+        "animals": 6,
+        "relative_mse": 0.16648646663177677,
+        "median_pearson_r": 0.9341848499092036,
+        "trials_beating_constant": 6
+      },
+      "validation": {
+        "trials": 2,
+        "animals": 2,
+        "relative_mse": 0.09190644001051848,
+        "median_pearson_r": 0.9725307012337077,
+        "trials_beating_constant": 2
+      },
+      "animal_test": {
+        "trials": 4,
+        "animals": 2,
+        "relative_mse": 0.4113296961787621,
+        "median_pearson_r": 0.8438772017457283,
+        "trials_beating_constant": 4
+      },
+      "protocol_test": {
+        "trials": 8,
+        "animals": 8,
+        "relative_mse": 0.24829605524589574,
+        "median_pearson_r": 0.9015670930163278,
+        "trials_beating_constant": 8
+      }
+    }
+  },
+  "sweep": [
+    {
+      "id": "0",
+      "name": "Flex 30\u00b0",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": -30,
+        "onset_s": 0.3,
+        "ramp_s": 0.1,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.6000000000000001,
+      "seed": 1,
+      "motor_spikes": 0,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 0.0,
+      "signed_restoring_difference_at_peak_deg": 0.0,
+      "active_final_angle_deg": 100.0003886070632,
+      "passive_final_angle_deg": 100.0003886070632
+    },
+    {
+      "id": "1",
+      "name": "Flex 20\u00b0",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": -20,
+        "onset_s": 0.3,
+        "ramp_s": 0.1,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.6000000000000001,
+      "seed": 1,
+      "motor_spikes": 0,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 0.0,
+      "signed_restoring_difference_at_peak_deg": 0.0,
+      "active_final_angle_deg": 100.00038862689044,
+      "passive_final_angle_deg": 100.00038862689044
+    },
+    {
+      "id": "2",
+      "name": "Flex 10\u00b0",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": -10,
+        "onset_s": 0.3,
+        "ramp_s": 0.1,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.6000000000000001,
+      "seed": 1,
+      "motor_spikes": 0,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 0.0,
+      "signed_restoring_difference_at_peak_deg": 0.0,
+      "active_final_angle_deg": 100.00038864609208,
+      "passive_final_angle_deg": 100.00038864609208
+    },
+    {
+      "id": "3",
+      "name": "Extend 10\u00b0",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": 10,
+        "onset_s": 0.3,
+        "ramp_s": 0.1,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.6000000000000001,
+      "seed": 1,
+      "motor_spikes": 2,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 0.4634444444504595,
+      "signed_restoring_difference_at_peak_deg": 0.4634444444504595,
+      "active_final_angle_deg": 100.00038867324484,
+      "passive_final_angle_deg": 100.00038867307758
+    },
+    {
+      "id": "4",
+      "name": "Extend 20\u00b0",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": 20,
+        "onset_s": 0.3,
+        "ramp_s": 0.1,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.6000000000000001,
+      "seed": 1,
+      "motor_spikes": 17,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 2.414848131519662,
+      "signed_restoring_difference_at_peak_deg": 2.414848131519662,
+      "active_final_angle_deg": 100.00038867587061,
+      "passive_final_angle_deg": 100.00038867463378
+    },
+    {
+      "id": "5",
+      "name": "Extend 30\u00b0",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": 30,
+        "onset_s": 0.3,
+        "ramp_s": 0.1,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.6000000000000001,
+      "seed": 1,
+      "motor_spikes": 18,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 2.428410105833663,
+      "signed_restoring_difference_at_peak_deg": 2.428410105833663,
+      "active_final_angle_deg": 100.00038866830816,
+      "passive_final_angle_deg": 100.00038866545634
+    },
+    {
+      "id": "6",
+      "name": "Extend 20\u00b0 \u00b7 fast",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": 20.0,
+        "onset_s": 0.3,
+        "ramp_s": 0.05,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.55,
+      "seed": 1,
+      "motor_spikes": 17,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 2.2063420674464425,
+      "signed_restoring_difference_at_peak_deg": 2.2063420674464425,
+      "active_final_angle_deg": 100.0003886758848,
+      "passive_final_angle_deg": 100.00038867887406
+    },
+    {
+      "id": "7",
+      "name": "Extend 20\u00b0 \u00b7 slow",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": 20.0,
+        "onset_s": 0.3,
+        "ramp_s": 0.2,
+        "hold_s": 0.2,
+        "distal_mass_scale": 1.0
+      },
+      "release_s": 0.7,
+      "seed": 1,
+      "motor_spikes": 24,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 2.0293251637698404,
+      "signed_restoring_difference_at_peak_deg": 2.0293251637698404,
+      "active_final_angle_deg": 100.00038867795607,
+      "passive_final_angle_deg": 100.00038878668147
+    },
+    {
+      "id": "8",
+      "name": "Extend 20\u00b0 \u00b7 2\u00d7 mass",
+      "protocol": {
+        "rest_angle_deg": 100.0,
+        "displacement_deg": 20.0,
+        "onset_s": 0.3,
+        "ramp_s": 0.1,
+        "hold_s": 0.2,
+        "distal_mass_scale": 2
+      },
+      "release_s": 0.6000000000000001,
+      "seed": 1,
+      "motor_spikes": 17,
+      "disconnected_motor_spikes": 0,
+      "max_angle_difference_deg": 2.3757112594203136,
+      "signed_restoring_difference_at_peak_deg": 2.3757112594203136,
+      "active_final_angle_deg": 100.00099677321963,
+      "passive_final_angle_deg": 100.00099677028568
+    }
+  ],
+  "input_sha256": "ef175a038a13411d4e079be77db3c4c5a6cf50af0ab3aa63b1c20c66ed997023",
+  "fit_sha256": "3223018a6bad9037bb67f3f6e2cc91ba752ad8d18b3a8371d5b20aae22effdc9",
+  "implementation_sha256": {
+    "brain/claw_calibration.py": "fbcd63a8dd67033f4e00bfa4f65e7d6bc706e0d1b3dbcf466f170165cb58446e",
+    "brain/leg_reflex.py": "dc145376d352bbc4e4bdb3ae73e0299c84cb4e499c251e23306b271e6aa430d7",
+    "scripts/continue_leg_reflex.py": "f129fca07d2b296524cbb12764af9b601e96086ded620b635c2c0096e6677c2a"
+  },
+  "runtime": {
+    "python": "3.12.13 (main, May 10 2026, 19:30:01) [Clang 22.1.3 ]",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "mujoco": "3.9.0"
+  },
+  "accepted_as_neural_calibration": false,
+  "maze_changed": false,
+  "limitations": [
+    "Only two animals form the final independent-animal test; no population confidence claim.",
+    "Opposite-order tests on animals 1\u20138 share animals with training or validation.",
+    "Pooled claw axon calcium cannot identify individual MaleCNS sensory-cell receptive fields.",
+    "The fixed calcium kernel and fitted fluorescence coefficients do not identify absolute firing rates.",
+    "Physical sweeps retain the original provisional extension-only encoder; the calcium fit is not injected into the circuit.",
+    "Distal load is a sensitivity test with tibia/tarsus mass and inertia doubled, not a measured biological load.",
+    "Motor recruitment, spike-to-force scaling and the missing circuit inputs remain uncalibrated."
+  ]
+}

@@ -4,7 +4,7 @@ function element(tag,attrs={},text=''){const n=document.createElementNS(NS,tag);
 function chart(id,time,series,unit,release){
   const svg=$(id);svg.replaceChildren();
   const values=series.flatMap(s=>s.values.filter(v=>Number.isFinite(v)));
-  let low=Math.min(...values),high=Math.max(...values);const pad=Math.max((high-low)*.08,.05);low-=pad;high+=pad;
+  let low=Math.min(...values),high=Math.max(...values);const pad=Math.max((high-low)*.08,.05);low-=pad;high+=pad;if(unit.includes('Hz'))low=Math.max(0,low);
   const end=Math.max(...time), x=t=>48+t/end*532, y=v=>205-(v-low)/(high-low)*160;
   for(let i=0;i<=4;i++){
     const value=low+(high-low)*i/4, t=end*i/4;
@@ -26,7 +26,7 @@ const names={train:'Training',validation:'Model selection',animal_test:'Unseen a
 try{
   const [report,traces,sweep]=await Promise.all(['claw-report.json','claw-traces.json','sweep-trials.json'].map(json));
   const test=report.evaluation.groups.animal_test, protocol=report.evaluation.groups.protocol_test;
-  $('claw-summary').textContent=`On the two unseen flies, the frozen fit reduces error by ${(100*(1-test.relative_mse)).toFixed(1)}% versus the training-constant baseline (median correlation ${test.median_pearson_r.toFixed(2)}). All ${test.trials} unseen-animal trials and all ${protocol.trials} opposite-order trials beat that baseline. This supports a useful sensory-response benchmark; physiological circuit calibration remains open.`;
+  $('claw-summary').textContent=`On the two unseen flies, the frozen fit reduces error by ${(100*(1-test.relative_mse)).toFixed(1)}% versus the training-constant baseline (median correlation ${test.median_pearson_r.toFixed(2)}). ${test.trials_beating_constant}/${test.trials} unseen-animal trials and ${protocol.trials_beating_constant}/${protocol.trials} opposite-order trials beat that baseline. This supports a useful sensory-response benchmark; physiological circuit calibration remains open.`;
   for(const r of traces){const option=document.createElement('option');option.value=r.id;option.textContent=`Fly ${r.animal_id} · ${r.protocol.includes('ext_first')?'extension':'flexion'} first · ${names[r.split]}`;$('claw-record').append(option);}
   function recording(){
     const r=traces.find(r=>r.id===$('claw-record').value);
