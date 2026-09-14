@@ -61,10 +61,10 @@ extern "C" __global__ void deliver(
 extern "C" __global__ void apply_inputs(
     int n, int m, int batch_step, long long* step, double* v, double* g,
     const unsigned char* eligible, const int* incoming, const int* input_slot,
-    const unsigned char* events) {
+    const unsigned char* events, const double* synaptic_gain) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n && eligible[i]) {
-        g[i] += incoming[i] * 0.275;
+        g[i] += incoming[i] * 0.275 * synaptic_gain[0];
         int slot = input_slot[i];
         if (slot >= 0 && events[batch_step*m+slot]) v[i] += 68.75;
     }
@@ -111,6 +111,9 @@ class CudaEngine:
         self.counts = cp.empty(n, cp.int32)
         self.clock = cp.empty(1, cp.int64)
         self.events = cp.empty((200, self.m), cp.uint8)
+        # Optional offline calibration multiplier. Anatomical counts and signs
+        # remain intact; the default exactly preserves the released equations.
+        self.synaptic_gain = cp.asarray([1.0], dtype=cp.float64)
         self.stream = cp.cuda.Stream(non_blocking=True)
         self.reset()
         module = cp.RawModule(code=KERNELS, options=('--std=c++11', '--fmad=false'))
@@ -124,7 +127,7 @@ class CudaEngine:
                     self.refractory, self.silenced, self.eligible, self.incoming, self.history, self.sizes, self.counts))
                 deliver((128,), (128,), (np.int32(n), self.clock, self.history, self.sizes, self.row, self.post, self.weights, self.incoming))
                 apply(blocks, (256,), (np.int32(n), np.int32(self.m), np.int32(batch_step), self.clock,
-                    self.v, self.g, self.eligible, self.incoming, self.input_slot, self.events))
+                    self.v, self.g, self.eligible, self.incoming, self.input_slot, self.events, self.synaptic_gain))
             self.graph = self.stream.end_capture()
         props = cp.cuda.runtime.getDeviceProperties(0)
         self.metadata = {
@@ -145,6 +148,14 @@ class CudaEngine:
         self.steps = 0
         self.rng = np.random.default_rng(42)
         self.secondary_rng = np.random.default_rng(43)
+
+    def set_synaptic_gain(self, value):
+        """Change effective coupling for an offline experiment; reset retains it."""
+        if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, float, np.integer, np.floating)) or not np.isfinite(value) or not .25 <= value <= 2:
+            raise ValueError('Synaptic gain must be finite and between 0.25 and 2')
+        self.stream.synchronize()
+        self.synaptic_gain.set(np.array([value], dtype=np.float64))
+        cp.cuda.get_current_stream().synchronize()
 
     def step(self, rates, silenced, events=None):
         rates = np.asarray(rates)
