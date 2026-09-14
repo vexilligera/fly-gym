@@ -78,7 +78,7 @@ rate, not animal measurements or confidence intervals. They establish that
 the implemented input produces a dose-dependent downstream response in this
 model. `scripts/validate_sugar.py` reproduces the checks; detailed traces are
 in `outputs/sugar-validation.json`. HTTP controls, pause/resume, ownership,
-invalid-input handling, held-body timing, and the 0 Hz control are checked by
+invalid-input handling, held torso/leg timing, and the 0 Hz control are checked by
 `scripts/validate_sugar_api.py` against a staging service.
 
 The deployed maze was rerun after this change. It reached the food zone at

@@ -188,9 +188,9 @@ browser report is versioned in `wasm/maze/validation.json`.
 
 After a maze arrival, `/maze/` offers **Watch proboscis + brain** and a no-taste
 control. The 21 released sugar GRNs drive the full network; the two MN9 cells
-are readouts only. This is a reset, held-body neural assay with a separate
-0–8 s clock, played at 0.2× speed. It does not simulate mouth mechanics or
-ingestion. See `brain/SUGAR_AND_SLEEP.md` for wiring and limitations.
+are observed downstream and drive engineered mouth servos. The brain resets
+with a separate 0–8 s clock shared by the proboscis, played at at most 0.2× speed.
+The torso and legs stay held; ingestion is not modeled. See `brain/SUGAR_AND_SLEEP.md` for wiring and limitations.
 
 `scripts/validate_sugar.py` checks the pinned input cohort, unchanged legacy
 CUDA inputs, stimulus timing, a silent control, and downstream responses at
