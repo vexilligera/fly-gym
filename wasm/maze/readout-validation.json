@@ -186,5 +186,50 @@
       "720575940610236514",
       "720575940640331472"
     ]
+  },
+  "simple": {
+    "revision": "dbf4426671d20c3ee3f7ac1690b35f037b87066e",
+    "passed": true,
+    "checks": [
+      "DN input exclusion",
+      "exact shared readout gains",
+      "policy never called",
+      "brain/body clock agreement"
+    ],
+    "trials": [
+      {
+        "name": "combined",
+        "config": {
+          "condition": "combined",
+          "heading_deg": 75,
+          "seed": 1,
+          "duration": 120.0,
+          "food_odor": true,
+          "layout": "simple",
+          "controller": "descending",
+          "silence_descending": false
+        },
+        "status": "finished",
+        "time": 120.00000000286005,
+        "distance_mm": 19.26823195391751,
+        "initial_distance_mm": 17.603821797349628,
+        "minimum_distance_mm": 16.189579699431555,
+        "net_displacement_mm": 1.6933744849119294,
+        "path_length_mm": 574.0251648522039,
+        "peak_abs_gain": 0.5069942350242903,
+        "dn_spikes": {
+          "DNp09_left": 0,
+          "DNp09_right": 0,
+          "DNa02_left": 6354,
+          "DNa02_right": 61,
+          "MDN_left": 0,
+          "MDN_right": 0
+        },
+        "brain_spikes": 74262977,
+        "wall_seconds": 305.0721219489351
+      }
+    ],
+    "limits": "One heading/leg seed and fixed neural seed. No trained parameters or claim of natural navigation.",
+    "summary": "B300 neuron-readout check: in the simple two-baffle maze (75\u00b0, seed 1), the fly did not reach sugar in 120 s. It came no closer than 16.19 mm and finished 19.27 mm away. DNa02 fired (left 6,354 spikes; right 61); DNp09 and MDN stayed silent. The earlier sensory-policy check reached this maze's food zone in 1.60 s. This is one start and fixed neural seed, not a population benchmark."
   }
 }

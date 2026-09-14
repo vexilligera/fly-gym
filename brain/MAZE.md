@@ -119,6 +119,13 @@ silencing removes DN spikes while preserving sensory activity. It saves every
 20 ms rate/gain/position sample under `outputs/neuron-navigation/`. These are
 single-start exploratory tests, not a population navigation benchmark.
 
+To test just the easier layout with the same neuron interface, run
+`scripts/validate_neuron_navigation.py --layout simple --trial-only --duration 120`
+on the allocated GPU. This records every neural/body bin separately under
+`outputs/neuron-navigation-simple/`, without replacing the branching-maze
+records or changing the live browser trial. The page displays the measured
+neuron-readout result for the active maze layout.
+
 ## Brain chemistry: what “interaction” means here
 
 The connectome engine uses uniform point-neuron LIF dynamics: 20 ms membrane
@@ -169,6 +176,20 @@ navigation in the tested configuration. It does not identify a unique cause:
 sensory mapping, neural dynamics, choice of descending cells, and motor
 decoding all remain incompletely validated. No forward bias or fallback was
 added to make the experiment succeed.
+
+A separate simple-maze neuron-readout trial on B300, revision `dbf4426`, used
+the same 75° heading, leg seed 1, both sensory inputs, and unchanged neural and
+motor parameters. It ran for the full **120 s without arrival**. Distance from
+sugar started at 17.60 mm, reached a minimum of 16.19 mm, and ended at 19.27 mm;
+the arrival threshold is 2.5 mm. DNa02 emitted 6,354 left and 61 right spikes.
+All DNp09 and MDN cells remained silent, so forward and reverse drive were zero
+throughout. The body moved within the starting area; making the maze simpler
+did not resolve the missing forward readout in this tested configuration.
+Every bin passed the direct-input exclusion, shared-adapter, and brain/body
+clock checks, and the sensory policy was never called. The earlier comparison
+policy reached the simple maze's sugar zone in 1.60 s. Complete rate, command,
+and body records are in `outputs/neuron-navigation-simple/`; the compact result
+is also stored under `simple` in `wasm/maze/readout-validation.json`.
 
 The historical navigation results below used **Sensory policy**. They are not
 evidence for success with the default neuron readouts.

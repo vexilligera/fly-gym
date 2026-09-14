@@ -22,7 +22,8 @@ let cameraView = null, commandEpoch = 0, pendingPoll = null;
 let validationReport = null, readoutReport = null;
 
 function renderValidation(layout,controller) {
-  const report=controller==='descending'?readoutReport:layout==='complex'?validationReport?.complex:validationReport;
+  const report=controller==='descending'?(layout==='simple'?readoutReport?.simple:readoutReport)
+    :layout==='complex'?validationReport?.complex:validationReport;
   $('validation').textContent=report?.summary||'Measured validation results are unavailable for this layout.';
 }
 
