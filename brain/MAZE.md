@@ -141,6 +141,35 @@ metabolism remain absent. Adding a chemical name would not establish its effects
 
 ## Measured checks and interpretation
 
+Neuron-readout checks on B300, revision `d5b9769`, used the branching maze,
+heading 75°, leg seed 1, and the fixed backend neural stream:
+
+| Neuron-readout trial | Duration | DNp09 / MDN spikes | DNa02 spikes, left / right | Peak absolute gain | Result |
+|---|---:|---:|---:|---:|---|
+| Vision + smell | 120 s | 0 / 0 | 6,231 / 86 | 0.522 | No arrival; 25.83 mm from sugar |
+| Vision only | 5 s | 0 / 0 | 0 / 0 | 0 | No locomotor command |
+| Smell only | 5 s | 0 / 0 | 232 / 2 | 0.427 | Turning; no arrival |
+| Both disconnected | 5 s | 0 / 0 | 0 / 0 | 0 | Entire brain silent |
+| DNs silenced, senses on | 5 s | 0 / 0 | 0 / 0 | 0 | Sensory/network activity persists; no motor command |
+
+All bilateral DNp09 and MDN cells were silent during the 120 s trial, so the
+adapter produced only differential leg commands. The body moved within the
+starting corner, ending 3.30 mm from its initial position and farther from
+sugar. Zero-gain controls had only 0.0031 mm net passive drift over 5 s.
+The silenced trial still produced 2,852,015 network spikes, separating the
+absence of motor commands from the absence of sensory activity. DN cells
+were never direct input targets in these trials; the sensory policy was
+guarded against being called. Its separately selected simple-maze regression
+still reached sugar in 1.60 s. These different-duration/layout runs are
+mechanism and regression checks, not matched estimates of navigation success.
+The compact results are versioned in `wasm/maze/readout-validation.json`.
+
+This shows a working neural-readout interface and a failure of useful maze
+navigation in the tested configuration. It does not identify a unique cause:
+sensory mapping, neural dynamics, choice of descending cells, and motor
+decoding all remain incompletely validated. No forward bias or fallback was
+added to make the experiment succeed.
+
 The historical navigation results below used **Sensory policy**. They are not
 evidence for success with the default neuron readouts.
 

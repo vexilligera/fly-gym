@@ -1,0 +1,190 @@
+{
+  "revision": "d5b976925a296f9db74ad012185f1d8adbbacd3f",
+  "passed": true,
+  "checks": [
+    "DN input exclusion",
+    "exact shared readout gains",
+    "policy never called",
+    "all-senses-off silence",
+    "DN silencing with sensory activity",
+    "comparison-policy simple-maze arrival",
+    "silencing clears after reset"
+  ],
+  "trials": [
+    {
+      "name": "combined",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 120,
+        "food_odor": true,
+        "layout": "complex",
+        "controller": "descending",
+        "silence_descending": false
+      },
+      "status": "finished",
+      "time": 120.00000000286005,
+      "distance_mm": 25.829384916065614,
+      "net_displacement_mm": 3.3043862647463738,
+      "path_length_mm": 246.98676058627728,
+      "peak_abs_gain": 0.5221613641295484,
+      "dn_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 6231,
+        "DNa02_right": 86,
+        "MDN_left": 0,
+        "MDN_right": 0
+      },
+      "brain_spikes": 85286857,
+      "wall_seconds": 311.99691381584853
+    },
+    {
+      "name": "vision_only",
+      "config": {
+        "condition": "vision_only",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true,
+        "layout": "complex",
+        "controller": "descending",
+        "silence_descending": false
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 22.535618989303465,
+      "net_displacement_mm": 0.003076541043628872,
+      "path_length_mm": 0.006073753611751957,
+      "peak_abs_gain": 0.0,
+      "dn_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 0,
+        "DNa02_right": 0,
+        "MDN_left": 0,
+        "MDN_right": 0
+      },
+      "brain_spikes": 722890,
+      "wall_seconds": 11.523034051992
+    },
+    {
+      "name": "odor_only",
+      "config": {
+        "condition": "odor_only",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true,
+        "layout": "complex",
+        "controller": "descending",
+        "silence_descending": false
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 23.148214049127418,
+      "net_displacement_mm": 2.8239804810763287,
+      "path_length_mm": 13.987940232431672,
+      "peak_abs_gain": 0.42699840295397545,
+      "dn_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 232,
+        "DNa02_right": 2,
+        "MDN_left": 0,
+        "MDN_right": 0
+      },
+      "brain_spikes": 2131499,
+      "wall_seconds": 12.174699067138135
+    },
+    {
+      "name": "neither",
+      "config": {
+        "condition": "neither",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true,
+        "layout": "complex",
+        "controller": "descending",
+        "silence_descending": false
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 22.535618989303465,
+      "net_displacement_mm": 0.003076541043628872,
+      "path_length_mm": 0.006073753611751957,
+      "peak_abs_gain": 0.0,
+      "dn_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 0,
+        "DNa02_right": 0,
+        "MDN_left": 0,
+        "MDN_right": 0
+      },
+      "brain_spikes": 0,
+      "wall_seconds": 11.60410754289478
+    },
+    {
+      "name": "silenced",
+      "config": {
+        "condition": "combined",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true,
+        "layout": "complex",
+        "controller": "descending",
+        "silence_descending": true
+      },
+      "status": "finished",
+      "time": 5.000000000001686,
+      "distance_mm": 22.535618989303465,
+      "net_displacement_mm": 0.003076541043628872,
+      "path_length_mm": 0.006073753611751957,
+      "peak_abs_gain": 0.0,
+      "dn_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 0,
+        "DNa02_right": 0,
+        "MDN_left": 0,
+        "MDN_right": 0
+      },
+      "brain_spikes": 2852015,
+      "wall_seconds": 12.142032580915838
+    }
+  ],
+  "comparison": {
+    "controller": "sensory_policy",
+    "layout": "simple",
+    "status": "reached",
+    "time": 1.5999999999998402
+  },
+  "limits": "One heading/leg seed and fixed neural seed. No trained parameters or claim of natural navigation.",
+  "summary": "B300 neuron-readout check: in the branching maze (75\u00b0, seed 1), the fly did not reach sugar in 120 s and ended 25.83 mm away. DNa02 fired (left 6,231 spikes; right 86); DNp09 and MDN stayed silent. In 5 s controls, disconnecting both senses or silencing the descending neurons gave zero leg gains. Vision alone gave zero gains; odor alone produced turning. These are exploratory results from one start, not a navigation benchmark.",
+  "readout_groups": {
+    "DNp09_left": [
+      "720575940635872101"
+    ],
+    "DNp09_right": [
+      "720575940627652358"
+    ],
+    "DNa02_left": [
+      "720575940629327659"
+    ],
+    "DNa02_right": [
+      "720575940604737708"
+    ],
+    "MDN_left": [
+      "720575940631082808",
+      "720575940616026939"
+    ],
+    "MDN_right": [
+      "720575940610236514",
+      "720575940640331472"
+    ]
+  }
+}
