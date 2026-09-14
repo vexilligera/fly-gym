@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "raw_archive_round_trip_checked": true,
+  "checks": [
+    "source and fit hashes",
+    "262 finite region traces with original timestamps",
+    "whole-fly split separation and correct reverse-order transfer group",
+    "equal weight per fly, then per region",
+    "poisoning test and reference inputs/outputs cannot alter fitting or selection",
+    "future joint angles cannot affect earlier predictions",
+    "all region scores and equal-fly aggregates recomputed",
+    "unsupported pickle globals rejected",
+    "no unverified EM tuning assignment or physiological promotion",
+    "original physical reflex implementation unchanged"
+  ]
+}

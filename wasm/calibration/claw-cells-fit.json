@@ -1,0 +1,173 @@
+{
+  "cohorts": {
+    "JR209": {
+      "selected": {
+        "tau_s": 3.0,
+        "parameters": [
+          -0.0016721226150634748,
+          4.081233605878182,
+          71.11313571496156,
+          17.537961122077423
+        ],
+        "training_mse": 0.47338990079530074,
+        "parameters_at_bound": [],
+        "validation_mse": 0.3074644839983832
+      },
+      "candidates": [
+        {
+          "tau_s": 0.0,
+          "parameters": [
+            -0.027202885590131662,
+            4.168646861393789,
+            70.00689462745866,
+            24.040001996230078
+          ],
+          "training_mse": 0.6927815692919344,
+          "parameters_at_bound": [],
+          "validation_mse": 0.5213640784581217
+        },
+        {
+          "tau_s": 0.3,
+          "parameters": [
+            -0.022866694498472454,
+            4.15005602159339,
+            70.23262227940394,
+            23.336098503941336
+          ],
+          "training_mse": 0.6564790351381466,
+          "parameters_at_bound": [],
+          "validation_mse": 0.47946617538974373
+        },
+        {
+          "tau_s": 1.0,
+          "parameters": [
+            -0.014457994739816144,
+            4.116440623867383,
+            70.64869009740136,
+            21.630915544763504
+          ],
+          "training_mse": 0.5745862026497462,
+          "parameters_at_bound": [],
+          "validation_mse": 0.38918571018667214
+        },
+        {
+          "tau_s": 3.0,
+          "parameters": [
+            -0.0016721226150634748,
+            4.081233605878182,
+            71.11313571496156,
+            17.537961122077423
+          ],
+          "training_mse": 0.47338990079530074,
+          "parameters_at_bound": [],
+          "validation_mse": 0.3074644839983832
+        }
+      ],
+      "constant_drr": 1.6028718733059526,
+      "legacy_coefficients": [
+        1.6028718733059515,
+        6.594720594636165e-15
+      ],
+      "train_flies": [
+        "JR209:1",
+        "JR209:2",
+        "JR209:3",
+        "JR209:4"
+      ],
+      "validation_flies": [
+        "JR209:5"
+      ],
+      "parameter_names": [
+        "offset_drr",
+        "gain_drr",
+        "midpoint_deg",
+        "width_deg"
+      ]
+    },
+    "JR688": {
+      "selected": {
+        "tau_s": 1.0,
+        "parameters": [
+          0.21883649443414294,
+          1.0610721397746972,
+          136.50326330732761,
+          10.082289178086295
+        ],
+        "training_mse": 0.19809509267336733,
+        "parameters_at_bound": [],
+        "validation_mse": 2.324514116881887
+      },
+      "candidates": [
+        {
+          "tau_s": 0.0,
+          "parameters": [
+            0.2189887569677802,
+            1.0910197804052781,
+            137.7293623027015,
+            11.458879311394757
+          ],
+          "training_mse": 0.19896254498277932,
+          "parameters_at_bound": [],
+          "validation_mse": 2.3267288921993834
+        },
+        {
+          "tau_s": 0.3,
+          "parameters": [
+            0.21877829209531965,
+            1.0867695493811778,
+            137.52538009587133,
+            11.199073753944425
+          ],
+          "training_mse": 0.1980428393604847,
+          "parameters_at_bound": [],
+          "validation_mse": 2.3247959284725574
+        },
+        {
+          "tau_s": 1.0,
+          "parameters": [
+            0.21883649443414294,
+            1.0610721397746972,
+            136.50326330732761,
+            10.082289178086295
+          ],
+          "training_mse": 0.19809509267336733,
+          "parameters_at_bound": [],
+          "validation_mse": 2.324514116881887
+        },
+        {
+          "tau_s": 3.0,
+          "parameters": [
+            0.21785808565926215,
+            0.9902241423750988,
+            134.3320953486605,
+            7.4485651324131625
+          ],
+          "training_mse": 0.2134174548752788,
+          "parameters_at_bound": [],
+          "validation_mse": 2.3485838117254
+        }
+      ],
+      "constant_drr": 0.4869385953160103,
+      "legacy_coefficients": [
+        0.20361357965410118,
+        0.7128176421701855
+      ],
+      "train_flies": [
+        "JR688:1",
+        "JR688:2",
+        "JR688:3"
+      ],
+      "validation_flies": [
+        "JR688:4"
+      ],
+      "parameter_names": [
+        "offset_drr",
+        "gain_drr",
+        "midpoint_deg",
+        "width_deg"
+      ]
+    }
+  },
+  "neural_parameters_fitted": false,
+  "promoted_to_circuit": false
+}

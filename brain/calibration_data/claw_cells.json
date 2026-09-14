@@ -1,0 +1,126 @@
+{
+  "source_doi": "https://doi.org/10.5061/dryad.dbrv15f6q",
+  "article_doi": "https://doi.org/10.1016/j.neuron.2023.07.009",
+  "download": "https://datadryad.org/downloads/file_stream/2453318",
+  "source_file": "2023_Mamiya_etal_Proprioceptor_feature_selectivity.zip",
+  "source_sha256": "866e8487b51b8e2cbc1c9ec7d875a33f918249d14c76c115e37601b05cf59862",
+  "source_bytes": 6113303,
+  "license": "CC0-1.0",
+  "indicator": "GCaMP7f + tdTomato",
+  "units": "Processed fluorescence ratio change, delta R/R; not Hz.",
+  "sex": "female",
+  "leg": "right front",
+  "cohorts": {
+    "JR209": {
+      "regions_per_order": 50,
+      "flies": 7,
+      "train": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "validation": [
+        5
+      ],
+      "animal_test": [
+        6,
+        7
+      ],
+      "expected_tuning": "flexion"
+    },
+    "JR688": {
+      "regions_per_order": 28,
+      "flies": 6,
+      "train": [
+        1,
+        2,
+        3
+      ],
+      "validation": [
+        4
+      ],
+      "animal_test": [
+        5,
+        6
+      ],
+      "expected_tuning": "extension"
+    },
+    "73D10": {
+      "regions_per_order": 53,
+      "flies": 7,
+      "reference_only": true,
+      "expected_tuning": "mixed"
+    }
+  },
+  "files": [
+    {
+      "key": "JR688_2",
+      "cohort": "JR688",
+      "order": 2,
+      "member": "2023_Mamiya_etal_Proprioceptor_feature_selectivity/claw_activity_position_tibia_angle_Fig5_S6/claw_extension_split_gal4_(JR688_claw_extension)/all_cell_centroids_column_row_rotated_DRR_normDRR_angle_flyId_trial_type2",
+      "member_sha256": "4e562230f49a9626d2c621538c620341dec65b1382a4c188545d09a767f1f1d9",
+      "samples_per_region": 689,
+      "regions": 28,
+      "dt_s": 0.07968127490039834
+    },
+    {
+      "key": "JR688_3",
+      "cohort": "JR688",
+      "order": 3,
+      "member": "2023_Mamiya_etal_Proprioceptor_feature_selectivity/claw_activity_position_tibia_angle_Fig5_S6/claw_extension_split_gal4_(JR688_claw_extension)/all_cell_centroids_column_row_rotated_DRR_normDRR_angle_flyId_trial_type3",
+      "member_sha256": "ce63fa5a7b94694947d075a6b3d841164fe004b5c7f953dc0b9435514a7b12bb",
+      "samples_per_region": 695,
+      "regions": 28,
+      "dt_s": 0.07968127490039834
+    },
+    {
+      "key": "JR209_2",
+      "cohort": "JR209",
+      "order": 2,
+      "member": "2023_Mamiya_etal_Proprioceptor_feature_selectivity/claw_activity_position_tibia_angle_Fig5_S6/claw_flexion_split_gal4_(JR209_claw_flexion)/all_cell_centroids_column_row_rotated_DRR_normDRR_angle_flyId_trial_type2",
+      "member_sha256": "2e61f0341cfe3651a03e4de9dde51267feb86e79af5dc544e55b48076196ce7c",
+      "samples_per_region": 724,
+      "regions": 50,
+      "dt_s": 0.07999999999999963
+    },
+    {
+      "key": "JR209_3",
+      "cohort": "JR209",
+      "order": 3,
+      "member": "2023_Mamiya_etal_Proprioceptor_feature_selectivity/claw_activity_position_tibia_angle_Fig5_S6/claw_flexion_split_gal4_(JR209_claw_flexion)/all_cell_centroids_column_row_rotated_DRR_normDRR_angle_flyId_trial_type3",
+      "member_sha256": "8e00a71733afbefc70ddf630eb14b2b05a59e53692538a8fb08cee7366a9b78c",
+      "samples_per_region": 717,
+      "regions": 50,
+      "dt_s": 0.0799999999999983
+    },
+    {
+      "key": "73D10_2",
+      "cohort": "73D10",
+      "order": 2,
+      "member": "2023_Mamiya_etal_Proprioceptor_feature_selectivity/claw_activity_position_tibia_angle_Fig5_S6/claw_gal4_(73D10_all_claw_cells)/all_cell_centroids_column_row_rotated_DRR_normDRR_angle_flyId_trial_type2",
+      "member_sha256": "31e22b4f9078e8a27a3b5e1316b8f4b2efeeafd73769b0b04fbe1c876d1504fd",
+      "samples_per_region": 726,
+      "regions": 53,
+      "dt_s": 0.07974481658692234
+    },
+    {
+      "key": "73D10_3",
+      "cohort": "73D10",
+      "order": 3,
+      "member": "2023_Mamiya_etal_Proprioceptor_feature_selectivity/claw_activity_position_tibia_angle_Fig5_S6/claw_gal4_(73D10_all_claw_cells)/all_cell_centroids_column_row_rotated_DRR_normDRR_angle_flyId_trial_type3",
+      "member_sha256": "744efcbb20ab36d3b3e8010d64f713cbb9486fbba0196e80e9ec354e6228bc93",
+      "samples_per_region": 720,
+      "regions": 53,
+      "dt_s": 0.07974481658692412
+    }
+  ],
+  "npz_sha256": "be596e0838cf6a725c4893c11b86f384009770d09fdee3c1fa4e1f4d555d5069",
+  "notes": [
+    "Source arrays are preserved exactly; normalized traces are reference only.",
+    "Regions sometimes merge multiple cells. Column correspondence across orders is not independently verified.",
+    "Type 2 starts extended; type 3 starts flexed. Times retain the source alignment.",
+    "Fly IDs are namespaced by driver; never count regions as independent flies.",
+    "No recording has an established MaleCNS body-ID match."
+  ]
+}
