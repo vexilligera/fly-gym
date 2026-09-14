@@ -38,7 +38,7 @@ def finished(check=lambda s: None):
 
 assert api('brain/status')['status'] == 'ready'
 reject('maze/taste', {'rate_hz':200})
-api('maze/start', {'layout':'simple','duration':5})
+api('maze/start', {'layout':'simple','duration':5,'controller':'sensory_policy'})
 arrival = finished()
 assert arrival['status'] == 'reached'
 for bad in [201, -1, True, '200', float('nan')]:

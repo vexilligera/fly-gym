@@ -4,20 +4,25 @@ const $ = id => document.getElementById(id);
 const brainView = new BrainView();
 const names = {combined:'Vision + smell',vision_only:'Vision only',odor_only:'Smell only',neither:'Both disconnected'};
 const layouts = {simple:'Simple maze',complex:'Branching maze'};
+const controllers = {descending:'Neuron readouts',sensory_policy:'Sensory policy'};
 const descriptions = {
-  combined:'Eye images drive R1–6 cells and local antenna samples drive DM1 odor neurons in the same brain step. A hand-designed controller combines L2 and odor-neuron spikes to steer the legs.',
-  vision_only:'Control: eyes remain connected; odor input is zero. The fly can respond to walls but has no encoded food-odor cue.',
-  odor_only:'Control: antenna samples remain connected; eye input is zero. The fly follows the odor signal without visual wall avoidance.',
-  neither:'Control: both sensory input streams are zero. The same constant walking drive remains. Any arrival is incidental.',
+  combined:'Eye images drive R1–6 cells and local antenna samples drive DM1 odor neurons in the same brain step.',
+  vision_only:'Control: eyes remain connected; odor input is zero.',
+  odor_only:'Control: antenna samples remain connected; eye input is zero.',
+  neither:'Control: both sensory input streams are zero. From reset, the brain has no spontaneous drive.',
+};
+const controllerDescriptions = {
+  descending:'DNp09, DNa02, and MDN activity sets the leg gains. No constant walking drive, odor-following rule, or wall-avoidance rule. The neuron-to-leg mapping and leg CPG remain engineered. Useful navigation is not guaranteed.',
+  sensory_policy:'Comparison: the previous controller combines L2 and ORN activity with constant walking drive, odor following, wall avoidance, and held escape turns.',
 };
 let state = {status:'idle'}, ready = false, busy = false, lastFrame = -1;
 let trialId = null, recordedId = null, trials = [], world = null, loadingWorld = false;
 let cameraStreaming = false, cameraRetryAt = 0, lastSnapshot = null;
 let cameraView = null, commandEpoch = 0, pendingPoll = null;
-let validationReport = null;
+let validationReport = null, readoutReport = null;
 
-function renderValidation(layout) {
-  const report=layout==='complex'?validationReport?.complex:validationReport;
+function renderValidation(layout,controller) {
+  const report=controller==='descending'?readoutReport:layout==='complex'?validationReport?.complex:validationReport;
   $('validation').textContent=report?.summary||'Measured validation results are unavailable for this layout.';
 }
 
@@ -33,7 +38,8 @@ function controls() {
 }
 function config() {
   return {layout:$('layout').value,condition:$('condition').value,heading_deg:Number($('heading').value),
-    seed:Number($('seed').value),duration:Number($('duration').value),food_odor:$('food-odor').checked};
+    seed:Number($('seed').value),duration:Number($('duration').value),food_odor:$('food-odor').checked,
+    controller:$('controller').value,silence_descending:$('controller').value==='descending'&&$('silence-descending').checked};
 }
 async function api(path, args, signal) {
   const response=await fetch('/api/'+path,args===undefined?{signal}:{method:'POST',
@@ -75,6 +81,11 @@ $('enlarge-fly').onclick=()=>{
   $('body-heading').scrollIntoView({behavior:'smooth',block:'start'});
 };
 $('condition').onchange=()=>{$('condition-description').textContent=descriptions[$('condition').value];};
+$('controller').onchange=()=>{
+  $('controller-description').textContent=controllerDescriptions[$('controller').value];
+  $('silence-descending').disabled=$('controller').value!=='descending';
+  if($('silence-descending').disabled)$('silence-descending').checked=false;
+};
 $('heading').oninput=()=>{$('heading-value').textContent=$('heading').value+'°';};
 $('show-field').onchange=drawField;
 $('layout').onchange=()=>{
@@ -160,13 +171,14 @@ function render(s,forceSnapshot=false) {
   const newTrial=s.trial_id!==trialId;
   if(newTrial){
     trialId=s.trial_id;lastFrame=-1;
-    renderValidation(s.config.layout);
+    renderValidation(s.config.layout,s.config.controller);
     if(world?.layout!==s.config.layout){world=null;$('walls').replaceChildren();}
     drawField();
   }
   loadWorld(s.config.layout);
   const statusText={running:'Live sensory feedback',tasting:'Live sugar taste → proboscis',paused:'Paused',reached:s.taste?'Sugar / proboscis assay complete':'Sugar zone reached',finished:'Time limit reached',fallen:'Fly lost balance'}[s.status]||s.status;
-  message(`● ${statusText} · ${layouts[s.config.layout]||'Simple maze'} · ${names[s.config.condition]}${s.config.food_odor?'':' · Food odor off'}`);
+  const isReadout=s.config.controller==='descending';
+  message(`● ${statusText} · ${controllers[s.config.controller]||'Sensory policy'}${s.config.silence_descending?' · DNs silenced':''} · ${layouts[s.config.layout]||'Simple maze'} · ${names[s.config.condition]}${s.config.food_odor?'':' · Food odor off'}`);
   $('trial-state').textContent=s.status.toUpperCase();
   $('brain-live-state').textContent=['running','tasting'].includes(s.status)?'Live · latest bin':'Held · last bin';
   $('brain-live-state').dataset.running=['running','tasting'].includes(s.status);
@@ -192,14 +204,25 @@ function render(s,forceSnapshot=false) {
   for(const [i,side] of ['left','right'].entries()) {
     $('odor-'+side).textContent=s.odor[i].toFixed(3);
     $('odor-meter-'+side).value=s.odor[i];
-    $('orn-'+side).textContent=(d['odor_'+side+'_hz']||0).toFixed(0)+' Hz';
+    $('orn-'+side).textContent=(o?.ORN_rates_hz[i]||0).toFixed(0)+' Hz';
     $('pn-'+side).textContent=o?.PN_spikes[i]||0;
     $('gain-'+side).textContent=s.taste?'held':(d.gains?.[i]||0).toFixed(2);
+    for(const cell of ['DNp09','DNa02','MDN']) {
+      const key=cell+'_'+side;
+      $('dn-'+cell+'-'+side).textContent=(s.brain?.filtered_rates_hz[key]||0).toFixed(1)+' Hz';
+      $('dn-'+cell+'-'+side).title=`Latest 20 ms: ${s.brain?.rates_hz[key]||0} Hz`;
+    }
   }
   $('l2-spikes').textContent=(d.L2_spikes||0).toLocaleString();
-  $('wall-front').textContent=(d.wall_front||0).toFixed(2);
+  $('wall-front').textContent=isReadout?'unused':(d.wall_front||0).toFixed(2);
+  $('vision-detail').textContent=isReadout?'Dark wall contrast enters R1–6 cells. L2 counts are displayed as a sensory response; movement reads descending neurons.':'Dark wall contrast enters R1–6 cells. The comparison policy uses downstream L2 activity for wall avoidance.';
+  $('motor-heading').textContent=isReadout?'3. Descending neurons → legs':'3. Sensory policy → legs';
+  $('motor-detail').textContent=controllerDescriptions[s.config.controller]||controllerDescriptions.sensory_policy;
   $('active').textContent=(s.brain?.active_neurons||0).toLocaleString();
-  $('steering').textContent=s.taste?'The fly is posed facing the sugar solution. Labellum contact gates taste input; measured MN9 activity drives the approximate mouth servos.':d.escape?'Turning away from a strong front-wall response.':`Odor steering ${(d.odor_turn||0).toFixed(2)} · Visual avoidance ${(d.visual_turn||0).toFixed(2)}. Positive turns left.`;
+  $('steering').textContent=s.taste?'Legs held; MN9 drives the mouth servos. Navigation gains are inactive.':isReadout
+    ?s.config.silence_descending?'Control: DNp09, DNa02, and MDN spikes are suppressed throughout this trial. Sensory inputs remain connected.'
+      :`Forward ${(d.forward||0).toFixed(3)} · Reverse ${(d.reverse||0).toFixed(3)} · Turn ${(d.turn||0).toFixed(3)}. Zero readout produces zero leg gain.`
+    :d.escape?'Turning away from a strong front-wall response.':`Odor steering ${(d.odor_turn||0).toFixed(2)} · Visual avoidance ${(d.visual_turn||0).toFixed(2)}. Positive turns left.`;
   $('ground-truth').textContent=`Evaluation: ${s.score.distance_mm.toFixed(1)} mm from center. The controller does not receive this distance.`;
   $('result').textContent=(s.status==='reached'||s.taste)?`Entered the 2.5 mm food zone after ${s.time.toFixed(2)} simulated seconds. Watch the proboscis and brain response below; ingestion is not modeled.`:s.status==='fallen'?'The fly lost balance; the trial stopped.':s.done?'Time limit reached without entering the food zone.':'A trial ends at the food zone, the time limit, or loss of balance.';
   renderTaste(s.taste,s.brain?.sugar);
@@ -231,7 +254,7 @@ function renderTrials() {
   $('trials').replaceChildren();
   for(const s of trials) {
     const row=document.createElement('tr');
-    const values=[layouts[s.config.layout]||'Simple maze',names[s.config.condition],s.config.food_odor?'On':'Off',`${s.config.heading_deg}° / ${s.config.seed}`,s.time.toFixed(2)+' s',s.distance.toFixed(1)+' mm',{reached:'Reached',finished:'Time limit',fallen:'Lost balance'}[s.status]];
+    const values=[layouts[s.config.layout]||'Simple maze',(controllers[s.config.controller]||'Sensory policy')+(s.config.silence_descending?' · silenced':''),names[s.config.condition],s.config.food_odor?'On':'Off',`${s.config.heading_deg}° / ${s.config.seed}`,s.time.toFixed(2)+' s',s.distance.toFixed(1)+' mm',{reached:'Reached',finished:'Time limit',fallen:'Lost balance'}[s.status]];
     for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
     $('trials').append(row);
   }
@@ -254,7 +277,9 @@ async function initialize() {
   try {
     const response=await fetch('validation.json');
     if(response.ok)validationReport=await response.json();
-    renderValidation(state.config?.layout||$('layout').value);
+    const readoutResponse=await fetch('readout-validation.json');
+    if(readoutResponse.ok)readoutReport=await readoutResponse.json();
+    renderValidation(state.config?.layout||$('layout').value,state.config?.controller||$('controller').value);
   } catch { $('validation').textContent='Measured validation results are unavailable.'; }
   while(true) {
     await pollStatus();

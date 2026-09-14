@@ -20,6 +20,14 @@ the exact wiring, measured responses, ingestion limits, and sleep feasibility.
 Choose vision + smell, either sense alone, or both disconnected. **Food odor
 on** independently controls the source for the next trial.
 
+**Neuron readouts** is now the default movement source. The earlier
+**Sensory policy** remains selectable as a comparison. **Silence descending
+neurons** suppresses all annotated bilateral DNp09, DNa02, and MDN cells from
+the start of a neuron-readout trial, while keeping the selected sensory inputs.
+Changing these controls applies to the next Run/Reset. Pause/Resume preserves
+the active trial's controller. The live table shows actual population firing
+rates smoothed over 100 ms, with raw 20 ms rates on hover.
+
 The server advances the entire loop every 20 ms, independently of browser
 polling. Pause stops at a completed bin; Resume continues the same trial.
 Run maze and Reset start a fresh brain and body. The default time limit is
@@ -62,7 +70,24 @@ the browser replaces the wall map and groups trial results by layout.
    138,639 neurons and 15,091,983 released signed connection rows. No
    connections are removed. L2 and DM1 projection-neuron activity is produced
    by the recurrent network; those readout cells are not directly stimulated.
-6. The engineered movement decoder reads L2 counts and **ORN** spike rates.
+6. In default neuron-readout mode, only the smoothed descending-neuron rates
+   determine the motor gains. No DN is directly stimulated during navigation.
+   The exact shared adapter in `brain/motor_readout.py` uses:
+
+   ```text
+   F = mean(DNp09 left, right) / 100 Hz
+   R = mean(MDN left, right) / 100 Hz
+   T = (DNa02 left − right) / 100 Hz
+   leg gains = clip([F − R − 0.6 T, F − R + 0.6 T], −1.2, 1.2)
+   ```
+
+   Rates use a causal exponential filter with a 100 ms time constant, reset
+   to zero. Zero readout gives zero gain; negative gain reverses CPG phase.
+   This adapter is the same one used on the manual brain-stimulation page.
+   There is no constant walking drive, wall avoidance, odor-following rule,
+   escape timer, direct L2/ORN steering, or successful-policy fallback in this
+   mode. L2 and ORN/PN activity remain visible for inspection.
+7. The optional comparison policy reads L2 counts and **ORN** spike rates.
    L2 sector responses are smoothed over 60 ms and produce wall avoidance;
    left/right ORN activity is smoothed over 120 ms and produces odor steering.
    A strong front response triggers a short held turn. These signals modulate
@@ -75,6 +100,24 @@ modality switches, and its history. It receives no body pose, target position,
 maze geometry, odor map, distance-to-goal, or waypoint plan. World coordinates
 are used only to construct the scene/field, sample sensors, and score arrival.
 The UI's odor map is an observer visualization.
+
+Removing the sensory policy does **not** remove all engineered assumptions.
+Sensory encoders still impose contrast/rate transforms and a bilateral odor
+contrast gain. The descending-neuron roles, gain scales, and recorded-step CPG
+are an uncalibrated brain-to-body interface, not a reconstructed VNC. The model
+has no spontaneous drive, internal state, plasticity, or leg/proprioceptive
+feedback into the connectome. DN activity can be silent, weak, or inappropriate;
+neuron-controlled motion does not establish accurate innate navigation.
+The GCaMP pilot did not justify changing the live neural parameters.
+
+`scripts/validate_neuron_navigation.py` runs a 120 s default trial, 5 s matched
+vision-only/odor-only/no-senses/DN-silenced controls, a simple-maze comparison
+policy trial, and a post-reset direct-stimulation positive control. It checks
+that DN cells receive no external input during navigation, every delivered
+gain matches the common adapter, the sensory policy is never called, and
+silencing removes DN spikes while preserving sensory activity. It saves every
+20 ms rate/gain/position sample under `outputs/neuron-navigation/`. These are
+single-start exploratory tests, not a population navigation benchmark.
 
 ## Brain chemistry: what “interaction” means here
 
@@ -97,6 +140,9 @@ learning, contact-controlled feeding, pumping, digestion, and
 metabolism remain absent. Adding a chemical name would not establish its effects.
 
 ## Measured checks and interpretation
+
+The historical navigation results below used **Sensory policy**. They are not
+evidence for success with the default neuron readouts.
 
 For the **simple maze**, `scripts/validate_maze.py` runs matched headings 45°, 75°, 105° with leg-phase
 seeds 1, 2, 3 and a 5 s limit for each of five conditions. Neural randomness

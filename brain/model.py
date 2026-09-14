@@ -15,6 +15,7 @@ import platform
 import numpy as np
 import pyarrow.parquet as pq
 import brian2 as b
+from brain.motor_readout import DESCENDING_GROUPS, descending_motor
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'external/fly-brain/data'
@@ -203,9 +204,9 @@ class ConnectomeBrain:
         rates[slots] = self.visual.rates(contrast, condition)
         return self._advance(rates, 'visual_' + condition, 180.0, 0.0, False)
 
-    def step_multisensory(self, contrast, odor, vision=True, olfaction=True):
-        if not isinstance(vision,bool) or not isinstance(olfaction,bool):
-            raise ValueError('Sensory switches must be booleans')
+    def step_multisensory(self, contrast, odor, vision=True, olfaction=True, silence_descending=False):
+        if any(not isinstance(value,bool) for value in (vision,olfaction,silence_descending)):
+            raise ValueError('Sensory and silencing switches must be booleans')
         from brain.olfactory_input import odor_input_rates
         odor_rates = odor_input_rates(odor)
         if not olfaction: odor_rates[:] = 0
@@ -213,7 +214,8 @@ class ConnectomeBrain:
         rates[np.searchsorted(self.inputs,self.visual.receptors)] = self.visual.rates(contrast,'vision' if vision else 'blind')
         for side, rate in zip(('left','right'),odor_rates):
             rates[np.searchsorted(self.inputs,self.groups['ORN_DM1_'+side])] = rate
-        result = self._advance(rates,'vision_and_olfaction',180.0,float(np.mean(odor)),False)
+        result = self._advance(rates,'vision_and_olfaction',180.0,float(np.mean(odor)),False,
+                               silence_descending=silence_descending)
         result['olfaction'] = {
             'input_rates_hz': odor_rates.tolist(),
             'ORN_rates_hz': [float(self.last_delta[self.groups['ORN_DM1_'+side]].mean()/.02) for side in ('left','right')],
@@ -230,16 +232,18 @@ class ConnectomeBrain:
         result['sugar'] = self.sugar.readout(self.last_delta, rate_hz)
         return result
 
-    def _advance(self, rates, stimulus, rate_hz, odor, silence):
-        silenced_ids = np.concatenate([self.groups['DNp09_left'], self.groups['DNp09_right']])
+    def _advance(self, rates, stimulus, rate_hz, odor, silence, silence_descending=False):
+        silenced_groups = DESCENDING_GROUPS if silence_descending else ('DNp09_left','DNp09_right') if silence else ()
+        silenced_ids = np.concatenate([self.groups[key] for key in silenced_groups]) if silenced_groups else np.array([],dtype=np.int32)
         started = time.perf_counter()
         if self.engine is not None:
-            delta = self.engine.step(rates, silenced_ids if silence else [])
+            delta = self.engine.step(rates, silenced_ids)
             simulation_time = self.engine.steps / 10000
         else:
             self.poisson.rates = rates*b.Hz
             self.neurons.rfc[self.inputs] = np.where(rates > 0, 0, 2.2)*b.ms
-            self.neurons.silenced[silenced_ids] = bool(silence)
+            self.neurons.silenced = False
+            self.neurons.silenced[silenced_ids] = True
             self.network.run(STEP_MS*b.ms, namespace={})
             counts = np.asarray(self.monitor.count[:], dtype=np.int32)
             delta = counts - self.previous_counts
@@ -253,10 +257,7 @@ class ConnectomeBrain:
             raw[key] = float(delta[indices].mean() / (STEP_MS / 1000))
             self.filtered[key] += alpha * (raw[key] - self.filtered[key])
         f = self.filtered
-        forward = (f['DNp09_left'] + f['DNp09_right'])/2/100
-        reverse = (f['MDN_left'] + f['MDN_right'])/2/100
-        turn = (f['DNa02_left'] - f['DNa02_right'])/100
-        gains = np.clip([forward-reverse-.6*turn, forward-reverse+.6*turn], -1.2, 1.2)
+        motor = descending_motor(f)
         active = np.flatnonzero(delta)
         top = active[np.argsort(delta[active])[-8:][::-1]]
         return {
@@ -265,7 +266,8 @@ class ConnectomeBrain:
             'stimulus': stimulus, 'input_rate_hz': rate_hz, 'odor': odor,
             'rates_hz': {k:round(v, 3) for k,v in raw.items()},
             'filtered_rates_hz': {k:round(v, 3) for k,v in f.items()},
-            'gains': gains.tolist(), 'silenced': bool(silence),
+            'gains': motor['gains'], 'motor_readout': motor, 'silenced': bool(silence),
+            'silence_descending': silence_descending, 'silenced_indices': silenced_ids.tolist(),
             # Lossless sparse counts from every neuron, in this completed
             # 20 ms bin. No subsampling, interpolated spikes, or activity trails.
             'activity': {'indices': active.tolist(), 'spike_counts': delta[active].tolist(),

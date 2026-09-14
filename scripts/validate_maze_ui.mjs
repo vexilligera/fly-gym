@@ -127,3 +127,27 @@ for(const failOldPoll of [false,true]) {
   await refresh;
 }
 console.log('PASS: reset/resume/pause, trial and feeding transitions, snapshot fallback, and delayed poll races');
+
+{
+  const h=harness(),s=sample('neuron',2);
+  s.config.controller='descending';
+  s.brain={filtered_rates_hz:{DNp09_left:12.345},rates_hz:{DNp09_left:50},olfaction:{ORN_rates_hz:[10,20],PN_spikes:[1,2]}};
+  s.decoder={mode:'descending',forward:.2,reverse:.1,turn:.3,gains:[-.08,.28]};
+  h.render(s);
+  assert.match(h.elements.status.textContent,/Neuron readouts/);
+  assert.equal(h.elements['dn-DNp09-left'].textContent,'12.3 Hz');
+  assert.equal(h.elements['gain-left'].textContent,'-0.08');
+  assert.equal(h.elements['wall-front'].textContent,'unused');
+  assert.match(h.elements.steering.textContent,/Zero readout/);
+  const silenced={...s,trial_id:'silenced',config:{...s.config,silence_descending:true}};
+  h.render(silenced);
+  assert.match(h.elements.steering.textContent,/suppressed/);
+  h.elements.controller.value='sensory_policy';
+  h.elements['silence-descending'].checked=true;
+  h.elements.controller.onchange();
+  assert.equal(h.elements['silence-descending'].disabled,true);
+  assert.equal(h.elements['silence-descending'].checked,false);
+  assert.equal(h.run('config().controller'),'sensory_policy');
+  assert.equal(h.run('config().silence_descending'),false);
+}
+console.log('PASS: DN readouts, active controller labels, silencing control and comparison config');

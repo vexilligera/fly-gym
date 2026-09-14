@@ -29,7 +29,7 @@ def finish():
     raise AssertionError('Trial did not finish')
 
 assert api('brain/status')['status']=='ready'
-s=api('maze/reset',{'layout':'simple','condition':'combined','duration':5,'heading_deg':75,'seed':1})
+s=api('maze/reset',{'controller':'sensory_policy','layout':'simple','condition':'combined','duration':5,'heading_deg':75,'seed':1})
 assert s['time']==0 and s['brain'] is None
 for key,data in [('body',s['images']['body']),*zip(('left','right'),s['images']['eyes'])]:
     image=Image.open(io.BytesIO(base64.b64decode(data)))
@@ -47,19 +47,32 @@ reject('vision/start',{'condition':'vision'})
 assert api('vision/status')['status']=='idle'
 paused=api('maze/pause',{})
 time.sleep(.15);assert api('maze/status')['time']==paused['time']
-for invalid in ({'food_odor':'yes'},{'duration':0},{'heading_deg':float('nan')},{'seed':True},{'condition':'bad'},{'target_deg':30},{'layout':'unknown'},{'layout':[]}):
+for invalid in ({'food_odor':'yes'},{'duration':0},{'heading_deg':float('nan')},{'seed':True},{'condition':'bad'},{'target_deg':30},{'layout':'unknown'},{'layout':[]},{'controller':'unknown'},{'silence_descending':'true'},
+                {'controller':'sensory_policy','silence_descending':True}):
     reject('maze/reset',invalid)
     current=api('maze/status');assert current['time']==paused['time'] and current['trial_id']==paused['trial_id']
 reject('maze/start',{},403,'https://unapproved.invalid')
 api('maze/start',{})
 arrived=finish();assert arrived['status']=='reached' and arrived['score']['distance_mm']<2.5
 for condition in ('combined','vision_only','odor_only','neither'):
-    api('maze/start',{'condition':condition,'duration':.2})
+    api('maze/start',{'controller':'sensory_policy','condition':condition,'duration':.2})
     s=finish();b=s['brain'];assert abs(s['time']-.2)<1e-7
     if condition=='neither':assert b['spikes']==0 and s['decoder']['gains']==[.78,.78]
     if condition in ('vision_only','neither'):assert b['olfaction']['input_rates_hz']==[0,0]
 api('maze/start',{'food_odor':False,'duration':.2})
 s=finish();assert s['odor']==[0,0] and s['brain']['olfaction']['input_rates_hz']==[0,0]
+# The new default consumes actual DN gains; sensory input never directly drives DNs.
+for arguments in ({'condition':'combined'}, {'condition':'neither'}, {'silence_descending':True}):
+    api('maze/start', {**arguments,'duration':.4})
+    s=finish(); b=s['brain']
+    assert s['config']['controller']=='descending'
+    assert s['decoder']['gains']==b['gains']==b['motor_readout']['gains']
+    if arguments.get('condition')=='neither' or arguments.get('silence_descending'):
+        assert s['decoder']['gains']==[0,0]
+    if arguments.get('silence_descending'):
+        assert b['spikes']>0 and len(b['silenced_indices'])>0
+        assert not set(b['silenced_indices']) & set(b['activity']['indices'])
+        assert all(b['rates_hz'][key]==0 for key in b['rates_hz'] if not key.startswith('ORN'))
 # One persistent camera connection spans live frames, pauses, and layout reset.
 first=api('maze/reset',{'layout':'complex','duration':2})
 assert api('maze/world')['layout']=='complex' and len(api('maze/world')['walls'])==20

@@ -1,4 +1,4 @@
-"""Engineered fusion of visual L2 and olfactory ORN activity in a simple maze.
+"""Sensory brain/body loop with descending readouts or a comparison policy.
 
 The policy receives neural activity and its own history only. World pose,
 wall geometry, odor maps and sugar coordinates do not enter the motor decoder.
@@ -61,10 +61,17 @@ class MazeNavigation:
         self.world = None
         self.reset()
 
-    def reset(self,condition='combined',heading_deg=75,seed=1,duration=120,food_odor=True,layout='complex'):
+    def reset(self,condition='combined',heading_deg=75,seed=1,duration=120,food_odor=True,layout='complex',
+              controller='descending',silence_descending=False):
         get_layout(layout)
         if condition not in ('combined','vision_only','odor_only','neither'):
             raise ValueError('Unknown maze sensory condition')
+        if controller not in ('descending','sensory_policy'):
+            raise ValueError('Unknown maze controller')
+        if not isinstance(silence_descending,bool):
+            raise ValueError('silence_descending must be a boolean')
+        if silence_descending and controller != 'descending':
+            raise ValueError('Descending-neuron silencing requires the neuron-readout controller')
         for value,low,high in [(heading_deg,-180,180),(duration,.1,120)]:
             if isinstance(value,bool) or not isinstance(value,(int,float)) or not np.isfinite(value) or not low<=value<=high:
                 raise ValueError('Heading must be −180…180°; duration .1…120 seconds')
@@ -75,14 +82,17 @@ class MazeNavigation:
             replacement = MazeWorld(layout)
             if self.world is not None:self.world.close()
             self.world = replacement
-        self.config = dict(condition=condition,heading_deg=heading_deg,seed=seed,duration=duration,food_odor=food_odor,layout=layout)
+        self.config = dict(condition=condition,heading_deg=heading_deg,seed=seed,duration=duration,food_odor=food_odor,
+                           layout=layout,controller=controller,silence_descending=silence_descending)
         self.trial_id = uuid.uuid4().hex
         self.brain.reset()
         self.world.food_odor = food_odor
         self.world.reset(heading_deg=heading_deg,seed=seed)
         self.world.vision();self.world.smell()
-        indices = self.brain.visual.readout_pixels
-        self.policy = MazePolicy(self.world.bearings.ravel()[indices],self.world.visual_mask.ravel()[indices],seed)
+        self.policy = None
+        if controller == 'sensory_policy':
+            indices = self.brain.visual.readout_pixels
+            self.policy = MazePolicy(self.world.bearings.ravel()[indices],self.world.visual_mask.ravel()[indices],seed)
         self.frames = 0;self.wall_seconds = 0;self.done = False;self.status = 'paused'
         self.taste = None
         self.contact_bins = 0
@@ -110,9 +120,18 @@ class MazeNavigation:
         vision = self.config['condition'] in ('combined','vision_only')
         olfaction = self.config['condition'] in ('combined','odor_only')
         contrast, odor = self.world.vision(), self.world.smell()
-        neural = self.brain.step_multisensory(contrast,odor,vision,olfaction)
-        gains, decoder = self.policy.step(self.brain.last_delta[self.brain.visual.readout],
-                                          neural['olfaction']['ORN_rates_hz'],vision,olfaction)
+        neural = self.brain.step_multisensory(contrast,odor,vision,olfaction,
+                                             silence_descending=self.config['silence_descending'])
+        if self.config['controller'] == 'descending':
+            # Use the same DN adapter as manual stimulation. No constant walk,
+            # sensory comparison, wall reflex, escape timer, or goal bearing.
+            decoder = dict(neural['motor_readout'])
+            gains = decoder['gains']
+        else:
+            gains, decoder = self.policy.step(self.brain.last_delta[self.brain.visual.readout],
+                                              neural['olfaction']['ORN_rates_hz'],vision,olfaction)
+        decoder['mode'] = self.config['controller']
+        decoder['L2_spikes'] = int(self.brain.last_delta[self.brain.visual.readout].sum())
         self.world.step(gains)
         if abs(self.world.data.time-neural['time'])>1e-7:raise RuntimeError('Brain/body clock mismatch')
         self.frames += 1
@@ -153,7 +172,8 @@ class MazeNavigation:
         state = {'status':self.status,'trial_id':self.trial_id,'config':self.config.copy(),
                  'time':float(w.data.time),'frame':self.frames,'done':self.done,
                  'position':w.position.tolist(),'heading_deg':float(np.rad2deg(w.heading)),
-                 'target':[0,0],'path':w.path.copy(),'score':w.score(),'decoder':decoder,
+                 'target':[0,0],'path':w.path.copy(),'score':w.score(),
+                 'decoder':decoder or {'mode':self.config['controller'],'gains':[0,0]},
                  'odor':w.odor.tolist(),'antennae':w.antennae.tolist(),
                  'contrast':w.contrast.round(4).tolist(),'retina':w.readings.round(4).tolist(),
                  'sensory_time':max(0,float(w.data.time)-(.02 if neural else 0)),

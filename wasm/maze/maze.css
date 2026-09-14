@@ -1,5 +1,11 @@
 .trial-controls { grid-template-columns:1.2fr 1.2fr 1fr 75px 1fr auto; }
 .trial-buttons { grid-column:1 / -1; justify-content:flex-start; }
+#controller-description { grid-column:1 / -1; margin:0; color:#b6dad1; font-size:12px; line-height:1.6; }
+.dn-readouts { width:100%; border-collapse:collapse; margin:10px 0; font-size:12px; font-variant-numeric:tabular-nums; }
+.dn-readouts th, .dn-readouts td { padding:8px 3px; text-align:right; border-bottom:1px solid var(--line); }
+.dn-readouts th:first-child { text-align:left; }
+.dn-readouts small { display:block; color:var(--muted); font-size:10px; font-weight:normal; }
+.dn-readouts output { color:#9affe2; }
 .odor-switch { display:flex; align-items:center; gap:7px; white-space:nowrap; }
 .maze-map { position:relative; width:min(100%,320px); aspect-ratio:1; margin:0 auto; background:#101d28; }
 #trajectory, #odor-map { position:absolute; width:100%; height:100%; inset:0; }

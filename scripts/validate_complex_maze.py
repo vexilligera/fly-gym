@@ -50,7 +50,7 @@ def main():
     brain=ConnectomeBrain(backend='cuda');nav=MazeNavigation(brain)
     records=[]
     for layout,heading,seed,duration in [('complex',75,1,30),('complex',90,2,10),('simple',75,1,5)]:
-        nav.reset(layout=layout,heading_deg=heading,seed=seed,duration=duration)
+        nav.reset(controller='sensory_policy',layout=layout,heading_deg=heading,seed=seed,duration=duration)
         totals={}
         originals=[]
         def profile(obj,name,label):

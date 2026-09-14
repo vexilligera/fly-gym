@@ -100,7 +100,7 @@ class LocalHandler(SimpleHTTPRequestHandler):
             arguments = json.loads(self.rfile.read(length))
             visual = self.path.startswith('/api/vision/')
             maze = self.path.startswith('/api/maze/')
-            allowed = {'rate_hz'} if self.path == '/api/maze/taste' else {'condition','heading_deg','seed','duration','food_odor','layout'} if maze else {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
+            allowed = {'rate_hz'} if self.path == '/api/maze/taste' else {'condition','heading_deg','seed','duration','food_odor','layout','controller','silence_descending'} if maze else {'condition', 'heading_deg', 'target_deg', 'seed', 'duration'} if visual else {'stimulus', 'rate_hz', 'odor', 'silence'}
             if not isinstance(arguments, dict) or set(arguments) - allowed:
                 raise ValueError('Unknown parameters')
             action = self.path.rsplit('/',1)[-1]
