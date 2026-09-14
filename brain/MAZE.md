@@ -201,6 +201,14 @@ check received 31 distinct frames at 19.1 frames/s; the in-app browser rendered
 the stream successfully. Streaming improves delivery,
 not simulation throughput or biological fidelity.
 
+Browser and network buffers can still delay an already-open MJPEG stream.
+Reset now disconnects that stream immediately, shows a reset indicator, and
+displays the time-zero JPEG returned by the reset command. Paused and completed
+trials use snapshots; resuming navigation opens a fresh stream. Late status
+responses from before a command are discarded. Feeding uses snapshots paired
+with the brain response. `node scripts/validate_maze_ui.mjs` checks these camera
+transitions and delayed-response races without needing a running simulation.
+
 Detailed trajectories: `outputs/maze-validation.json`. Compact browser report:
 `wasm/maze/validation.json`. `scripts/validate_maze_api.py` checks live images,
 continuous stepping, modality/source controls, arrival, pause/resume, invalid

@@ -13,6 +13,7 @@ const descriptions = {
 let state = {status:'idle'}, ready = false, busy = false, lastFrame = -1;
 let trialId = null, recordedId = null, trials = [], world = null, loadingWorld = false;
 let cameraStreaming = false, cameraRetryAt = 0, lastSnapshot = null;
+let cameraView = null, commandEpoch = 0, pendingPoll = null;
 let validationReport = null;
 
 function renderValidation(layout) {
@@ -34,18 +35,27 @@ function config() {
   return {layout:$('layout').value,condition:$('condition').value,heading_deg:Number($('heading').value),
     seed:Number($('seed').value),duration:Number($('duration').value),food_odor:$('food-odor').checked};
 }
-async function api(path, args) {
-  const response=await fetch('/api/'+path,args===undefined?{}:{method:'POST',
-    headers:{'Content-Type':'application/json'},body:JSON.stringify(args)});
+async function api(path, args, signal) {
+  const response=await fetch('/api/'+path,args===undefined?{signal}:{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify(args),signal});
   const data=await response.json().catch(()=>{throw new Error('Compute service is temporarily unavailable.');});
   if(!response.ok)throw new Error(data.error||'Compute service request failed');
   return data;
 }
 async function command(action,args={}) {
   if(!$('seed').reportValidity())return;
+  ++commandEpoch;
+  pendingPoll?.abort();
   busy=true;controls();
+  stopCamera();
+  if(action==='reset'||(action==='start'&&Object.keys(args).length)) {
+    $('body').hidden=true;
+    $('body-loading').hidden=false;
+    $('body-loading').textContent='Resetting MuJoCo view…';
+    $('body-time').textContent='Resetting…';
+  }
   message(action==='pause'?'Finishing the current simulation bin…':action==='taste'?'Preparing the sugar-taste assay…':'Preparing the maze and both senses…');
-  try { render(await api('maze/'+action,args)); }
+  try { render(await api('maze/'+action,args),true); }
   catch(error) { message(error.message,true); }
   finally { busy=false;controls(); }
 }
@@ -74,10 +84,44 @@ $('layout').onchange=()=>{
 };
 $('body').onerror=()=>{
   if(!cameraStreaming)return;
-  cameraStreaming=false;cameraRetryAt=Date.now()+5000;
-  if(lastSnapshot)$('body').src='data:image/jpeg;base64,'+lastSnapshot;
+  stopCamera();cameraRetryAt=Date.now()+5000;
+  if(lastSnapshot)$('body').src='data:image/jpeg;base64,'+lastSnapshot.body;
   $('body-time').textContent='Snapshot fallback';
 };
+
+function stopCamera() {
+  if(cameraStreaming)$('body').removeAttribute('src');
+  cameraStreaming=false;
+}
+function renderCamera(s,newTrial,forceSnapshot) {
+  const view=s.taste?'proboscis':'maze';
+  if(newTrial||view!==cameraView) {
+    stopCamera();lastSnapshot=null;cameraRetryAt=0;cameraView=view;
+    $('body').removeAttribute('src');
+  }
+  if(s.images?.body)lastSnapshot={body:s.images.body,time:s.taste?.time??s.time,frame:s.frame};
+  // Reset/pause must replace the buffered stream with the command's snapshot.
+  // A new trial first shows its snapshot; a later running poll opens a new stream.
+  // Feeding snapshots keep mouth and brain timestamps paired.
+  if(newTrial||forceSnapshot||s.status!=='running'||s.taste) {
+    stopCamera();
+    if(lastSnapshot?.frame!==s.frame)lastSnapshot=null;
+  } else if(!cameraStreaming&&Date.now()>=cameraRetryAt) {
+    cameraStreaming=true;
+    $('body').src='/api/maze/camera.mjpg';
+  }
+  if(!cameraStreaming&&lastSnapshot) {
+    const src='data:image/jpeg;base64,'+lastSnapshot.body;
+    if($('body').getAttribute('src')!==src)$('body').src=src;
+  }
+  const visible=cameraStreaming||Boolean(lastSnapshot);
+  $('body').hidden=!visible;
+  $('body-loading').hidden=visible;
+  $('body-loading').textContent='Waiting for the current camera frame…';
+  $('body-time').textContent=cameraStreaming?'Streaming camera':lastSnapshot
+    ?s.taste?`Mouth + brain ${lastSnapshot.time.toFixed(2)} s`:`Camera ${lastSnapshot.time.toFixed(3)} s`
+    :'Waiting for camera';
+}
 
 async function loadWorld(layout) {
   if(world?.layout===layout||loadingWorld)return;
@@ -109,11 +153,12 @@ function drawField() {
     ctx.fillRect((field.axis_mm[x]-cell/2+22)*scale,(22-field.axis_mm[y]-cell/2)*scale,cell*scale+.5,cell*scale+.5);
   }
 }
-function render(s) {
+function render(s,forceSnapshot=false) {
   state=s;controls();
   if(s.status==='error'){message(s.message||'Maze simulation stopped with an error',true);return;}
   if(!s.config){message(s.message||'Ready to run the sugar maze');return;}
-  if(s.trial_id!==trialId){
+  const newTrial=s.trial_id!==trialId;
+  if(newTrial){
     trialId=s.trial_id;lastFrame=-1;
     renderValidation(s.config.layout);
     if(world?.layout!==s.config.layout){world=null;$('walls').replaceChildren();}
@@ -125,26 +170,14 @@ function render(s) {
   $('trial-state').textContent=s.status.toUpperCase();
   $('brain-live-state').textContent=['running','tasting'].includes(s.status)?'Live · latest bin':'Held · last bin';
   $('brain-live-state').dataset.running=['running','tasting'].includes(s.status);
+  // Status and camera changes can arrive without a new simulation frame.
+  renderCamera(s,newTrial,forceSnapshot);
   if(s.frame===lastFrame)return;
   lastFrame=s.frame;
   if(s.brain)brainView.update(s.brain);else brainView.reset();
-  $('body-loading').hidden=Boolean(s.images);
   if(s.images) {
-    if(s.images.body)lastSnapshot=s.images.body;
-    if(s.taste) {
-      // A bounded response carries the matching brain and mouth frame. Native
-      // MJPEG decoders can buffer seconds of old images on slow connections.
-      cameraStreaming=false;
-      if(s.images.body)$('body').src='data:image/jpeg;base64,'+s.images.body;
-    } else if(!cameraStreaming&&Date.now()>=cameraRetryAt){
-      cameraStreaming=true;
-      $('body').src='/api/maze/camera.mjpg';
-    } else if(!cameraStreaming&&lastSnapshot) {
-      $('body').src='data:image/jpeg;base64,'+lastSnapshot;
-    }
     for(const [i,side] of ['left','right'].entries())$('eye-'+side).src='data:image/jpeg;base64,'+s.images.eyes[i];
   }
-  $('body-time').textContent=s.taste?`Mouth + brain ${s.taste.time.toFixed(2)} s`:cameraStreaming?'Streaming camera':'Snapshot view';
   $('distance').textContent=s.taste?(s.taste.proboscis?.contact?.touching?'Labellum touching sugar':'No mouth contact'):'At brain readout: '+s.score.distance_mm.toFixed(1)+' mm';
   $('body-heading').textContent=s.taste?'Proboscis close-up':'The sugar maze';
   $('body').alt=s.taste?'Live MuJoCo proboscis extension and turning driven by measured MN9 activity':'Live overhead MuJoCo view of the sugar maze';
@@ -224,9 +257,22 @@ async function initialize() {
     renderValidation(state.config?.layout||$('layout').value);
   } catch { $('validation').textContent='Measured validation results are unavailable.'; }
   while(true) {
-    try { if(!busy){const next=await api('maze/status'+(cameraStreaming?'?body=0':''));if(!busy)render(next);} }
-    catch(error) { message('Connection lost: '+error.message,true); }
+    await pollStatus();
     await new Promise(resolve=>setTimeout(resolve,150));
+  }
+}
+async function pollStatus() {
+  if(busy)return;
+  const epoch=commandEpoch, controller=new AbortController();
+  pendingPoll=controller;
+  try {
+    const next=await api('maze/status'+(cameraStreaming?'?body=0':''),undefined,controller.signal);
+    // A pre-command response may finish after Reset, even after busy clears.
+    if(!busy&&epoch===commandEpoch)render(next);
+  } catch(error) {
+    if(!controller.signal.aborted&&epoch===commandEpoch)message('Connection lost: '+error.message,true);
+  } finally {
+    if(pendingPoll===controller)pendingPoll=null;
   }
 }
 initialize();
