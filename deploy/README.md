@@ -8,7 +8,7 @@ Vision + olfaction maze: **https://cw-login-zny.alpaca-elnath.ts.net:8443/maze/*
 
 The current deployment is Slurm job **5807547**, on `slurm-b300-128-021`, with
 one NVIDIA B300, 8 CPUs, and 24 GiB host memory. It expires at
-**2026-09-15 01:52:56 UTC / 2026-09-15 10:52:56 JST**, or earlier if canceled. The `low`
+**2026-09-15 10:27:59 UTC / 2026-09-15 19:27:59 JST**, or earlier if canceled. The `low`
 QoS is preemptible. This is a Slurm allocation, not a permanent hosted service.
 
 All files are under `/mnt/home/zny/flygym` on `crwv` and the shared compute
@@ -31,8 +31,8 @@ binds only to `127.0.0.1`; its browser-origin allowlist explicitly includes the
 Tailscale HTTPS origin. The gateway follows this job's compute-node changes
 after a Slurm requeue, and exits when the allocation ends. A requeue resets the
 brain state; use **Reset both** after reconnecting. The gateway tolerates the
-empty node field while a requeued job is pending. The contact-gated proboscis update
-restarted this job on 2026-09-14 at 01:52:56 UTC; the expiry above reflects that restart.
+empty node field while a requeued job is pending. The neuron-readout update
+restarted this job on 2026-09-14 at 10:27:59 UTC; the expiry above reflects that restart.
 
 ## Operations (on the login node)
 
@@ -216,3 +216,17 @@ srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NU
 
 The sugar API validation also covers actual joint movement, washout retraction,
 and a stationary no-taste control. Use the staging port as described above.
+
+## Descending-neuron maze control
+
+Neuron readouts are the default on `/maze/`: DNp09, DNa02, and MDN set leg gains
+through the existing approximate motor adapter. The previous sensory policy is
+an explicit comparison; DN silencing and modality controls are available. No
+forward bias or policy fallback is added. The 120 s B300 test did not navigate
+to sugar: DNa02 responded while DNp09/MDN remained silent. See
+[MAZE.md](../brain/MAZE.md) and `wasm/maze/readout-validation.json`.
+
+The update passed full-brain/body controls and staging HTTP/camera tests before
+requeue. Records and figures are in `outputs/neuron-navigation/`; validation ran
+in the detached `outputs/neuron-readout-staging` checkout. That staging server
+was stopped after its checks. The persistent service continues on port 8000.

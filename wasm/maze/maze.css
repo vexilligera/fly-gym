@@ -1,4 +1,4 @@
-.trial-controls { grid-template-columns:1.2fr 1.2fr 1fr 75px 1fr auto; }
+.trial-controls { grid-template-columns:repeat(4,minmax(0,1fr)); }
 .trial-buttons { grid-column:1 / -1; justify-content:flex-start; }
 #controller-description { grid-column:1 / -1; margin:0; color:#b6dad1; font-size:12px; line-height:1.6; }
 .dn-readouts { width:100%; border-collapse:collapse; margin:10px 0; font-size:12px; font-variant-numeric:tabular-nums; }
