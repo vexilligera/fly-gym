@@ -142,6 +142,13 @@ and exact independence of fitted parameters from corrupted held-out data.
 The promotion gate rejects unverified cell matching and missing spike-to-force
 calibration regardless of the numerical observation fit.
 
+The complete experiment and validation also passed on B300 node
+`slurm-b300-128-021`, Slurm allocation `5807547`, using commit `7211d29`.
+The cluster reproduced all spike counts and the 2.414848° causal effect
+(local/cluster difference below 3e-13 degrees). The published replay, figure,
+report and validation are the cluster-generated artifacts. The report records
+input and implementation hashes plus Python, NumPy, SciPy and MuJoCo versions.
+
 ## Reproduction
 
 Use an environment with current FlyGym 2.1 and its MuJoCo 3.9 dependency.
