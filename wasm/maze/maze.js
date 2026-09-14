@@ -145,7 +145,7 @@ function render(s) {
     for(const [i,side] of ['left','right'].entries())$('eye-'+side).src='data:image/jpeg;base64,'+s.images.eyes[i];
   }
   $('body-time').textContent=s.taste?`Mouth + brain ${s.taste.time.toFixed(2)} s`:cameraStreaming?'Streaming camera':'Snapshot view';
-  $('distance').textContent='At brain readout: '+s.score.distance_mm.toFixed(1)+' mm';
+  $('distance').textContent=s.taste?(s.taste.proboscis?.contact?.touching?'Labellum touching sugar':'No mouth contact'):'At brain readout: '+s.score.distance_mm.toFixed(1)+' mm';
   $('body-heading').textContent=s.taste?'Proboscis close-up':'The sugar maze';
   $('body').alt=s.taste?'Live MuJoCo proboscis extension and turning driven by measured MN9 activity':'Live overhead MuJoCo view of the sugar maze';
   $('camera-description').textContent=s.taste?'Feeding pose facing sugar · Taste requires mouth contact · Legs held.':'Camera streams independently. Brain readouts may update more slowly.';
