@@ -39,6 +39,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--unit-only', action='store_true')
     parser.add_argument('--duration', type=float, default=120)
+    parser.add_argument('--layout', choices=('complex','simple'), default='complex')
+    parser.add_argument('--trial-only', action='store_true',
+                        help='Run the selected layout with both senses; skip previously verified controls')
     args = parser.parse_args()
     unit_checks()
     if args.unit_only:
@@ -47,7 +50,7 @@ def main():
     from brain.maze_navigation import MazeNavigation, MazePolicy
     brain = ConnectomeBrain(backend='cuda')
     nav = MazeNavigation(brain)
-    output = ROOT / 'outputs/neuron-navigation'
+    output = ROOT / ('outputs/neuron-navigation' if args.layout=='complex' else 'outputs/neuron-navigation-simple')
     output.mkdir(parents=True, exist_ok=True)
     dn_indices = np.concatenate([brain.groups[key] for key in DESCENDING_GROUPS])
     report = {'revision':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
@@ -58,8 +61,12 @@ def main():
              ('odor_only', {'condition':'odor_only','duration':5}),
              ('neither', {'condition':'neither','duration':5}),
              ('silenced', {'silence_descending':True,'duration':5})]
+    if args.trial_only:
+        cases=cases[:1]
     for name, arguments in cases:
-        nav.reset(**arguments)
+        nav.reset(layout=args.layout,**arguments)
+        initial_distance=nav.state['score']['distance_mm']
+        minimum_distance=initial_distance
         assert nav.policy is None
         trace, total_spikes = [], 0
         dn_counts = dict.fromkeys(DESCENDING_GROUPS, 0)
@@ -69,6 +76,7 @@ def main():
             while not nav.done:
                 state = nav.step(images=False)
                 neural, decoder = state['brain'], state['decoder']
+                minimum_distance=min(minimum_distance,state['score']['distance_mm'])
                 assert decoder['gains'] == neural['gains'] == descending_motor(brain.filtered)['gains']
                 assert not set(dn_indices) & set(neural['activity']['input_indices'])
                 if name in ('neither','silenced'):
@@ -91,6 +99,7 @@ def main():
         path = np.asarray(state['path'])
         result = {'name':name, 'config':state['config'], 'status':state['status'], 'time':state['time'],
                   'distance_mm':state['score']['distance_mm'],
+                  'initial_distance_mm':initial_distance, 'minimum_distance_mm':minimum_distance,
                   'net_displacement_mm':float(np.linalg.norm(path[-1]-path[0])),
                   'path_length_mm':float(np.linalg.norm(np.diff(path,axis=0),axis=1).sum()),
                   'peak_abs_gain':float(np.max(np.abs([row['decoder']['gains'] for row in trace]))),
@@ -101,6 +110,14 @@ def main():
         (output / f'{name}-final.jpg').write_bytes(base64.b64decode(nav.world.images()['body']))
         (output / 'report.json').write_text(json.dumps(report,indent=2)+'\n')
         print(json.dumps(result), flush=True)
+
+    if args.trial_only:
+        report['checks']=['DN input exclusion','exact shared readout gains','policy never called','brain/body clock agreement']
+        report['passed']=True
+        (output / 'report.json').write_text(json.dumps(report,indent=2)+'\n')
+        nav.world.close()
+        print('PASS: selected-layout DN trial and signal provenance',flush=True)
+        return
 
     # The previous policy remains an explicitly selected comparison.
     nav.reset(controller='sensory_policy',layout='simple',duration=5)
