@@ -64,6 +64,9 @@ $('enlarge-fly').onclick=async()=>{
     else await document.querySelector('.body-pane').requestFullscreen();
   } catch { message('Use your browser zoom to enlarge the fly view.'); }
 };
+document.addEventListener('fullscreenchange',()=>{
+  $('enlarge-fly').textContent=document.fullscreenElement?'Exit enlarged view':'Enlarge fly';
+});
 $('condition').onchange=()=>{$('condition-description').textContent=descriptions[$('condition').value];};
 $('heading').oninput=()=>{$('heading-value').textContent=$('heading').value+'°';};
 $('show-field').onchange=drawField;
