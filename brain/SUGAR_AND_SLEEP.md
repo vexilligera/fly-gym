@@ -124,6 +124,12 @@ of all fixed body poses, unchanged navigation state, rendering, and reset.
 activity causes movement, the no-taste control stays still, and brain/mouth
 clocks and MJPEG assay timestamps agree.
 
+Both validations passed locally/on the B300 as applicable. In the full-network
+200 Hz API trial, sampled rostrum extension reached 94.70° and yaw reached
+5.65° left; the angles returned to within 0.001° of rest after washout. The
+no-taste control remained within 10⁻⁶° of rest. These are outputs of the chosen
+servo mapping, not measured animal kinematics.
+
 ## How to extend this into actual sugar interaction
 
 1. Add contact sensors on the tarsi/labellum and a sugar-solution surface.
