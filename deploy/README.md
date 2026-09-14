@@ -190,7 +190,8 @@ After a maze arrival, `/maze/` offers **Watch proboscis + brain** and a no-taste
 control. The 21 released sugar GRNs drive the full network; the two MN9 cells
 are observed downstream and drive engineered mouth servos. The brain resets
 with a separate 0–8 s clock shared by the proboscis, played at at most 0.2× speed.
-The torso and legs stay held; ingestion is not modeled. See `brain/SUGAR_AND_SLEEP.md` for wiring and limitations.
+The torso and legs stay in a staged feeding pose; labellum contact gates taste.
+Ingestion is not modeled. See `brain/SUGAR_AND_SLEEP.md` for wiring and limitations.
 
 `scripts/validate_sugar.py` checks the pinned input cohort, unchanged legacy
 CUDA inputs, stimulus timing, a silent control, and downstream responses at
@@ -203,9 +204,10 @@ body/clock separation, ownership, and reset. Reports are saved in `outputs/`.
 ### Articulated proboscis
 
 The sugar assay now renders the existing mouth meshes with three MuJoCo hinges
-and engineered MN9-driven servos. Torso and legs stay at the arrival pose;
-brain and mouth share the assay clock. The main camera switches to a close-up,
-and MJPEG headers add `X-Assay-Time` and `X-View: proboscis`. Restart the Python
+and engineered MN9-driven servos. The fly is posed facing the sugar solution;
+brain and mouth share the assay clock. The page switches to synchronized brain/image responses for the close-up
+to avoid browser MJPEG buffering; enlargement stays within the page. The
+optional MJPEG endpoint adds `X-Assay-Time` and `X-View: proboscis`. Restart the Python
 service after deploying this change. No additional asset generation is needed.
 
 ```sh

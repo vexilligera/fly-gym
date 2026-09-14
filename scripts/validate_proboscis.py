@@ -34,8 +34,16 @@ def main():
         world.start_feeding()
         mouth = world.feeding
         assert mouth.model.nq == mouth.model.nu == 3
-        np.testing.assert_allclose(mouth.data.xpos, before[3], atol=1e-10)
-        np.testing.assert_allclose(np.abs(mouth.data.xquat), np.abs(before[4]), atol=1e-10)
+        fixed_pose = mouth.data.xpos.copy()
+        np.testing.assert_allclose(fixed_pose[:, 2], before[3][:, 2], atol=1e-10)
+        assert mouth.contact()['touching']
+        # Contact follows the actual rendered food geometry, not an assay timer.
+        mouth.model.geom_pos[mouth.food_geom, 0] += 10
+        mj.mj_forward(mouth.model, mouth.data)
+        assert not mouth.contact()['touching']
+        mouth.model.geom_pos[mouth.food_geom, 0] -= 10
+        mj.mj_forward(mouth.model, mouth.data)
+        assert mouth.contact()['touching']
         moving = [mj.mj_name2id(mouth.model, mj.mjtObj.mjOBJ_BODY, 'nmf/'+s)
                   for s in ('c_rostrum', 'c_haustellum')]
         fixed = np.ones(mouth.model.nbody, dtype=bool)
@@ -48,7 +56,8 @@ def main():
                 mouth.step(rates)
                 assert np.all(mouth.data.qpos >= mouth.model.jnt_range[:, 0]-.001)
                 assert np.all(mouth.data.qpos <= mouth.model.jnt_range[:, 1]+.001)
-                np.testing.assert_allclose(mouth.data.xpos[fixed], before[3][fixed], atol=1e-10)
+                np.testing.assert_allclose(mouth.data.xpos[fixed], fixed_pose[fixed], atol=1e-10)
+                assert mouth.contact()['touching']
             states[label] = mouth.snapshot()
             images[label] = mouth.image()
         assert abs(states['active']['angles_deg']['rostrum_pitch']) > 70
@@ -64,7 +73,7 @@ def main():
         world.reset()
         assert world.feeding is None
         result = {'passed': True, 'checks': ['bilateral symmetry', 'zero symmetric yaw',
-                  'bounded targets', 'preserved arrival pose', 'fixed torso and legs',
+                  'bounded targets', 'staged feeding pose', 'geometric labellum contact', 'fixed torso and legs',
                   'dynamic joint limits', 'extension and turning', 'washout retraction',
                   'rendered image changes', 'navigation state unchanged', 'replay and reset'],
                   'states': states}

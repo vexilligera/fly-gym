@@ -64,9 +64,15 @@ def main():
         trials.append({'input_rate_hz': rate, 'mean_on_rates_hz': mean,
                        'trace': assay.trace, 'wall_seconds': time.perf_counter()-started})
         print(json.dumps({k:v for k,v in trials[-1].items() if k != 'trace'}), flush=True)
+    withdrawn = SugarAssay(brain, 200, paced=False)
+    while not withdrawn.done:
+        n = withdrawn.step(contact=False)
+        assert n['spikes'] == 0 and n['sugar']['input_rate_hz'] == 0
+        assert len(n['activity']['input_indices']) == 0
     result = {'passed': True, 'source_cohort_verified': True,
               'legacy_input_counts_and_voltages_identical': True,
               'direct_input_only_to_sugar_GRNs': True, 'no_taste_control_silent': True,
+              'no_contact_blocks_sugar_input': True,
               'metadata': brain.sugar.metadata, 'trials': trials}
     (ROOT / 'outputs/sugar-validation.json').write_text(json.dumps(result, indent=2)+'\n')
     print('Sugar validation passed', flush=True)

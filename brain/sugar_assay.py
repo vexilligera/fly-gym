@@ -18,13 +18,15 @@ class SugarAssay:
         self.bucket = []
         self.done = False
         self.phase = 'baseline'
+        self.contact = True
         self.brain.reset()
 
-    def step(self):
+    def step(self, contact=True):
         started = time.perf_counter()
+        self.contact = bool(contact)
         before = self.steps * .02
         self.phase = 'baseline' if before < 2 else 'sugar' if before < 6 else 'washout'
-        rate = self.rate_hz if self.phase == 'sugar' else 0
+        rate = self.rate_hz if self.phase == 'sugar' and self.contact else 0
         neural = self.brain.step_sugar(rate)
         self.steps += 1
         self.done = self.steps >= 400

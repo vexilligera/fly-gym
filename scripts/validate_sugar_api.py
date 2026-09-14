@@ -63,6 +63,8 @@ def held(state):
     assert state['taste']['torso_legs_held'] and not state['taste']['body_held']
     assert not state['taste']['vision_and_odor_input']
     mouth = state['taste']['proboscis']
+    assert state['taste']['contact_gated'] and state['taste']['input_contact']
+    assert mouth['contact']['touching']
     assert abs(mouth['time'] - state['taste']['time']) < 1e-8
     motion.append(mouth)
     if state['brain']:

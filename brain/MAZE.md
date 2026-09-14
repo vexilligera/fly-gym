@@ -13,7 +13,8 @@ Both eyes, two antenna readings, the body, path, and brain activity update live.
 After arrival, **Watch proboscis + brain** opens a separate neural/mouth assay:
 2 s baseline, 4 s input to the released sugar GRNs, and 2 s washout. A no-taste
 control is available. The brain resets and shares an assay clock with a
-three-hinge MuJoCo proboscis. The torso, legs, and arrival time stay held. The
+three-hinge MuJoCo proboscis. The torso and legs are held in a declared feeding pose facing sugar solution;
+the recorded navigation arrival remains unchanged. Labellum contact gates taste. The
 close-up streams extension and turning driven by an approximate MN9 decoder. See [SUGAR_AND_SLEEP.md](SUGAR_AND_SLEEP.md) for
 the exact wiring, measured responses, ingestion limits, and sleep feasibility.
 Choose vision + smell, either sense alone, or both disconnected. **Food odor

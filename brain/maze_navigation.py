@@ -93,7 +93,7 @@ class MazeNavigation:
         if self.done:return self.state
         if self.taste is not None:
             started = time.perf_counter()
-            neural = self.taste.step()
+            neural = self.taste.step(contact=self.world.feeding.contact()['touching'])
             self.world.feeding.step(neural['sugar']['MN9_hz'])
             if abs(self.world.feeding.data.time-neural['time']) > 1e-7:
                 raise RuntimeError('Brain/proboscis clock mismatch')
@@ -145,6 +145,7 @@ class MazeNavigation:
 
     def taste_snapshot(self):
         return {**self.taste.snapshot(), 'body_held': False, 'torso_legs_held': True,
+                'contact_gated': True, 'input_contact': self.taste.contact,
                 'proboscis': self.world.feeding.snapshot()}
 
     def snapshot(self,neural,decoder,images):

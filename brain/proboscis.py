@@ -29,6 +29,9 @@ class ProboscisDrive:
 
 
 class ProboscisWorld:
+    # Approximate distal labellum location in the native haustellum mesh (mm).
+    LABELLUM = np.array([.3184, 0, -.1411])
+
     def __init__(self, world):
         root = ET.fromstring(world.model_xml)
         # Freeze the *measured arrival pose*, including every leg articulation.
@@ -46,6 +49,31 @@ class ProboscisWorld:
             body.set('quat', ' '.join(map(str, Rotation.from_matrix(relative).as_quat(scalar_first=True))))
             for joint in list(body.findall('joint')) + list(body.findall('freejoint')):
                 body.remove(joint)
+        # A declared feeding preparation, separate from the recorded arrival:
+        # face the source and place the labellum at the edge of sugar solution.
+        # Keep height and all relative leg articulations, so feet stay grounded.
+        old_haustellum = mj.mj_name2id(world.model, mj.mjtObj.mjOBJ_BODY, 'nmf/c_haustellum')
+        old_tip = world.data.xpos[old_haustellum] + world.data.xmat[old_haustellum].reshape(3, 3) @ self.LABELLUM
+        yaw_rotation = Rotation.from_euler('z', -world.heading).as_matrix()
+        target_tip = np.array([-1.35, 0, old_tip[2]])
+        posed_position = target_tip - yaw_rotation @ (old_tip-world.position)
+        posed_rotation = yaw_rotation @ world.data.xmat[world.thorax].reshape(3, 3)
+        thorax = root.find(".//body[@name='nmf/c_thorax']")
+        thorax.set('pos', ' '.join(map(str, posed_position)))
+        thorax.set('quat', ' '.join(map(str, Rotation.from_matrix(posed_rotation).as_quat(scalar_first=True))))
+        self.posed_position = posed_position
+        self.food_radii = np.array([1.6, 1.6, .45])
+        self.food_center = np.array([0, 0, target_tip[2]-.45*np.sqrt(1-(1.35/1.6)**2)+.015])
+        wb = root.find('worldbody')
+        for geom in list(wb.findall('geom')):
+            if geom.get('name', '').startswith('sugar_cube_'):
+                wb.remove(geom)
+        ET.SubElement(wb, 'geom', name='sugar_solution', type='ellipsoid',
+                      pos=' '.join(map(str, self.food_center)), size='1.6 1.6 .45',
+                      rgba='.95 .66 .15 .65', contype='0', conaffinity='0')
+        haustellum = root.find(".//body[@name='nmf/c_haustellum']")
+        ET.SubElement(haustellum, 'site', name='labellum_contact',
+                      pos=' '.join(map(str, self.LABELLUM)), size='.015', rgba='0 0 0 0')
         root.find('option').set('integrator', 'implicitfast')
         actuator = ET.SubElement(root, 'actuator')
         self.joint_names = ('mouth_yaw', 'rostrum_pitch', 'haustellum_pitch')
@@ -61,6 +89,8 @@ class ProboscisWorld:
                           ctrlrange=limits, ctrllimited='true')
         self.model = mj.MjModel.from_xml_string(ET.tostring(root, encoding='unicode'))
         self.data = mj.MjData(self.model)
+        self.tip_site = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_SITE, 'labellum_contact')
+        self.food_geom = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_GEOM, 'sugar_solution')
         self.drive = ProboscisDrive()
         mj.mj_forward(self.model, self.data)
         self.renderer = mj.Renderer(self.model, height=600, width=800)
@@ -71,10 +101,10 @@ class ProboscisWorld:
                 self.model.geom_group[i] = 4
         self.options.geomgroup[4] = 0
         self.camera = mj.MjvCamera()
-        self.camera.lookat[:] = world.position + world.data.xmat[world.thorax].reshape(3, 3) @ np.array([.45, 0, -.2])
-        self.camera.distance = 4.0
-        self.camera.elevation = -22
-        self.camera.azimuth = np.rad2deg(world.heading)+115
+        self.camera.lookat[:] = posed_position + posed_rotation @ np.array([.65, 0, -.22])
+        self.camera.distance = 4.6
+        self.camera.elevation = -20
+        self.camera.azimuth = 110
         self.jpeg = world.jpeg
 
     def step(self, mn9_hz):
@@ -90,8 +120,19 @@ class ProboscisWorld:
                 'angles_deg': dict(zip(self.joint_names, np.rad2deg(self.data.qpos).tolist())),
                 'targets_deg': dict(zip(self.joint_names, np.rad2deg(self.drive.targets).tolist())),
                 'filtered_MN9_hz': self.drive.rates.tolist(),
+                'contact': self.contact(),
+                'placement': 'Staged feeding pose facing the sugar solution; navigation arrival is retained separately',
+                'position_mm': self.posed_position.tolist(),
                 'mapping': 'Engineered MN9-to-servo mapping; yaw and haustellum coupling are uncalibrated',
                 'ingestion': False}
+
+    def contact(self):
+        tip = self.data.site_xpos[self.tip_site]
+        center = self.data.geom_xpos[self.food_geom]
+        inside = float(np.sum(((tip-center)/self.model.geom_size[self.food_geom])**2))
+        return {'touching': inside <= 1, 'labellum_mm': tip.tolist(),
+                'normalized_surface_offset': inside-1,
+                'sensor': 'Approximate labellum point within the sugar-solution ellipsoid'}
 
     def image(self):
         self.renderer.update_scene(self.data, self.camera, scene_option=self.options)

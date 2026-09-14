@@ -58,15 +58,12 @@ async function watchTaste(rate_hz) {
 }
 $('taste-start').onclick=()=>watchTaste(Number($('taste-rate').value));
 $('taste-control').onclick=()=>watchTaste(0);
-$('enlarge-fly').onclick=async()=>{
-  try {
-    if(document.fullscreenElement)await document.exitFullscreen();
-    else await document.querySelector('.body-pane').requestFullscreen();
-  } catch { message('Use your browser zoom to enlarge the fly view.'); }
+$('enlarge-fly').onclick=()=>{
+  const expanded=document.querySelector('.vision-workspace').classList.toggle('camera-enlarged');
+  $('enlarge-fly').textContent=expanded?'Restore view':'Enlarge fly';
+  $('enlarge-fly').setAttribute('aria-expanded',String(expanded));
+  $('body-heading').scrollIntoView({behavior:'smooth',block:'start'});
 };
-document.addEventListener('fullscreenchange',()=>{
-  $('enlarge-fly').textContent=document.fullscreenElement?'Exit enlarged view':'Enlarge fly';
-});
 $('condition').onchange=()=>{$('condition-description').textContent=descriptions[$('condition').value];};
 $('heading').oninput=()=>{$('heading-value').textContent=$('heading').value+'°';};
 $('show-field').onchange=drawField;
@@ -134,7 +131,12 @@ function render(s) {
   $('body-loading').hidden=Boolean(s.images);
   if(s.images) {
     if(s.images.body)lastSnapshot=s.images.body;
-    if(!cameraStreaming&&Date.now()>=cameraRetryAt){
+    if(s.taste) {
+      // A bounded response carries the matching brain and mouth frame. Native
+      // MJPEG decoders can buffer seconds of old images on slow connections.
+      cameraStreaming=false;
+      if(s.images.body)$('body').src='data:image/jpeg;base64,'+s.images.body;
+    } else if(!cameraStreaming&&Date.now()>=cameraRetryAt){
       cameraStreaming=true;
       $('body').src='/api/maze/camera.mjpg';
     } else if(!cameraStreaming&&lastSnapshot) {
@@ -142,16 +144,16 @@ function render(s) {
     }
     for(const [i,side] of ['left','right'].entries())$('eye-'+side).src='data:image/jpeg;base64,'+s.images.eyes[i];
   }
-  $('body-time').textContent=cameraStreaming?'Streaming camera':'Snapshot view';
+  $('body-time').textContent=s.taste?`Mouth + brain ${s.taste.time.toFixed(2)} s`:cameraStreaming?'Streaming camera':'Snapshot view';
   $('distance').textContent='At brain readout: '+s.score.distance_mm.toFixed(1)+' mm';
   $('body-heading').textContent=s.taste?'Proboscis close-up':'The sugar maze';
   $('body').alt=s.taste?'Live MuJoCo proboscis extension and turning driven by measured MN9 activity':'Live overhead MuJoCo view of the sugar maze';
-  $('camera-description').textContent=s.taste?'MN9-driven mouth servos · Torso/legs fixed · Walls hidden for the close-up.':'Camera streams independently. Brain readouts may update more slowly.';
+  $('camera-description').textContent=s.taste?'Feeding pose facing sugar · Taste requires mouth contact · Legs held.':'Camera streams independently. Brain readouts may update more slowly.';
   $('speed').textContent=s.taste?'Mouth + brain · 0.2× playback':s.playback_speed.toFixed(2)+'× real time';
   const vision=['combined','vision_only'].includes(s.config.condition);
   const smell=['combined','odor_only'].includes(s.config.condition);
   $('eyes-state').textContent=s.taste?'Held arrival image':vision?'721 samples / eye':'Input disconnected';
-  $('sensory-time').textContent=s.taste?`Assay brain time ${s.taste.time.toFixed(3)} s; torso and legs held at arrival (${s.time.toFixed(3)} s).`:`Sensors sampled at ${s.sensory_time.toFixed(3)} s → brain/body at ${s.time.toFixed(3)} s.`;
+  $('sensory-time').textContent=s.taste?`Assay brain time ${s.taste.time.toFixed(3)} s; feeding pose shown; navigation arrival ${s.time.toFixed(3)} s.`:`Sensors sampled at ${s.sensory_time.toFixed(3)} s → brain/body at ${s.time.toFixed(3)} s.`;
   $('odor-state').textContent=s.taste?'Arrival samples held for reference. Vision and odor inputs are off during the taste assay.':!s.config.food_odor?'Food odor off: both antenna samples are zero.':smell?'Local food-odor concentration, normalized 0–1.':'Odor is present here; neural odor input is disconnected.';
   const d=s.taste?{}:s.decoder||{}, o=s.brain?.olfaction;
   for(const [i,side] of ['left','right'].entries()) {
@@ -164,7 +166,7 @@ function render(s) {
   $('l2-spikes').textContent=(d.L2_spikes||0).toLocaleString();
   $('wall-front').textContent=(d.wall_front||0).toFixed(2);
   $('active').textContent=(s.brain?.active_neurons||0).toLocaleString();
-  $('steering').textContent=s.taste?'Legs held at arrival. MN9 motor activity drives the articulated mouth in the close-up; the mouth decoder is engineered.':d.escape?'Turning away from a strong front-wall response.':`Odor steering ${(d.odor_turn||0).toFixed(2)} · Visual avoidance ${(d.visual_turn||0).toFixed(2)}. Positive turns left.`;
+  $('steering').textContent=s.taste?'The fly is posed facing the sugar solution. Labellum contact gates taste input; measured MN9 activity drives the approximate mouth servos.':d.escape?'Turning away from a strong front-wall response.':`Odor steering ${(d.odor_turn||0).toFixed(2)} · Visual avoidance ${(d.visual_turn||0).toFixed(2)}. Positive turns left.`;
   $('ground-truth').textContent=`Evaluation: ${s.score.distance_mm.toFixed(1)} mm from center. The controller does not receive this distance.`;
   $('result').textContent=(s.status==='reached'||s.taste)?`Entered the 2.5 mm food zone after ${s.time.toFixed(2)} simulated seconds. Watch the proboscis and brain response below; ingestion is not modeled.`:s.status==='fallen'?'The fly lost balance; the trial stopped.':s.done?'Time limit reached without entering the food zone.':'A trial ends at the food zone, the time limit, or loss of balance.';
   renderTaste(s.taste,s.brain?.sugar);
@@ -179,9 +181,10 @@ function render(s) {
 function renderTaste(taste,readout) {
   const trace=taste?.trace||[];
   $('taste-phase').textContent=!taste?'Available after arrival':`${taste.done?'Complete':taste.phase} · ${taste.time.toFixed(2)} / 8.00 s`;
-  $('taste-detail').textContent=!taste?'21 released sugar GRNs are stimulated. Both MN9 motor neurons are observed downstream, without direct stimulation.':`${taste.rate_hz===0?'No-taste control':taste.rate_hz+' Hz sugar input'} · 21 GRNs · reset neural baseline · torso and legs held. MN9 drives approximate mouth servos; no pumping or ingestion.`;
+  $('taste-detail').textContent=!taste?'21 released sugar GRNs are stimulated. Both MN9 motor neurons are observed downstream, without direct stimulation.':`${taste.rate_hz===0?'No-taste control':taste.rate_hz+' Hz sugar input'} · 21 GRNs · reset neural baseline · staged feeding pose. Contact gates taste; MN9 drives approximate mouth servos. Liquid intake is not modeled.`;
   $('taste-grn').textContent=readout?readout.GRN_hz.toFixed(1)+' Hz':'—';
   for(const side of ['left','right'])$('taste-mn-'+side).textContent=readout?readout.MN9_hz[side].toFixed(1)+' Hz':'—';
+  $('mouth-contact').textContent=!taste?.proboscis?.contact?'—':taste.proboscis.contact.touching?'Touching sugar':'No contact';
   const mouth=taste?.proboscis?.angles_deg;
   $('mouth-extension').textContent=mouth?(-mouth.rostrum_pitch).toFixed(1)+'°':'—';
   $('mouth-turn').textContent=mouth?`${Math.abs(mouth.mouth_yaw).toFixed(1)}° ${mouth.mouth_yaw>=0?'left':'right'}`:'—';

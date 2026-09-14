@@ -10,9 +10,9 @@ by this assay's silent baseline.
 
 ```text
 Maze food-zone arrival (thorax within 2.5 mm)
-  → user starts a separate taste presentation with torso and legs held
+  → user starts a staged feeding preparation facing sugar solution
   → brain reset; 2 s baseline / 4 s sugar input / 2 s washout
-  → 21 released sugar GRNs receive imposed 0–200 Hz input
+  → labellum contact with solution gates imposed 0–200 Hz input to 21 sugar GRNs
   → all 138,639 neurons and 15,091,983 connection rows remain active in the model
   → actual modeled spikes in the full brain and the two MN9 motor readouts
   → engineered joint targets → MuJoCo rostrum/haustellum movement
@@ -52,8 +52,10 @@ scaled by 0.275 mV. Source events add the existing 68.75 mV input kick. No MN9,
 dopamine, or reward neurons are directly driven.
 
 During the assay, vision and odor input are off to isolate the taste response.
-The torso and legs remain held at their actual arrival posture and time. A
-separate posed copy of the MuJoCo scene articulates the mouth. The brain and
+A separate copy of the MuJoCo scene is posed facing the sugar solution, with
+the labellum at its edge. Body height and relative leg articulations are retained.
+This is a declared feeding preparation, not autonomous repositioning or walking.
+The recorded navigation arrival, path, and time remain unchanged. The brain and
 proboscis share a separate 0–8 s assay clock. The display runs at 0.2× neural time so the
 response is watchable. The 3D view shows measured model spikes per 20 ms bin;
 the chart aggregates actual counts into 100 ms bins. A 0 Hz control repeats the
@@ -93,11 +95,15 @@ brain**, or compared with **Run no-taste control**.
 ## Visible proboscis action
 
 The native NeuroMechFly rostrum and haustellum meshes and masses are retained.
-`brain/proboscis.py` freezes every existing body at its measured arrival pose,
-then adds three dynamic hinges and position servos in a separate MuJoCo model.
+`brain/proboscis.py` retains the relative body articulations, turns the fly
+toward the sugar source, and positions the labellum at the edge of an explicit
+sugar-solution ellipsoid. It then adds three dynamic hinges and position servos
+in a separate MuJoCo model. The torso and legs stay fixed in this feeding pose.
 The original maze model, path, and walking dynamics are untouched. The main
-MJPEG camera switches to a three-quarter close-up; **Enlarge fly** opens it
-full-screen. Maze walls are hidden in this observer close-up to prevent occlusion;
+camera switches to a three-quarter close-up; **Enlarge fly** widens it within
+the page, keeping the brain alongside. During the assay, each bounded JSON
+response carries the matching mouth image and brain readout. This avoids the
+MJPEG decoder backlog observed in the browser. Navigation still uses MJPEG. Maze walls are hidden in this observer close-up to prevent occlusion;
 the navigation scene is unchanged. The neural and mouth clocks advance together in 20 ms bins, with
 200 MuJoCo steps per bin. Playback is paced to at most 0.2× real time.
 
@@ -111,15 +117,20 @@ haustellum coupling, and frequency-to-angle conversion are not established by
 the connectome or calibrated to an animal. No oscillation or sucking cycle is
 invented. The mouth retracts when the MN9 response subsides.
 
-These are gravity-compensated, damped joint dynamics, with no mouth collision,
-contact-triggered taste, fluid intake, or feedback to the brain. The food-zone
-arrival threshold does not establish that the mouth touches the sugar. This
+These are gravity-compensated, damped joint dynamics. An approximate labellum
+point at [0.3184, 0, −0.1411] mm in the native haustellum frame is tested against
+the rendered solution ellipsoid each bin. No contact means zero sugar input;
+contact plus the protocol's sugar interval enables the selected input rate.
+The 2/4/2 s protocol acts like controlled taste perfusion at a contacting mouth.
+There are no fluid forces, solid-mouth collisions, depletion, or swallowing.
+The food-zone arrival threshold itself still does not establish mouth contact. This
 visualizes a feeding-initiation command and an approximate movement response;
 it is not a complete physical feeding loop.
 
 `scripts/validate_proboscis.py` checks bilateral symmetry, bounded targets,
 stationary zero input, extension and retraction, dynamic joint limits, preservation
-of all fixed body poses, unchanged navigation state, rendering, and reset.
+of all fixed body poses and height, geometric contact and withdrawal, unchanged
+navigation state, rendering, and reset.
 `scripts/validate_sugar_api.py` additionally checks that full-connectome MN9
 activity causes movement, the no-taste control stays still, and brain/mouth
 clocks and MJPEG assay timestamps agree.
@@ -132,10 +143,10 @@ servo mapping, not measured animal kinematics.
 
 ## How to extend this into actual sugar interaction
 
-1. Add contact sensors on the tarsi/labellum and a sugar-solution surface.
-   The existing 2.5 mm arrival radius is an evaluation zone, not proof of
-   mouth contact. Use physical contact to gate taste input, distinct from the
-   airborne food-odor field.
+1. Replace the staged feeding pose and approximate labellum point sensor with
+   autonomous food alignment and validated distributed tarsal/labellar sensors.
+   The current geometric contact gate is distinct from the airborne odor field;
+   the 2.5 mm maze arrival radius remains an evaluation zone only.
 2. Calibrate concentration-to-GRN activity from experiments, including onset,
    adaptation, mixture effects, and nutritional-state dependence. The current
    50/100/200 Hz controls are stimulation settings, not mM or ppm.
