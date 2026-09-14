@@ -2,3 +2,7 @@
 .controls select{min-width:200px;max-width:100%;padding:10px;border:1px solid #ccd7ce;border-radius:5px;background:#fff;color:#284236;font:inherit}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:18px}th,td{text-align:left;padding:10px 14px;border-bottom:1px solid #e7ebe4}th{font-weight:600;color:#576f60}td{font-variant-numeric:tabular-nums}#claw-summary{color:#365f49}
 
 .cell-stats{grid-template-columns:repeat(3,1fr);margin-top:24px}.cell-stats strong{font-size:25px}caption{text-align:left;font-size:12px;color:#67736c;padding:8px 14px}#claw-cell-validation{scroll-margin-top:24px}#cell-verdict{color:#365f49}@media(max-width:600px){.cell-stats{grid-template-columns:1fr}.cell-stats strong{font-size:23px}}
+
+#assignment-sweep{scroll-margin-top:24px}#assignment-sweep .controls{flex-wrap:wrap}#assignment-sweep select{min-width:100px}details{border-top:1px solid #e5ebe3;padding:16px 0;margin-top:16px}summary{cursor:pointer;font-size:14px;color:#365f49;font-weight:600}#assignment-matrix td:first-child{font-family:ui-monospace,monospace}
+
+.assignment-neuron-chart{width:100%;max-width:800px;display:block;margin-top:20px;font-family:inherit;font-size:11px}

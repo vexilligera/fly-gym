@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "trial": "gain_300__FEFE__extend_30__2",
+  "all_body_id_spike_counts_identical": true,
+  "post_onset_counts_identical": true,
+  "max_angle_difference_deg": 9.094947017729282e-13,
+  "angle_tolerance_deg": 1e-10,
+  "local_host": "NYs-Laptop-9.local",
+  "cluster_host": "slurm-b300-128-021"
+}

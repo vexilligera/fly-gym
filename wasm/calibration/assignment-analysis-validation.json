@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "identical candidates produce no separation",
+    "one known one-degree difference separates exactly 15 pairs",
+    "an exceptional seed is not mistaken for all-seed agreement",
+    "all raw-trial hashes match the analyzed outputs",
+    "seven physical contrasts recomputed directly from saved raw traces",
+    "all 256 display traces finite and consistent",
+    "suggested downstream readouts exclude imposed sensory inputs",
+    "no biological target fitting, rejection or automatic mapping selection"
+  ]
+}
