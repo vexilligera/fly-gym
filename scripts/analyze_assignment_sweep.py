@@ -36,7 +36,10 @@ def pairwise(groups, setting, names):
                 'angle_rms_deg': float(np.sqrt(np.mean(angle.mean(axis=0)**2))),
                 'motor_rms_hz': float(np.sqrt(np.mean(motor.mean(axis=0)**2))),
                 'minimum_seed_angle_rms_deg': float(np.sqrt(np.mean(angle**2, axis=1)).min()),
-                'minimum_seed_motor_rms_hz': float(np.sqrt(np.mean(motor**2, axis=(1, 2))).min())}
+                'minimum_seed_motor_rms_hz': float(np.sqrt(np.mean(motor**2, axis=(1, 2))).min()),
+                'joint_separated_every_seed': bool(np.all(
+                    (np.sqrt(np.mean(angle**2, axis=1)) > ANGLE_RESOLUTION) |
+                    (np.sqrt(np.mean(motor**2, axis=(1, 2))) > MOTOR_RESOLUTION)))}
         angle_max = max(p['angle_rms_deg'] for p in by_protocol.values())
         motor_max = max(p['motor_rms_hz'] for p in by_protocol.values())
         rows.append({'a': a, 'b': b, 'by_protocol': by_protocol,
@@ -125,7 +128,7 @@ def analyze(output):
             'angle_separated_pairs': sum(r['angle_rms_deg'] > ANGLE_RESOLUTION for r in ps),
             'motor_separated_pairs': sum(r['motor_rms_hz'] > MOTOR_RESOLUTION for r in ps),
             'joint_separated_pairs': sum(r['angle_rms_deg'] > ANGLE_RESOLUTION or r['motor_rms_hz'] > MOTOR_RESOLUTION for r in ps),
-            'every_seed_joint_separated_pairs': sum(r['minimum_seed_angle_rms_deg'] > ANGLE_RESOLUTION or r['minimum_seed_motor_rms_hz'] > MOTOR_RESOLUTION for r in ps),
+            'every_seed_joint_separated_pairs': sum(r['joint_separated_every_seed'] for r in ps),
             'median_pair_angle_rms_deg': float(np.median([r['angle_rms_deg'] for r in ps])),
             'median_pair_motor_rms_hz': float(np.median([r['motor_rms_hz'] for r in ps]))})
     # A suggested measurable downstream cell, excluding the four imposed inputs.

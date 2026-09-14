@@ -35,6 +35,10 @@ def synthetic_checks():
     involving = [r for r in altered if 'FFFF' in (r['a'], r['b'])]
     assert all(r['by_protocol']['test']['minimum_seed_angle_rms_deg'] == 0 for r in involving)
     assert all(r['angle_separated'] for r in involving)
+    assert all(not r['by_protocol']['test']['joint_separated_every_seed'] for r in involving)
+    groups[('nominal', 'FFFF', 'test')]['evoked_motor'][0] = 10
+    mixed = pairwise(groups, 'nominal', ['test'])
+    assert all(r['by_protocol']['test']['joint_separated_every_seed'] for r in mixed if 'FFFF' in (r['a'], r['b']))
     print('Synthetic identical-signal, known-difference and seed-consistency checks passed.', flush=True)
 
 
