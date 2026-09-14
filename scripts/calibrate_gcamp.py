@@ -23,6 +23,23 @@ def write_json(path, data):
     path.write_text(json.dumps(data, allow_nan=False, separators=(',', ':'))+'\n')
 
 
+def assess(report):
+    baseline = report['candidates'][report['baseline_index']]
+    selected = report['candidates'][report['selected_index']]
+    comparison = report.get('different_seed_check')
+    deltas = [baseline['test_nmse']-selected['test_nmse']]
+    if comparison:
+        deltas.append(comparison['baseline']['test_nmse']-comparison['selected']['test_nmse'])
+    report['assessment'] = {
+        'live_action': 'retain_baseline',
+        'reason': 'This exploratory fit has unresolved stimulus/ROI matching and indicator assumptions; no candidate is automatically applied to the live model.',
+        'test_improvement_by_simulation_seed': deltas,
+        'improvement_consistent_across_checked_seeds': len(deltas)>1 and all(d>0 for d in deltas),
+        'measurement_model_boundary_cases': [name for name, c in selected['cells'].items()
+                                              if c['observation']['decay_at_bound']],
+    }
+
+
 def simulate(data, path, candidates, seed):
     from brain.model import ConnectomeBrain
     brain = ConnectomeBrain(backend='cuda')
@@ -86,6 +103,7 @@ def fit(data, grid_path, output):
                          'Three cell types and one sugar concentration do not uniquely identify neural gain versus input strength.',
                          'Water/bitter records are preserved but excluded from this sugar-only fit.',
                          'These experiments informed the original model literature; this is a held-out split for this fit, not wholly new external validation.']}
+    assess(result)
     write_json(output, result)
     print(json.dumps({'baseline': baseline['candidate'], 'selected': selected['candidate'],
                       'baseline_test_nmse': baseline['test_nmse'], 'selected_test_nmse': selected['test_nmse'],
@@ -109,6 +127,7 @@ def seed_check(data, output_dir):
                        'cells': cells})
     report['different_seed_check'] = {'seed': 144, 'refit_observation_parameters': False,
                                       'baseline': checks[0], 'selected': checks[1]}
+    assess(report)
     write_json(report_path, report)
     print(json.dumps({'seed': 144, 'baseline_test_nmse': checks[0]['test_nmse'],
                       'selected_test_nmse': checks[1]['test_nmse']}), flush=True)

@@ -1,0 +1,141 @@
+{
+  "schema": "gcamp-fit-v1",
+  "scope": "Offline sugar-circuit calibration pilot; not whole-brain validation",
+  "applied_to_live_model": false,
+  "dataset_source": {
+    "paper": "Shiu, Sterne et al., eLife 2022, Figure 3 source data 1",
+    "doi": "10.7554/eLife.79887",
+    "url": "https://cdn.elifesciences.org/articles/79887/elife-79887-fig3-data1-v3.xlsx",
+    "sha256": "8258ac1e7bd49ff9dae01dca796d85dadbb595940a9a030abf20fe7d11ccc987",
+    "license": "CC BY 4.0; attribution to the original authors",
+    "mapping_reference": "Shiu et al. Nature 2024 Supplementary Table 1A; pinned v783 annotations"
+  },
+  "dataset_sha256": "e25ac1a80f8c8ab0950eb7a12ecd3b0924b34824a8da4920d4e7c358df7c79f8",
+  "selection": "Lowest mean normalized training MSE, with equal cell-type weighting. Test flies were scored only after selection.",
+  "assessment": {
+    "live_action": "retain_baseline",
+    "reason": "This exploratory fit has unresolved stimulus/ROI matching and indicator assumptions; no candidate is automatically applied to the live model.",
+    "test_improvement_by_simulation_seed": [
+      -0.001600379186073031,
+      0.003041729697869311
+    ],
+    "improvement_consistent_across_checked_seeds": false,
+    "measurement_model_boundary_cases": []
+  },
+  "limits": [
+    "Cell-type correspondence across flies. Recording side is unspecified; model readout averages the listed bilateral homologues.",
+    "The workbook uses 1.2 s/frame; Methods describe nominal 0.8 Hz. Two-photon sheets have a larger timing discrepancy and are excluded.",
+    "Released unilateral 21-cell sugar cohort is a proxy for bilateral physical taste stimulation. Analytically resting prehistory precedes the simulated 1.2 s baseline.",
+    "Fitted decay and fluorescence gain belong to the observation model, not to neural membrane dynamics.",
+    "Three cell types and one sugar concentration do not uniquely identify neural gain versus input strength.",
+    "Water/bitter records are preserved but excluded from this sugar-only fit.",
+    "These experiments informed the original model literature; this is a held-out split for this fit, not wholly new external validation."
+  ],
+  "held_out_comparison": {
+    "metric": "baseline minus selected normalized MSE; positive favors selected",
+    "mean": -0.0016003791860730264,
+    "interval_95": [
+      -0.0026232999164190842,
+      -0.0004788825461992602
+    ],
+    "replicates": 5000,
+    "warning": "Small held-out sample; interval covers fly variability, not model or protocol uncertainty."
+  },
+  "implementation_commit": "5faebd0",
+  "candidate_grid": [
+    {
+      "candidate": {
+        "synaptic_gain": 0.75,
+        "sugar_input_hz": 50.0
+      },
+      "train_nmse": 0.5883548240829679,
+      "test_nmse": 0.3290521017505341
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 0.75,
+        "sugar_input_hz": 100.0
+      },
+      "train_nmse": 0.5953035536914245,
+      "test_nmse": 0.32862902934106547
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 0.75,
+        "sugar_input_hz": 200.0
+      },
+      "train_nmse": 0.5945104799995389,
+      "test_nmse": 0.3286414380204478
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 1.0,
+        "sugar_input_hz": 50.0
+      },
+      "train_nmse": 0.5870652267711719,
+      "test_nmse": 0.33005708866444106
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 1.0,
+        "sugar_input_hz": 100.0
+      },
+      "train_nmse": 0.5954432622576752,
+      "test_nmse": 0.32914300403378804
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 1.0,
+        "sugar_input_hz": 200.0
+      },
+      "train_nmse": 0.5938880039917152,
+      "test_nmse": 0.328456709478368
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 1.25,
+        "sugar_input_hz": 50.0
+      },
+      "train_nmse": 0.5911210688355802,
+      "test_nmse": 0.329449581505682
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 1.25,
+        "sugar_input_hz": 100.0
+      },
+      "train_nmse": 0.5959883059163472,
+      "test_nmse": 0.3288012911935902
+    },
+    {
+      "candidate": {
+        "synaptic_gain": 1.25,
+        "sugar_input_hz": 200.0
+      },
+      "train_nmse": 0.5949260160891815,
+      "test_nmse": 0.32845314267616665
+    }
+  ],
+  "selected_candidate": {
+    "synaptic_gain": 1.0,
+    "sugar_input_hz": 50.0
+  },
+  "different_seed_check": {
+    "seed": 144,
+    "refit_observation_parameters": false,
+    "baseline": {
+      "candidate": {
+        "synaptic_gain": 1.0,
+        "sugar_input_hz": 200.0
+      },
+      "test_nmse": 0.32920018927987366
+    },
+    "selected": {
+      "candidate": {
+        "synaptic_gain": 1.0,
+        "sugar_input_hz": 50.0
+      },
+      "test_nmse": 0.32615845958200435
+    }
+  }
+}

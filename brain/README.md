@@ -128,6 +128,11 @@ Changing a weight or stimulation rate is not a validated chemical treatment.
 
 ## Limitations
 
+An [offline GCaMP calibration pilot](GCAMP_CALIBRATION.md) now compares a small
+published taste-circuit dataset with the full network. It keeps the live model
+unchanged and separates neural candidate selection from fitting the calcium
+readout. Its scope and experimental uncertainties are documented separately.
+
 - This is the **released brain model**, not an entire central nervous system:
   the VNC, peripheral circuits, and detailed muscles are not reconstructed.
 - Anatomical connectivity is not a complete description of neuronal function.

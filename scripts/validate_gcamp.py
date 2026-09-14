@@ -41,7 +41,12 @@ def validate():
         expected = .08*predicted_trace(fixture, c, simulation, 2.)
         for tr in c['traces']:
             tr['dff'] = expected.tolist()
-    fit, _ = fit_candidates(fixture, [simulation])
+    delayed = deepcopy(simulation)
+    delayed['candidate']['synaptic_gain'] = 1.25
+    delayed['rates_hz'] = {name: np.r_[np.zeros(100), values[:-100]].tolist()
+                           for name, values in simulation['rates_hz'].items()}
+    fit, selected = fit_candidates(fixture, [simulation, delayed])
+    assert selected == 0
     for c in fit[0]['cells'].values():
         assert abs(c['observation']['effective_decay_s']-2.) < 1e-3
         assert abs(c['observation']['fluorescence_gain']-.08) < 1e-4
@@ -51,7 +56,8 @@ def validate():
         for tr in c['traces']:
             if tr['split'] == 'test':
                 tr['dff'] = [10*v for v in tr['dff']]
-    altered, _ = fit_candidates(changed, [simulation])
+    altered, selected_after = fit_candidates(changed, [simulation, delayed])
+    assert selected_after == selected
     for name in fit[0]['cells']:
         assert fit[0]['cells'][name]['observation'] == altered[0]['cells'][name]['observation']
     assert altered[0]['test_nmse'] > fit[0]['test_nmse']
