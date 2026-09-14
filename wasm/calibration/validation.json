@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "checks": [
+    "left-leg anatomical selection",
+    "positive muscle directions",
+    "circuit disconnection",
+    "sensory silencing",
+    "motor silencing",
+    "matched passive mechanics",
+    "held-out data cannot affect fitted parameters",
+    "unverified cell mapping prevents promotion",
+    "finite physics and matched clocks"
+  ],
+  "direct_muscle_final_angles_deg": [
+    100.00044210811099,
+    90.21021921804537,
+    142.41969846923277
+  ]
+}

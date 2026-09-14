@@ -1,0 +1,407 @@
+{
+  "title": "Left-front-leg calibration fixture",
+  "status": "Prototype wired; physiological calibration not accepted",
+  "connectome": {
+    "raw_segment_edges": 151856684,
+    "neurons": 194,
+    "edges": 8133,
+    "synapses": 80165,
+    "retained_incoming_synapse_fraction": 0.1995241188607724
+  },
+  "dataset": "male-cns:v1.0",
+  "input_hashes": {
+    "leg_connectome.json": "0802ddf26cc7e5610cb4ebf483291993f28cdf2a752053178dddc1bc864f7cbc",
+    "leg_recordings.json": "d9c1b824fa30f53b256da1f99ad1a0c0520e797389494b26b7587cb16ce42e9d"
+  },
+  "circuit_selection": "All annotated VNC intrinsic neurons on two-edge paths from left ProLN SNpp50/51 to left front-leg Ti flexor/extensor MNs; retain every induced edge.",
+  "anatomy_mapping": {
+    "SNpp50_SNpp51": "FeCO claw annotations are present on these types elsewhere in the release. Left ProLN selects the front leg. Individual extension/flexion tuning remains unresolved.",
+    "flexor": "Ti flexor MN population -> LFTibia_flex_93434, pooled motor-unit approximation.",
+    "extensor": "Ti extensor MN population -> LFTibia_extensor_93932, pooled motor-unit approximation.",
+    "13Balpha": null
+  },
+  "calcium_fits": [
+    {
+      "parameters": {
+        "fluorescence_gain": 1.8880961426911518,
+        "angle_midpoint_deg": 149.397314623387,
+        "angle_width_deg": 16.583781838453405,
+        "effective_tau_s": 0.12298932915130636
+      },
+      "parameter_values": [
+        1.8880961426911518,
+        149.397314623387,
+        16.583781838453405,
+        0.12298932915130636
+      ],
+      "sample_rate_hz": 7.57,
+      "scores": [
+        {
+          "id": "rampandhold-1",
+          "split": "train",
+          "mse": 0.04219978366838144,
+          "zero_response_mse": 0.40065912467781634,
+          "relative_mse": 0.105325901918035,
+          "n_samples": 454
+        },
+        {
+          "id": "rampandhold-2",
+          "split": "train",
+          "mse": 0.008497706391623772,
+          "zero_response_mse": 0.23171595601572545,
+          "relative_mse": 0.036672944486598386,
+          "n_samples": 455
+        },
+        {
+          "id": "rampandhold-3",
+          "split": "test",
+          "mse": 0.044441813876479365,
+          "zero_response_mse": 0.2791039099683487,
+          "relative_mse": 0.15923035217069947,
+          "n_samples": 454
+        },
+        {
+          "id": "extfirstswings-1",
+          "split": "protocol_test",
+          "mse": 0.706758828727161,
+          "zero_response_mse": 0.051893674979474905,
+          "relative_mse": 13.619363612361232,
+          "n_samples": 320
+        },
+        {
+          "id": "extfirstswings-2",
+          "split": "protocol_test",
+          "mse": 0.5325036936167964,
+          "zero_response_mse": 0.09778153022886807,
+          "relative_mse": 5.445851505600443,
+          "n_samples": 303
+        },
+        {
+          "id": "extfirstswings-3",
+          "split": "protocol_test",
+          "mse": 0.3493196014350116,
+          "zero_response_mse": 0.1846481265540897,
+          "relative_mse": 1.8918123240892135,
+          "n_samples": 303
+        },
+        {
+          "id": "extfirstswings-4",
+          "split": "protocol_test",
+          "mse": 0.6436240384152723,
+          "zero_response_mse": 0.08272907856204519,
+          "relative_mse": 7.779900968346539,
+          "n_samples": 303
+        },
+        {
+          "id": "extfirstswings-5",
+          "split": "protocol_test",
+          "mse": 0.8881088339420359,
+          "zero_response_mse": 0.028574144914539096,
+          "relative_mse": 31.080854268718582,
+          "n_samples": 303
+        },
+        {
+          "id": "flexfirstswings-1",
+          "split": "protocol_test",
+          "mse": 0.20184332895642898,
+          "zero_response_mse": 0.3516766104955778,
+          "relative_mse": 0.5739458438023335,
+          "n_samples": 303
+        },
+        {
+          "id": "flexfirstswings-2",
+          "split": "protocol_test",
+          "mse": 0.08249651727885521,
+          "zero_response_mse": 0.5196066710984824,
+          "relative_mse": 0.15876724042909648,
+          "n_samples": 303
+        },
+        {
+          "id": "flexfirstswings-3",
+          "split": "protocol_test",
+          "mse": 0.15426007424975463,
+          "zero_response_mse": 1.473477944480846,
+          "relative_mse": 0.10469113217986134,
+          "n_samples": 293
+        },
+        {
+          "id": "flexfirstswings-4",
+          "split": "protocol_test",
+          "mse": 0.38245516248342776,
+          "zero_response_mse": 0.10357321197336117,
+          "relative_mse": 3.6926069511274258,
+          "n_samples": 303
+        }
+      ],
+      "parameters_at_bound": [],
+      "optimizer_success": true,
+      "meaning": "Effective angle-to-GCaMP response fit; not a connectome, firing-rate or muscle calibration."
+    },
+    {
+      "parameters": {
+        "fluorescence_gain": 1.888095861355394,
+        "angle_midpoint_deg": 149.39730815472643,
+        "angle_width_deg": 16.583778615043773,
+        "effective_tau_s": 0.116234233538909
+      },
+      "parameter_values": [
+        1.888095861355394,
+        149.39730815472643,
+        16.583778615043773,
+        0.116234233538909
+      ],
+      "sample_rate_hz": 8.01,
+      "scores": [
+        {
+          "id": "rampandhold-1",
+          "split": "train",
+          "mse": 0.0421997894196486,
+          "zero_response_mse": 0.40065912467781634,
+          "relative_mse": 0.10532591627254936,
+          "n_samples": 454
+        },
+        {
+          "id": "rampandhold-2",
+          "split": "train",
+          "mse": 0.008497700643307453,
+          "zero_response_mse": 0.23171595601572545,
+          "relative_mse": 0.03667291967900024,
+          "n_samples": 455
+        },
+        {
+          "id": "rampandhold-3",
+          "split": "test",
+          "mse": 0.044441818538776164,
+          "zero_response_mse": 0.2791039099683487,
+          "relative_mse": 0.1592303688752193,
+          "n_samples": 454
+        },
+        {
+          "id": "extfirstswings-1",
+          "split": "protocol_test",
+          "mse": 0.7067588107419771,
+          "zero_response_mse": 0.051893674979474905,
+          "relative_mse": 13.61936326578366,
+          "n_samples": 320
+        },
+        {
+          "id": "extfirstswings-2",
+          "split": "protocol_test",
+          "mse": 0.53250352986012,
+          "zero_response_mse": 0.09778153022886807,
+          "relative_mse": 5.445849830880523,
+          "n_samples": 303
+        },
+        {
+          "id": "extfirstswings-3",
+          "split": "protocol_test",
+          "mse": 0.3493194813401545,
+          "zero_response_mse": 0.1846481265540897,
+          "relative_mse": 1.8918116736907538,
+          "n_samples": 303
+        },
+        {
+          "id": "extfirstswings-4",
+          "split": "protocol_test",
+          "mse": 0.6436239118646464,
+          "zero_response_mse": 0.08272907856204519,
+          "relative_mse": 7.7798994386470905,
+          "n_samples": 303
+        },
+        {
+          "id": "extfirstswings-5",
+          "split": "protocol_test",
+          "mse": 0.888108731027143,
+          "zero_response_mse": 0.028574144914539096,
+          "relative_mse": 31.080850667039755,
+          "n_samples": 303
+        },
+        {
+          "id": "flexfirstswings-1",
+          "split": "protocol_test",
+          "mse": 0.20184315210682074,
+          "zero_response_mse": 0.3516766104955778,
+          "relative_mse": 0.5739453409266717,
+          "n_samples": 303
+        },
+        {
+          "id": "flexfirstswings-2",
+          "split": "protocol_test",
+          "mse": 0.08249636627556005,
+          "zero_response_mse": 0.5196066710984824,
+          "relative_mse": 0.15876694981832576,
+          "n_samples": 303
+        },
+        {
+          "id": "flexfirstswings-3",
+          "split": "protocol_test",
+          "mse": 0.15425986134132358,
+          "zero_response_mse": 1.473477944480846,
+          "relative_mse": 0.10469098768605888,
+          "n_samples": 293
+        },
+        {
+          "id": "flexfirstswings-4",
+          "split": "protocol_test",
+          "mse": 0.3824550825387088,
+          "zero_response_mse": 0.10357321197336117,
+          "relative_mse": 3.6926061792606713,
+          "n_samples": 303
+        }
+      ],
+      "parameters_at_bound": [],
+      "optimizer_success": true,
+      "meaning": "Effective angle-to-GCaMP response fit; not a connectome, firing-rate or muscle calibration."
+    }
+  ],
+  "promotion": {
+    "eligible": false,
+    "reasons": [
+      "Recorded 13Balpha cells have no verified match to MaleCNS body IDs.",
+      "No measured spike-to-force calibration for the pooled muscle adapter.",
+      "Individual claw-neuron angle tuning and omitted circuit inputs remain unresolved.",
+      "The frozen observation fit fails to beat zero response on several held-out swing records."
+    ],
+    "live_maze_changed": false,
+    "neural_parameters_fitted": false
+  },
+  "causal_effect": {
+    "max_additional_flexion_deg": 2.414848131519932,
+    "motor_spikes": 17,
+    "disconnected_motor_spikes": 0,
+    "sensory_off_total_spikes": 0,
+    "motor_silenced_motor_spikes": 0
+  },
+  "sensitivity": [
+    {
+      "seed": 2,
+      "glutamate_sign": -1,
+      "max_additional_flexion_deg": 1.756825842443618,
+      "motor_spikes": 18
+    },
+    {
+      "seed": 3,
+      "glutamate_sign": -1,
+      "max_additional_flexion_deg": 1.4273422402470999,
+      "motor_spikes": 18
+    },
+    {
+      "seed": 1,
+      "glutamate_sign": 1,
+      "max_additional_flexion_deg": 1.0339662164589072,
+      "motor_spikes": 18
+    }
+  ],
+  "published_behavior": [
+    {
+      "id": "offball-1",
+      "condition": "unloaded",
+      "split": "train",
+      "stim_change_deg": -10.554955906068372,
+      "control_change_deg": 0.729002626394248,
+      "stim_minus_control_deg": -11.28395853246262
+    },
+    {
+      "id": "offball-2",
+      "condition": "unloaded",
+      "split": "train",
+      "stim_change_deg": -49.200350171438416,
+      "control_change_deg": -8.430737416430006,
+      "stim_minus_control_deg": -40.76961275500841
+    },
+    {
+      "id": "offball-3",
+      "condition": "unloaded",
+      "split": "train",
+      "stim_change_deg": -62.37018689291173,
+      "control_change_deg": -0.5252140880445637,
+      "stim_minus_control_deg": -61.84497280486717
+    },
+    {
+      "id": "offball-4",
+      "condition": "unloaded",
+      "split": "test",
+      "stim_change_deg": 1.4597767617217414,
+      "control_change_deg": -1.4440137186597184,
+      "stim_minus_control_deg": 2.90379048038146
+    },
+    {
+      "id": "onball-1",
+      "condition": "loaded",
+      "split": "load_test",
+      "stim_change_deg": -0.756970600835885,
+      "control_change_deg": 0.16526391514821626,
+      "stim_minus_control_deg": -0.9222345159841012
+    },
+    {
+      "id": "onball-2",
+      "condition": "loaded",
+      "split": "load_test",
+      "stim_change_deg": -2.5453490613856786,
+      "control_change_deg": -0.6365872826782919,
+      "stim_minus_control_deg": -1.9087617787073867
+    },
+    {
+      "id": "onball-3",
+      "condition": "loaded",
+      "split": "load_test",
+      "stim_change_deg": -11.053828098358437,
+      "control_change_deg": 0.9024065012699651,
+      "stim_minus_control_deg": -11.956234599628402
+    },
+    {
+      "id": "onball-4",
+      "condition": "loaded",
+      "split": "load_test",
+      "stim_change_deg": -7.348204399413618,
+      "control_change_deg": -1.708192544061184,
+      "stim_minus_control_deg": -5.640011855352434
+    },
+    {
+      "id": "onball-5",
+      "condition": "loaded",
+      "split": "load_test",
+      "stim_change_deg": -1.3473878858932409,
+      "control_change_deg": -0.15562661547875223,
+      "stim_minus_control_deg": -1.1917612704144886
+    },
+    {
+      "id": "onball-6",
+      "condition": "loaded",
+      "split": "load_test",
+      "stim_change_deg": 0.37769717112063006,
+      "control_change_deg": -1.7052119384410673,
+      "stim_minus_control_deg": 2.0829091095616974
+    },
+    {
+      "id": "onball-7",
+      "condition": "loaded",
+      "split": "load_test",
+      "stim_change_deg": -6.928782726880968,
+      "control_change_deg": 0.31053505307310303,
+      "stim_minus_control_deg": -7.239317779954071
+    }
+  ],
+  "behavior_comparison_status": "Recorded 13Balpha stimulation is a distinct experiment. No direct numerical equivalence to the simulated mechanical perturbation is claimed.",
+  "limitations": [
+    "A reduced circuit, not the entire VNC or CNS.",
+    "Many inputs from outside the selected circuit are omitted.",
+    "The 13Balpha recording cohort has no verified body-ID match here.",
+    "Motor pools are not resolved into experimentally identified slow/intermediate/fast motor units.",
+    "Transmitter predictions do not determine postsynaptic receptor physiology.",
+    "Raw arrays are preserved; missing samples are null.",
+    "Imaging README specifies 7.57 Hz unless otherwise specified; article methods say 8.01 Hz. Both rates are evaluated.",
+    "Fly labels in different imaging protocols are not confirmed to identify the same individuals. Protocol tests are not independent-animal validation.",
+    "Calcium traces are GCaMP6f. They do not provide absolute spike rates.",
+    "Behavior is headless flies with optogenetic 13Balpha activation, not direct motor-neuron stimulation.",
+    "The model-to-13Balpha identity is unresolved; these recordings cannot calibrate named MaleCNS cells yet.",
+    "All four selected claw-type sensory cells are provisionally extension-tuned; their individual receptive fields are not known.",
+    "LIF parameters, synaptic gain and motor-to-muscle gain are provisional. None were fitted to these calcium traces.",
+    "Glutamate is modeled as inhibitory within the CNS in the baseline; a positive-sign sensitivity run is reported. Motor-to-muscle excitation is positive.",
+    "Three neurons have unclear transmitter predictions: their outgoing edges remain in the anatomical file but are disabled in dynamics.",
+    "The physical test clamps other joints, counterbalances the resting tibia, imposes a 20-degree extension, then releases it.",
+    "Passive mechanics also return the leg. The reported neural effect is the difference against a matched disconnected control.",
+    "The pooled flexor/extensor muscle mapping omits recruitment differences among motor units.",
+    "This is an isolated leg experiment; the live maze still uses its previous brain and body controller."
+  ]
+}
