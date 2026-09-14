@@ -74,6 +74,7 @@ def analyze(output):
         trials[job['id']] = {'values': np.array([[point[field] for point in r['trace']] for field in fields]),
                             'time': np.array([point['time_s'] for point in r['trace']]),
                             'counts': np.array([r['post_onset_spikes_by_body_id'][str(i)] for i in ids]),
+                            'all_counts': np.array([r['spikes_by_body_id'][str(i)] for i in ids]),
                             'motor_spikes': r['motor_spikes']}
     groups, summaries, view = {}, [], []
     for setting in SETTINGS:
@@ -146,11 +147,21 @@ def analyze(output):
                 'median_within_mapping_seed_sd_hz': float(np.median(responses[:, :, index].std(axis=1, ddof=1))),
                 'mean_evoked_hz_by_assignment': dict(zip(ASSIGNMENTS, means[:, index].tolist()))})
     readouts.sort(key=lambda r: (-r['candidate_mean_rate_sd_hz'], r['body_id'], r['protocol']))
+    recruitment = {}
+    for scope, selected_jobs in [('primary_perturbations', [j for j in jobs() if j['condition'] == 'connected' and j['setting'] == 'nominal' and not j['protocol_name'].startswith('sham')]),
+                                 ('all_connected', [j for j in jobs() if j['condition'] == 'connected'])]:
+        recruitment[scope] = {}
+        for pool, pool_ids in [('flexor', graph['flexor_ids']), ('extensor', graph['extensor_ids'])]:
+            indices = [ids.index(i) for i in pool_ids]
+            totals = [int(trials[j['id']]['all_counts'][indices].sum()) for j in selected_jobs]
+            recruitment[scope][pool] = {'total_spikes': sum(totals), 'trials_with_spikes': sum(n > 0 for n in totals),
+                                       'trials': len(totals), 'maximum_trial_spikes': max(totals)}
     report = {'config': config, 'runtime': json.loads((output/'runtime.json').read_text()),
         'preflight': json.loads((output/'preflight.json').read_text()),
         'sweep_validation': json.loads((output/'sweep-validation.json').read_text()),
         'summary': summarize_pairs(pairs), 'pairwise': pairs, 'groups': summaries,
         'sensitivity_at_30_deg': sensitivity, 'protocol_comparison': protocol_comparison,
+        'motor_recruitment': recruitment,
         'suggested_downstream_readouts': readouts[:20], 'biological_mapping_selected': None,
         'measured_downstream_targets_used': False, 'rejected_biological_mappings': [],
         'assumed_resolution': {'angle_rms_deg': ANGLE_RESOLUTION, 'pooled_motor_rms_hz': MOTOR_RESOLUTION},
@@ -166,8 +177,10 @@ def analyze(output):
     dump(output/'assignment-trial-hashes.json', {'config_hash': config['config_hash'], 'trials': hashes})
     (output/'assignment-traces.json').write_text(json.dumps(view, separators=(',', ':'), allow_nan=False)+'\n')
     plot(report, output)
-    print(json.dumps({'summary': report['summary'], 'sensitivity': sensitivity,
-                      'protocols': protocol_comparison, 'top_readout': readouts[0]}, indent=2))
+    print(json.dumps({'summary': {k:v for k,v in report['summary'].items() if k != 'close_pairs'},
+                      'sensitivity': {s:{k:v for k,v in r.items() if k != 'close_pairs'} for s,r in sensitivity.items()},
+                      'motor_recruitment': recruitment, 'protocols': protocol_comparison,
+                      'top_readout': {k:v for k,v in readouts[0].items() if k != 'mean_evoked_hz_by_assignment'}}, indent=2))
     return report
 
 
