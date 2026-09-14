@@ -191,6 +191,36 @@ policy reached the simple maze's sugar zone in 1.60 s. Complete rate, command,
 and body records are in `outputs/neuron-navigation-simple/`; the compact result
 is also stored under `simple` in `wasm/maze/readout-validation.json`.
 
+### Isolated olfactory response in the simple maze
+
+`scripts/validate_maze_olfaction.py` measures three 5 s trials with vision off,
+heading 75°, leg seed 1, fresh neural/body resets, and descending-neuron control.
+On B300 at revision `f378859`, the mean firing rates per neuron were:
+
+| Condition | ORN_DM1 left / right (Hz) | DM1_lPN left / right (Hz) |
+|---|---:|---:|
+| Food odor connected | 42.50 / 54.36 | 263.8 / 249.2 |
+| Odor source off | 0 / 0 | 0 / 0 |
+| Odor present, neural input disconnected | 0 / 0 | 0 / 0 |
+
+With the source present, initial normalized antenna samples were approximately
+0.02958 left and 0.02934 right. Thus the modeled field reaches the starting
+position. Only the 68 ORN_DM1 cells received external input; DM1 projection
+neurons were never directly stimulated. Their responses arose through the
+released network. Disconnecting input preserved nonzero environmental odor
+but eliminated all spikes, as did removing the source. Zero activity in these
+controls reflects the model's zero spontaneous drive after reset.
+
+This confirms the implemented field → ORN → downstream olfactory pathway,
+not calibrated biological firing rates or sucrose volatility. DNp09 and MDN
+remained silent; DNa02 mean rates were 55.0 Hz left and 0.8 Hz right. Olfactory
+detection therefore works in this model without producing forward drive in
+the selected motor decoder. Every 20 ms bin is recorded under
+`outputs/simple-maze-olfaction/`; the compact report is versioned at
+`wasm/maze/olfaction-validation.json`.
+
+### Earlier sensory-policy navigation tests
+
 The historical navigation results below used **Sensory policy**. They are not
 evidence for success with the default neuron readouts.
 

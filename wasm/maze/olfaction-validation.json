@@ -1,0 +1,280 @@
+{
+  "revision": "f37885951387e5e65f6efe22d7432458f402a0e8",
+  "group_sizes": {
+    "DNp09_left": 1,
+    "DNp09_right": 1,
+    "DNa02_left": 1,
+    "DNa02_right": 1,
+    "MDN_left": 2,
+    "MDN_right": 2,
+    "ORN_DM1_left": 35,
+    "DM1_lPN_left": 1,
+    "ORN_DM1_right": 33,
+    "DM1_lPN_right": 1
+  },
+  "group_ids": {
+    "DNp09_left": [
+      "720575940635872101"
+    ],
+    "DNp09_right": [
+      "720575940627652358"
+    ],
+    "DNa02_left": [
+      "720575940629327659"
+    ],
+    "DNa02_right": [
+      "720575940604737708"
+    ],
+    "MDN_left": [
+      "720575940631082808",
+      "720575940616026939"
+    ],
+    "MDN_right": [
+      "720575940610236514",
+      "720575940640331472"
+    ],
+    "ORN_DM1_left": [
+      "720575940619419757",
+      "720575940629918762",
+      "720575940632224031",
+      "720575940628800277",
+      "720575940635146926",
+      "720575940620071872",
+      "720575940626779644",
+      "720575940622651389",
+      "720575940607927817",
+      "720575940642284704",
+      "720575940631240296",
+      "720575940645824035",
+      "720575940623942119",
+      "720575940627253865",
+      "720575940639427416",
+      "720575940605328230",
+      "720575940625821758",
+      "720575940620574305",
+      "720575940637472053",
+      "720575940630496975",
+      "720575940628621316",
+      "720575940622281399",
+      "720575940627996315",
+      "720575940622276791",
+      "720575940630664273",
+      "720575940627316303",
+      "720575940629350782",
+      "720575940606001074",
+      "720575940635562096",
+      "720575940624223888",
+      "720575940643980910",
+      "720575940636187054",
+      "720575940627526735",
+      "720575940614559163",
+      "720575940626868818"
+    ],
+    "DM1_lPN_left": [
+      "720575940630770042"
+    ],
+    "ORN_DM1_right": [
+      "720575940629728732",
+      "720575940620028788",
+      "720575940631217782",
+      "720575940635757936",
+      "720575940626976522",
+      "720575940628429056",
+      "720575940643977070",
+      "720575940619844534",
+      "720575940633471839",
+      "720575940624045155",
+      "720575940614102930",
+      "720575940633509407",
+      "720575940615723350",
+      "720575940636093541",
+      "720575940622262593",
+      "720575940624689336",
+      "720575940647088004",
+      "720575940619451233",
+      "720575940616546333",
+      "720575940617577797",
+      "720575940618539422",
+      "720575940622891923",
+      "720575940639080526",
+      "720575940617825563",
+      "720575940627163560",
+      "720575940619702337",
+      "720575940628749111",
+      "720575940610059726",
+      "720575940617351990",
+      "720575940618696920",
+      "720575940619789248",
+      "720575940614522847",
+      "720575940622564621"
+    ],
+    "DM1_lPN_right": [
+      "720575940619071005"
+    ]
+  },
+  "trials": [
+    {
+      "name": "source_off",
+      "config": {
+        "condition": "odor_only",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": false,
+        "layout": "simple",
+        "controller": "descending",
+        "silence_descending": false
+      },
+      "duration_s": 5.0,
+      "initial_concentration": [
+        0.0,
+        0.0
+      ],
+      "mean_concentration": [
+        0.0,
+        0.0
+      ],
+      "mean_input_rates_hz": [
+        0.0,
+        0.0
+      ],
+      "mean_rates_hz": {
+        "DNp09_left": 0.0,
+        "DNp09_right": 0.0,
+        "DNa02_left": 0.0,
+        "DNa02_right": 0.0,
+        "MDN_left": 0.0,
+        "MDN_right": 0.0,
+        "ORN_DM1_left": 0.0,
+        "DM1_lPN_left": 0.0,
+        "ORN_DM1_right": 0.0,
+        "DM1_lPN_right": 0.0
+      },
+      "group_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 0,
+        "DNa02_right": 0,
+        "MDN_left": 0,
+        "MDN_right": 0,
+        "ORN_DM1_left": 0,
+        "DM1_lPN_left": 0,
+        "ORN_DM1_right": 0,
+        "DM1_lPN_right": 0
+      },
+      "brain_spikes": 0
+    },
+    {
+      "name": "input_disconnected",
+      "config": {
+        "condition": "neither",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true,
+        "layout": "simple",
+        "controller": "descending",
+        "silence_descending": false
+      },
+      "duration_s": 5.0,
+      "initial_concentration": [
+        0.02957760124865287,
+        0.029340109605037263
+      ],
+      "mean_concentration": [
+        0.029582631062642605,
+        0.02934462307758354
+      ],
+      "mean_input_rates_hz": [
+        0.0,
+        0.0
+      ],
+      "mean_rates_hz": {
+        "DNp09_left": 0.0,
+        "DNp09_right": 0.0,
+        "DNa02_left": 0.0,
+        "DNa02_right": 0.0,
+        "MDN_left": 0.0,
+        "MDN_right": 0.0,
+        "ORN_DM1_left": 0.0,
+        "DM1_lPN_left": 0.0,
+        "ORN_DM1_right": 0.0,
+        "DM1_lPN_right": 0.0
+      },
+      "group_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 0,
+        "DNa02_right": 0,
+        "MDN_left": 0,
+        "MDN_right": 0,
+        "ORN_DM1_left": 0,
+        "DM1_lPN_left": 0,
+        "ORN_DM1_right": 0,
+        "DM1_lPN_right": 0
+      },
+      "brain_spikes": 0
+    },
+    {
+      "name": "odor_on",
+      "config": {
+        "condition": "odor_only",
+        "heading_deg": 75,
+        "seed": 1,
+        "duration": 5,
+        "food_odor": true,
+        "layout": "simple",
+        "controller": "descending",
+        "silence_descending": false
+      },
+      "duration_s": 5.0,
+      "initial_concentration": [
+        0.02957760124865287,
+        0.029340109605037263
+      ],
+      "mean_concentration": [
+        0.031730137580405354,
+        0.03228325725603381
+      ],
+      "mean_input_rates_hz": [
+        42.58846363428088,
+        54.939933328448554
+      ],
+      "mean_rates_hz": {
+        "DNp09_left": 0.0,
+        "DNp09_right": 0.0,
+        "DNa02_left": 55.0,
+        "DNa02_right": 0.8,
+        "MDN_left": 0.0,
+        "MDN_right": 0.0,
+        "ORN_DM1_left": 42.49714285714286,
+        "DM1_lPN_left": 263.8,
+        "ORN_DM1_right": 54.36363636363636,
+        "DM1_lPN_right": 249.2
+      },
+      "group_spikes": {
+        "DNp09_left": 0,
+        "DNp09_right": 0,
+        "DNa02_left": 275,
+        "DNa02_right": 4,
+        "MDN_left": 0,
+        "MDN_right": 0,
+        "ORN_DM1_left": 7437,
+        "DM1_lPN_left": 1319,
+        "ORN_DM1_right": 8970,
+        "DM1_lPN_right": 1246
+      },
+      "brain_spikes": 2403254
+    }
+  ],
+  "limits": "Food-associated volatile proxy, not sucrose vapor or a calibrated receptor model. One start/seed. Zero spontaneous input; PN firing is simulated, not a biological recording.",
+  "passed": true,
+  "checks": [
+    "vision disconnected in all cases",
+    "source off removes local odor and all spikes",
+    "odor present with neural input disconnected gives no spikes",
+    "only ORNs receive direct input",
+    "ORN and downstream PN response with odor on",
+    "brain/body clocks agree"
+  ]
+}
