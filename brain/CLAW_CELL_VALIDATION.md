@@ -117,3 +117,23 @@ checks pass. The deployed neural encoder and maze are not modified by this
 experiment. The next calibration step needs per-cell tuning/variability and an
 anatomical match; this population fit is not accepted as physiological circuit
 calibration.
+
+## Cluster reproduction
+
+The analysis and full validation suite also passed on `slurm-b300-128-021`,
+inside allocation 5807547, from source commit `4e16968`. The source ZIP round
+trip was checked on both hosts. The largest selected-parameter difference was
+3.982e-6 and the largest aggregate relative-MSE difference was 5.562e-9; every
+fly and region pass/fail decision matched. The selected relaxation times were
+identical. Parameter tolerance was 1e-4 absolute, aggregate relative-MSE
+tolerance 1e-6 absolute, and per-region MSE tolerance 1e-6 absolute/relative.
+The published artifacts come from the B300 run and include
+`claw-cells-reproduction.json` with runtime versions and comparison results.
+
+```sh
+ssh crwv 'srun --jobid=5807547 --overlap --nodes=1 --ntasks=1 --cpus-per-task=2 --chdir=/mnt/home/zny/flygym env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python scripts/validate_claw_cells.py'
+ssh crwv 'srun --jobid=5807547 --overlap --nodes=1 --ntasks=1 --cpus-per-task=2 --chdir=/mnt/home/zny/flygym env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python scripts/check_claw_cell_validation.py'
+```
+
+The allocation ID is runtime provenance; substitute a current allocation when
+reproducing after that job expires.
