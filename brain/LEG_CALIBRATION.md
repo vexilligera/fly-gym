@@ -11,6 +11,13 @@ calcium fit does not identify the parameters of the simulated circuit. The
 recorded 13Bα cells have no verified MaleCNS body-ID match in this implementation.
 No parameters from this fit are copied into the neural engine or the maze.
 
+A follow-up now adds 60 published claw-proprioceptor GCaMP6f traces, an
+animal-separated sensory-response benchmark and nine paired physical
+perturbations. See [REFLEX_FOLLOWUP.md](REFLEX_FOLLOWUP.md) for sources, splits,
+results and reproduction. The new population fit is useful but is not promoted
+to individual neural firing rates; the original controller fails the added
+flexion tests because its sensory encoder only responds to extension.
+
 ## Anatomical circuit
 
 Official MaleCNS v1.0 download source:

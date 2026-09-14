@@ -26,6 +26,26 @@ class ReflexParameters:
     glutamate_sign: int = -1
 
 
+@dataclass(frozen=True)
+class ReflexProtocol:
+    rest_angle_deg: float = 100.
+    displacement_deg: float = 20.
+    onset_s: float = .3
+    ramp_s: float = .1
+    hold_s: float = .2
+    distal_mass_scale: float = 1.
+
+    @property
+    def release_s(self):
+        return self.onset_s + self.ramp_s + self.hold_s
+
+    def held_angle(self, time_s):
+        if time_s >= self.release_s - 1e-12:
+            return None
+        return self.rest_angle_deg + self.displacement_deg*np.clip(
+            (time_s-self.onset_s)/self.ramp_s, 0, 1)
+
+
 class LegCircuit:
     def __init__(self, graph, parameters=ReflexParameters(), seed=1):
         self.graph, self.parameters = graph, parameters
@@ -94,7 +114,7 @@ class LegCircuit:
 
 
 class LegFixture:
-    def __init__(self, rest_angle=100.):
+    def __init__(self, rest_angle=100., distal_mass_scale=1.):
         import mujoco as mj
         from flygym.compose import MusculoskeletalFly
         self.mj = mj
@@ -112,6 +132,15 @@ class LegFixture:
                     solref=[.002, 1.])
         self.model, self.data = fly.compile()
         m, d = self.model, self.data
+        if distal_mass_scale <= 0:
+            raise ValueError('Distal mass scale must be positive')
+        if distal_mass_scale != 1:
+            for body in range(m.nbody):
+                name = mj.mj_id2name(m, mj.mjtObj.mjOBJ_BODY, body) or ''
+                if name.startswith(('LFTibia', 'LFTarsus')):
+                    m.body_mass[body] *= distal_mass_scale
+                    m.body_inertia[body] *= distal_mass_scale
+            mj.mj_setConst(m, d)
         mj.mj_resetDataKeyframe(m, d, 0)
         m.actuator_ctrlrange[:, 0] = 0  # permit genuinely zero excitation controls
         joint = m.joint('joint_LFTibia_pitch').id
@@ -180,17 +209,19 @@ class LegFixture:
             self.renderer.close()
 
 
-def run_reflex(graph, condition='connected', *, seed=1, duration=1.6, parameters=ReflexParameters(), video=None):
+def run_reflex(graph, condition='connected', *, seed=1, duration=1.6, parameters=ReflexParameters(), video=None, protocol=ReflexProtocol()):
     if condition not in ('connected', 'disconnected', 'sensory_off', 'motor_silenced'):
         raise ValueError('Unknown reflex condition')
-    fixture = LegFixture()
+    if protocol.ramp_s <= 0 or protocol.onset_s < 0 or protocol.hold_s < 0 or duration <= protocol.release_s:
+        raise ValueError('Protocol needs a positive ramp and a post-release interval')
+    fixture = LegFixture(protocol.rest_angle_deg, protocol.distal_mass_scale)
     brain = LegCircuit(graph, parameters, seed)
     trace, images = [], []
     try:
         for step in range(round(duration/.001)):
             t = step*.001
             # A physical perturbation, explicitly separate from the neural loop.
-            held = (100. if t < .3 else 100 + 20*min((t-.3)/.1, 1)) if t < .6 else None
+            held = protocol.held_angle(t)
             if held is not None:
                 fixture.hold(held)
             activation, neural = brain.step(fixture.angle(), fixture.rest_angle,
@@ -209,7 +240,7 @@ def run_reflex(graph, condition='connected', *, seed=1, duration=1.6, parameters
             # 50 simulated frames/s played at 10 fps for a fivefold slowed replay.
             imageio.mimsave(str(video), images, fps=10, macro_block_size=2)
         return {'condition': condition, 'seed': seed, 'duration_s': duration,
-                'parameters': asdict(parameters), 'trace': trace,
+                'parameters': asdict(parameters), 'protocol': asdict(protocol), 'trace': trace,
                 'spikes_by_body_id': dict(zip(map(str, brain.ids), map(int, brain.counts))),
                 'unknown_sign_edges_disabled': brain.unknown_sign_edges,
                 'fixture_counter_torque': fixture.counter_torque,
