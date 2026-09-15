@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NeuroMechFly · Motor circuit</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports":{"three":"../shared/vendor/three/three.module.js"}}</script>
+</head>
+<body>
+  <header><a class="brand" href="../maze/">NeuroMechFly <span>MOTOR CIRCUIT</span></a>
+    <nav><a href="../calibration/">Calibration</a><a href="../maze/">Sugar maze</a><a href="report.json">Experiment results ↗</a></nav></header>
+  <main>
+    <p class="eyebrow">DESCENDING NEURONS → NERVE CORD → SIX LEGS → SENSORY FEEDBACK</p>
+    <h1>Let the motor circuit move the legs.</h1>
+    <p class="intro">Stimulate named neurons and watch their activity drive individual joints. This isolated experiment reproduces DesktopFly’s reduced MaleCNS circuit and simplified body mechanics.</p>
+    <div class="scope"><strong>1,045 neurons · 17,224 connections</strong><span>Direct neural motor control · no stepping generator · provisional physiology</span></div>
+    <section class="lab">
+      <div class="stage-card">
+        <div class="card-heading"><h2>Six-leg experiment</h2><span id="run-state" role="status">Loading circuit…</span></div>
+        <div id="stage" aria-label="Interactive three-dimensional fly with simulated leg movements"><div class="stage-note">SIMPLIFIED ARTICULATED BODY</div><div id="stage-error" role="alert"></div></div>
+        <div class="stage-footer"><span>Drag to orbit · scroll to zoom</span><label><input id="follow" type="checkbox" checked> Follow fly</label><button id="camera">Reset camera</button></div>
+        <div class="controls">
+          <label class="experiment-label">Experiment<select id="protocol" disabled></select></label>
+          <label>Speed<select id="speed" disabled><option value=".25">¼ speed</option><option value="1" selected>1× speed</option><option value="2">2× speed</option></select></label>
+          <button id="run" class="primary" disabled>Run experiment</button><button id="reset" disabled>Reset</button>
+        </div>
+        <p id="stimulus-note" class="caption"></p>
+        <div class="metrics">
+          <div><strong id="clock">0.000 s</strong><span>body simulation time</span></div>
+          <div><strong id="motor-spikes">0</strong><span>motor-neuron spikes</span></div>
+          <div><strong id="sensory-spikes">0</strong><span>sensory-neuron spikes</span></div>
+          <div><strong id="distance">0.00</strong><span>forward travel · model units</span></div>
+        </div>
+        <p class="caption">Translation comes from supporting feet in a rigid ground-contact approximation. Distance is in model units; gravity, body balance and slipping are simplified. This view uses DesktopFly mechanics, not MuJoCo.</p>
+      </div>
+      <aside class="neural-card">
+        <div class="card-heading"><h2>Live neural activity</h2><span id="neural-clock">0 ms</span></div>
+        <p class="caption">All 1,045 simulated neurons, grouped by role. Brightness shows the model’s filtered firing rate. Click a cell to inspect its identity.</p>
+        <canvas id="neural-map" width="560" height="360" aria-label="Computed firing rates of all neurons grouped by population"></canvas>
+        <div class="legend"><span><i style="background:#5288b2"></i>Descending</span><span><i style="background:#7b73b2"></i>Interneurons</span><span><i style="background:#c27535"></i>Motor</span><span><i style="background:#488776"></i>Sensory</span><span><i style="background:#997aa1"></i>Ascending</span></div>
+        <div id="neuron-detail" class="neuron-detail">Choose a cell in the activity map.</div>
+        <h3>Motor output by leg</h3>
+        <p class="caption">Pooled muscle activation, 0–1. Colored dots mark modeled foot contact.</p>
+        <div class="table-wrap"><table id="motor-table"><thead><tr><th>Leg</th><th>Flex</th><th>Extend</th><th>Lift</th><th>Depress</th><th>Protract</th><th>Retract</th></tr></thead><tbody></tbody></table></div>
+      </aside>
+    </section>
+    <section class="panel">
+      <div class="card-heading"><h2>Left-front leg: movement and motor output</h2><span>Computed during this run</span></div>
+      <div class="charts"><div><h3>Knee angle</h3><svg id="knee-chart" viewBox="0 0 560 190" role="img" aria-label="Actual left-front knee angle during the experiment"></svg></div>
+        <div><h3>Antagonist muscle activation</h3><svg id="activation-chart" viewBox="0 0 560 190" role="img" aria-label="Actual left-front flexor and extensor activation during the experiment"></svg></div></div>
+      <p class="caption">Blue: knee angle. Orange: flexor activation. Teal: extensor activation. These are computed model outputs, not biological recordings. Reset clears neurons, muscles, body position, trail and charts together.</p>
+    </section>
+    <section class="panel" id="validation">
+      <div class="card-heading"><h2>What the controls establish</h2><a href="report.json">Download all results</a></div>
+      <p id="validation-summary" role="status">Loading independently run control experiments…</p>
+      <div class="table-wrap"><table><thead><tr><th>Experiment</th><th>Motor spikes</th><th>Late forward travel</th><th>Late foot contacts · RF / LF / RM / LM / RH / LH</th></tr></thead><tbody id="result-rows"></tbody></table></div>
+      <p class="caption">“Late” means after the first 3 s. Travel sums motion along the fly’s changing forward direction. Steering is assessed against a shared 3 s baseline because this reduced circuit has a persistent turn bias. These controls test causal model behavior, not agreement with living flies.</p>
+    </section>
+    <section class="panel" id="mujoco-transfer">
+      <div class="card-heading"><h2>Transfer to our MuJoCo leg</h2><span>Separate physical test</span></div>
+      <p id="transfer-summary">The detailed left-front-leg transfer experiment is being prepared.</p>
+      <div id="transfer-view" hidden>
+        <div class="videos"><figure><video id="transfer-active" controls muted playsinline preload="metadata" aria-label="MuJoCo leg driven by DesktopFly-style circuit"></video><figcaption>Motor circuit connected · 5× slow motion</figcaption></figure>
+          <figure><video id="transfer-passive" controls muted playsinline preload="metadata" aria-label="Matched MuJoCo leg with motor neurons silenced"></video><figcaption>Motor neurons silenced · identical fixture</figcaption></figure></div>
+        <p class="caption">The thorax and other joints are restrained. Left-front tibia motor pools drive two existing Hill-type muscle actuators. The physical knee angle and velocity return to the selected left-front proprioceptors through a provisional encoder. Other legs supply no sensory feedback in this assay. <a href="transfer-report.json">Transfer checks</a> · <a href="transfer-traces.json">Full traces and neuron counts</a></p>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>What we added, and what remains assumed</h2>
+      <div class="limits"><p>The circuit contains 16 descending neurons, 622 interneurons, 220 motor neurons, 153 sensory neurons and 34 ascending neurons. Synaptic transmission produces motor firing; antagonist motor pools produce joint forces; realized joint motion and contact return as sensory input.</p>
+        <p>The selected neurons and connections come from MaleCNS. Electrical dynamics, normalized synaptic gains, pooled sensory tuning, muscle forces and body mechanics are supplied model choices. Our four unresolved claw sensory cells remain unlabeled. This experiment tests motor control under artificial descending stimulation; it does not add autonomous sugar navigation or connect this subset to the full FlyWire brain.</p></div>
+      <p class="sources">Adapted from <a href="https://github.com/DenisSergeevitch/desktop-fly/tree/32b00011e83c3dc85fa3ea0b3934155b04f1635d">DesktopFly by Denis Shiryaev</a> · <a href="vendor/LICENSE">MIT code license</a> · <a href="vendor/DATA_LICENSE.md">MaleCNS data: CC BY 4.0</a> · <a href="vendor/LOCOMOTOR_PROVENANCE.md">Anatomical provenance and coverage</a> · <a href="provenance.json">Pinned files and hashes</a>. MaleCNS: FlyEM/HHMI Janelia, University of Cambridge, MRC LMB and Google Research.</p>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

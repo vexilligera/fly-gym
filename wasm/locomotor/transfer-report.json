@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "host": "nys-laptop.alpaca-elnath.ts.net",
+  "python": "3.14.6",
+  "graph_sha256": "8f76d94034dcf802453e3a0a8ed5342d122e57d37e2bb5ea28da66de0856f5d6",
+  "port_validation": {
+    "passed": true,
+    "max_errors": {
+      "voltage": 0.0,
+      "rates": 0.0,
+      "adaptation": 0.0,
+      "excitatory": 0.0,
+      "inhibitory": 0.0,
+      "refractory": 0.0
+    },
+    "counts_match": true,
+    "reference": "Unmodified upstream JavaScript, 2 s bilateral DNp09 and fixed LF knee velocity."
+  },
+  "duration_s": 4,
+  "muscle_gain": 0.2,
+  "max_added_angle_deg": 30.510987356315198,
+  "max_added_flexion_deg": 5.1814140556548125,
+  "max_added_extension_deg": 30.510987356315198,
+  "lf_flexor_spikes": 290,
+  "lf_extensor_spikes": 83,
+  "trials": {
+    "connected": {
+      "condition": "connected",
+      "duration_s": 4.0,
+      "muscle_gain": 0.2,
+      "descending_drive_hz_equivalent": 40,
+      "runtime_seconds": 5.079637125134468,
+      "total_spikes": 48775,
+      "motor_spikes": 6966,
+      "sensory_spikes": 475,
+      "lf_flexor_spikes": 290,
+      "lf_extensor_spikes": 83,
+      "final_angle_deg": 123.43231293014405
+    },
+    "motor_silenced": {
+      "condition": "motor_silenced",
+      "duration_s": 4.0,
+      "muscle_gain": 0.2,
+      "descending_drive_hz_equivalent": 40,
+      "runtime_seconds": 4.8652962082996964,
+      "total_spikes": 41017,
+      "motor_spikes": 0,
+      "sensory_spikes": 0,
+      "lf_flexor_spikes": 0,
+      "lf_extensor_spikes": 0,
+      "final_angle_deg": 100.00038866240575
+    },
+    "synapses_cut": {
+      "condition": "synapses_cut",
+      "duration_s": 4.0,
+      "muscle_gain": 0.2,
+      "descending_drive_hz_equivalent": 40,
+      "runtime_seconds": 3.623363458085805,
+      "total_spikes": 412,
+      "motor_spikes": 0,
+      "sensory_spikes": 0,
+      "lf_flexor_spikes": 0,
+      "lf_extensor_spikes": 0,
+      "final_angle_deg": 100.00038866240575
+    },
+    "feedback_off": {
+      "condition": "feedback_off",
+      "duration_s": 4.0,
+      "muscle_gain": 0.2,
+      "descending_drive_hz_equivalent": 40,
+      "runtime_seconds": 3.56822504196316,
+      "total_spikes": 47493,
+      "motor_spikes": 7086,
+      "sensory_spikes": 0,
+      "lf_flexor_spikes": 273,
+      "lf_extensor_spikes": 64,
+      "final_angle_deg": 97.65604789703144
+    }
+  },
+  "six_leg_mujoco_locomotion_validated": false,
+  "biological_calibration": false,
+  "summary": "The reduced circuit drives our restrained MuJoCo left-front tibia. Over 4 s, the connected leg differs from the motor-silenced control by up to 30.51\u00b0. Its left-front motor pools emit 290 flexor and 83 extensor spikes. Synaptic disconnection and motor silencing remove the neural movement. This establishes a one-joint transfer under a fixed 0.2 muscle gain; it does not establish six-leg MuJoCo walking or physiological calibration.",
+  "videos": {
+    "connected": "transfer-connected.mp4",
+    "motor_silenced": "transfer-motor-silenced.mp4"
+  }
+}

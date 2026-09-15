@@ -1,0 +1,22 @@
+{
+  "upstream_repository": "https://github.com/DenisSergeevitch/desktop-fly",
+  "revision": "32b00011e83c3dc85fa3ea0b3934155b04f1635d",
+  "vendor_files_sha256": {
+    "DATA_LICENSE.md": "70859ae0977af0c4386c7a7b82fda0f0bb3c7ebc0de9d9070a887c234aced931",
+    "LICENSE": "8e644c828e8061c099787a633363537f9670ec01b704460f864c9284f769d256",
+    "LOCOMOTOR_PROVENANCE.md": "192fb442d6739f7729a53ac1ff5483d4ca1890e9a0b0eece86900fd287eac6f6",
+    "legdynamics.js": "b2315b40a6e9b024b5416bb3a0536cab2b74aa81ec77b85742815e0a61d283b1",
+    "locomotor.js": "a00ad3935a555c09192f835a54ca89edc6173e5cf93c83797cd6b5bfc6123d2d",
+    "locomotor_circuit.json": "8f76d94034dcf802453e3a0a8ed5342d122e57d37e2bb5ea28da66de0856f5d6",
+    "locomotor_report.json": "453f2566bdb7652d9e17e2c8539c1b0f92b84f0db155f6f19738267ed337b358"
+  },
+  "code_license": "MIT, copyright 2026 Denis Shiryaev",
+  "data_license": "CC BY 4.0 for MaleCNS circuit and report",
+  "upstream_code_changes": "None. The JavaScript LocomotorSim and SixLegDynamics modules are unmodified. Our loop, UI and Python transfer adapter are separate.",
+  "anatomy": "MaleCNS v1.0; 1045 selected neurons, 17224 directed edges, 708689 anatomical contacts. See vendor/LOCOMOTOR_PROVENANCE.md for omitted inputs.",
+  "geometry": "Segment lengths and attachment locations match the upstream fly body. The new visual mesh is illustrative. All rendered leg endpoints are computed from the mechanical joint state.",
+  "physiology": "Upstream normalized synaptic input, 1 ms LIF steps with adaptation, pooled sensory encoders and saturating motor rates. No biological calibration is claimed.",
+  "runtime": "Browser worker: 120 Hz feedback, 1 kHz neurons, 600 Hz simplified mechanics. No server neural state is advanced.",
+  "mujoco_transfer": "Separate four-second left-front-tibia assay. A Python port, checked against upstream JS neural states, drives two FlyMimic muscles with fixed gain 0.2. Only the physical LF knee supplies feedback. No six-leg MuJoCo walking is claimed.",
+  "claw_mapping": "815843, 817680, 912317 and 935383 are present but their joint/direction fields remain null. No assignment sweep candidate was promoted."
+}

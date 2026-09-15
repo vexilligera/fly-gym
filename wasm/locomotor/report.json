@@ -1,0 +1,284 @@
+{
+  "passed": true,
+  "runtime": {
+    "node": "v24.3.0",
+    "platform": "darwin"
+  },
+  "source_revision": "32b00011e83c3dc85fa3ea0b3934155b04f1635d",
+  "tests": [
+    "pinned upstream code and data hashes",
+    "valid graph and raw contacts",
+    "four sensory cells remain unresolved",
+    "forward recruitment and sustained contacts",
+    "backward propulsion",
+    "paired steering after identical prefix",
+    "synaptic disconnection",
+    "motor silencing",
+    "no-input baseline",
+    "feedback changes activity",
+    "reference 8-second native result",
+    "30/60/120 Hz frame independence",
+    "rendered endpoints equal sensed endpoints",
+    "reset of all model state",
+    "finite mechanics and sub-millisecond neural clock lag"
+  ],
+  "reference_8s": {
+    "forward": 10.643656660238427,
+    "lateral": 1.4941606061466228,
+    "yaw": -1.4134580005971586,
+    "lateForward": 8.13236237761527,
+    "lateYaw": -1.0493050185073869,
+    "latePath": 60.55365766323325,
+    "contacts": [
+      20,
+      22,
+      19,
+      11,
+      16,
+      14
+    ],
+    "motorSpikes": 12868,
+    "sensorySpikes": 34593,
+    "networkSpikes": 142336,
+    "finite": true,
+    "maxClockLagMs": 0.6666666666669698
+  },
+  "trials": [
+    {
+      "key": "forward",
+      "label": "Forward · DNp09",
+      "duration_s": 10,
+      "summary": {
+        "forward": 14.798161067745152,
+        "lateral": 0.12345844673698488,
+        "yaw": -1.7998941304126646,
+        "lateForward": 12.286866785121994,
+        "lateYaw": -1.435741148322893,
+        "latePath": 79.36163607320125,
+        "contacts": [
+          28,
+          28,
+          27,
+          12,
+          20,
+          17
+        ],
+        "motorSpikes": 15922,
+        "sensorySpikes": 43212,
+        "networkSpikes": 176683,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "backward",
+      "label": "Backward · MDN",
+      "duration_s": 10,
+      "summary": {
+        "forward": -17.28359338960506,
+        "lateral": 8.253345563545196,
+        "yaw": -2.4953642771157325,
+        "lateForward": -12.656059873993106,
+        "lateYaw": -1.7750007965025876,
+        "latePath": 97.92008475185229,
+        "contacts": [
+          37,
+          22,
+          40,
+          13,
+          26,
+          34
+        ],
+        "motorSpikes": 17832,
+        "sensorySpikes": 47088,
+        "networkSpikes": 205383,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "baseline",
+      "label": "Steering baseline · DNp09",
+      "duration_s": 10,
+      "summary": {
+        "forward": 12.460642598022204,
+        "lateral": -10.51173253609711,
+        "yaw": -1.5708790808378619,
+        "lateForward": 8.683379856484322,
+        "lateYaw": -1.2477477019987862,
+        "latePath": 83.59046543251291,
+        "contacts": [
+          28,
+          29,
+          16,
+          13,
+          22,
+          22
+        ],
+        "motorSpikes": 16648,
+        "sensorySpikes": 44304,
+        "networkSpikes": 176397,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "left",
+      "label": "Left steering after 3 s",
+      "duration_s": 10,
+      "summary": {
+        "forward": 7.2604494405123825,
+        "lateral": -8.609525444459754,
+        "yaw": -0.9843437436318857,
+        "lateForward": 3.4831866989745146,
+        "lateYaw": -0.6612123647928115,
+        "latePath": 79.29369730357342,
+        "contacts": [
+          26,
+          29,
+          15,
+          11,
+          22,
+          20
+        ],
+        "motorSpikes": 17570,
+        "sensorySpikes": 44736,
+        "networkSpikes": 185301,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "right",
+      "label": "Right steering after 3 s",
+      "duration_s": 10,
+      "summary": {
+        "forward": 10.744780481785083,
+        "lateral": -5.672484032528913,
+        "yaw": -1.7819632309385873,
+        "lateForward": 6.967517740247195,
+        "lateYaw": -1.4588318520995138,
+        "latePath": 86.21180813484652,
+        "contacts": [
+          32,
+          30,
+          15,
+          10,
+          24,
+          14
+        ],
+        "motorSpikes": 18049,
+        "sensorySpikes": 44894,
+        "networkSpikes": 187956,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "quiet",
+      "label": "No descending or sensory input",
+      "duration_s": 10,
+      "summary": {
+        "forward": 0,
+        "lateral": 0,
+        "yaw": 0,
+        "lateForward": 0,
+        "lateYaw": 0,
+        "latePath": 0,
+        "contacts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "motorSpikes": 0,
+        "sensorySpikes": 0,
+        "networkSpikes": 0,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "cut",
+      "label": "Cut synaptic transmission",
+      "duration_s": 10,
+      "summary": {
+        "forward": 0,
+        "lateral": 0,
+        "yaw": 0,
+        "lateForward": 0,
+        "lateYaw": 0,
+        "latePath": 0,
+        "contacts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "motorSpikes": 0,
+        "sensorySpikes": 2763,
+        "networkSpikes": 3775,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "silenced",
+      "label": "Silence motor neurons",
+      "duration_s": 10,
+      "summary": {
+        "forward": 0,
+        "lateral": 0,
+        "yaw": 0,
+        "lateForward": 0,
+        "lateYaw": 0,
+        "latePath": 0,
+        "contacts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "motorSpikes": 0,
+        "sensorySpikes": 25112,
+        "networkSpikes": 126397,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    },
+    {
+      "key": "open",
+      "label": "Disconnect sensory feedback",
+      "duration_s": 10,
+      "summary": {
+        "forward": 17.73250276243053,
+        "lateral": -2.0249563928866747,
+        "yaw": -1.666664919325184,
+        "lateForward": 12.152193674070277,
+        "lateYaw": -1.1054140711581102,
+        "latePath": 60.536706410702664,
+        "contacts": [
+          11,
+          26,
+          15,
+          19,
+          15,
+          10
+        ],
+        "motorSpikes": 16936,
+        "sensorySpikes": 0,
+        "networkSpikes": 118360,
+        "finite": true,
+        "maxClockLagMs": 0.6666666666678793
+      }
+    }
+  ],
+  "biological_validation": false,
+  "units": "Body distances and forces are model units, not calibrated physical units."
+}

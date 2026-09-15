@@ -6,9 +6,9 @@ Visual navigation: **https://cw-login-zny.alpaca-elnath.ts.net:8443/vision/**
 
 Vision + olfaction maze: **https://cw-login-zny.alpaca-elnath.ts.net:8443/maze/**
 
-The current deployment is Slurm job **5807547**, on `slurm-b300-128-021`, with
+The current deployment is Slurm job **5814037**, on `slurm-b300-128-021`, with
 one NVIDIA B300, 8 CPUs, and 24 GiB host memory. It expires at
-**2026-09-15 10:27:59 UTC / 2026-09-15 19:27:59 JST**, or earlier if canceled. The `low`
+**2026-09-16 13:06:22 UTC / 2026-09-16 21:06:22 CST**, or earlier if canceled. The `low`
 QoS is preemptible. This is a Slurm allocation, not a permanent hosted service.
 
 All files are under `/mnt/home/zny/flygym` on `crwv` and the shared compute
@@ -31,8 +31,8 @@ binds only to `127.0.0.1`; its browser-origin allowlist explicitly includes the
 Tailscale HTTPS origin. The gateway follows this job's compute-node changes
 after a Slurm requeue, and exits when the allocation ends. A requeue resets the
 brain state; use **Reset both** after reconnecting. The gateway tolerates the
-empty node field while a requeued job is pending. The neuron-readout update
-restarted this job on 2026-09-14 at 10:27:59 UTC; the expiry above reflects that restart.
+empty node field while a requeued job is pending. The prior allocation expired. The motor-circuit work started this allocation
+on 2026-09-15 at 13:06:22 UTC; the expiry above reflects that start.
 
 ## Operations (on the login node)
 
@@ -49,7 +49,7 @@ cd /mnt/home/zny/flygym
 git pull --ff-only
 ```
 
-Restart the running server after backend changes with `scontrol requeue 5807547`
+Restart the running server after backend changes with `scontrol requeue 5814037`
 only after validation. This resets the live experiment and temporarily takes
 the endpoint offline while the job is pending. The gateway follows the new
 node. Runtime state, downloaded connectome data, generated meshes, environments,
@@ -58,8 +58,8 @@ needs the installation/data/asset steps described below.
 
 ```sh
 cd /mnt/home/zny/flygym
-squeue -j 5807547
-tail -f outputs/slurm-5807547.log
+squeue -j 5814037
+tail -f outputs/slurm-5814037.log
 curl http://127.0.0.1:18080/api/brain/status
 ```
 
@@ -82,7 +82,7 @@ Do not start a second job/gateway while the current one is active.
 To stop this allocation:
 
 ```sh
-scancel 5807547
+scancel 5814037
 /mnt/home/zny/tailscale/tailscale --socket=/mnt/home/zny/.tailscale/tailscaled.sock serve --https=8443 off
 ```
 
@@ -98,8 +98,8 @@ connectome and annotation files recorded in `brain/provenance.json`.
 
 ```sh
 /mnt/home/zny/.local/bin/uv pip sync --python .venv/bin/python brain/requirements-vision-b300-lock.txt
-srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=8 .venv/bin/python scripts/validate_cuda.py
-srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=8 .venv/bin/python scripts/validate_connectome.py
+srun --jobid=5814037 --overlap --ntasks=1 --cpus-per-task=8 .venv/bin/python scripts/validate_cuda.py
+srun --jobid=5814037 --overlap --ntasks=1 --cpus-per-task=8 .venv/bin/python scripts/validate_connectome.py
 ```
 
 Pause the browser before running the full-connectome checks: they reset and
@@ -150,7 +150,7 @@ To reproduce visual checks in this allocation:
 
 ```sh
 cd /mnt/home/zny/flygym
-srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_vision.py
+srun --jobid=5814037 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_vision.py
 ```
 
 The matched 24-trial check passed: 6/6 arrivals with vision, 2/6 for each of
@@ -174,8 +174,8 @@ movement decoder is engineered and receives neural activity, without a maze
 map or target coordinates. The brain, stripe, and maze pages share one worker.
 
 ```sh
-srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_maze.py
-srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=1 .venv/bin/python scripts/validate_maze_api.py --port 8000
+srun --jobid=5814037 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_maze.py
+srun --jobid=5814037 --overlap --ntasks=1 --cpus-per-task=1 .venv/bin/python scripts/validate_maze_api.py --port 8000
 ```
 
 The standalone behavioral check constructs its own brain/world. The API check
@@ -211,7 +211,7 @@ optional MJPEG endpoint adds `X-Assay-Time` and `X-View: proboscis`. Restart the
 service after deploying this change. No additional asset generation is needed.
 
 ```sh
-srun --jobid=5807547 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_proboscis.py
+srun --jobid=5814037 --overlap --ntasks=1 --cpus-per-task=4 env MUJOCO_GL=egl NUMBA_NUM_THREADS=4 LD_LIBRARY_PATH="$PWD/deploy/egl/usr/lib/x86_64-linux-gnu" .venv/bin/python scripts/validate_proboscis.py
 ```
 
 The sugar API validation also covers actual joint movement, washout retraction,
@@ -230,3 +230,12 @@ The update passed full-brain/body controls and staging HTTP/camera tests before
 requeue. Records and figures are in `outputs/neuron-navigation/`; validation ran
 in the detached `outputs/neuron-readout-staging` checkout. That staging server
 was stopped after its checks. The persistent service continues on port 8000.
+
+## Isolated motor-circuit experiment
+
+`/locomotor/` serves the DesktopFly-style reduced MaleCNS reference and the
+separate MuJoCo tibia transfer results. Its six-leg neural/mechanical loop runs
+in a browser worker; the B300 serves static assets and continues to host the
+existing full-brain experiments. See `brain/DESKTOP_LOCOMOTOR.md` for sources,
+controls, reproduction, and the distinction between simplified six-leg
+mechanics and the one-joint MuJoCo test. Static edits do not require a requeue.
