@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "cluster_host": "slurm-b300-128-021",
+  "local_host": "nys-laptop.alpaca-elnath.ts.net",
+  "conditions": {
+    "connected": {
+      "all_neuron_counts_match": true,
+      "max_angle_error_deg": 1.2363443602225743e-12
+    },
+    "motor_silenced": {
+      "all_neuron_counts_match": true,
+      "max_angle_error_deg": 1.3642420526593924e-12
+    },
+    "synapses_cut": {
+      "all_neuron_counts_match": true,
+      "max_angle_error_deg": 1.3642420526593924e-12
+    },
+    "feedback_off": {
+      "all_neuron_counts_match": true,
+      "max_angle_error_deg": 1.1510792319313623e-12
+    }
+  },
+  "threshold_deg": 1e-08,
+  "scope": "Independent rerun on the B300 compute node; same fixed-input port check and all four MuJoCo transfer controls."
+}

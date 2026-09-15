@@ -87,6 +87,11 @@ Silencing motor neurons and disabling synaptic transmission yield identical
 passive mechanics. Feedback-off gives a different neural response and joint
 trajectory. Recorded videos play at fivefold slow motion.
 
+An independent rerun on slurm-b300-128-021 passed the same port and physical
+controls. All 1,045 per-neuron spike counts matched the Mac in each of the four
+conditions. Maximum joint-angle difference was below 1.4e-12 degrees. The
+comparison is published in wasm/locomotor/runtime-comparison.json.
+
 The report, videos and raw traces are published beside the six-leg viewer.
 The tests establish a causal one-joint transfer. They do not establish
 six-leg MuJoCo walking, accurate motor physiology or an innate sensory policy.
